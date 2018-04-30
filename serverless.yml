@@ -1,0 +1,119 @@
+service: &service
+  name: coinietrade-back
+  frameworkVersion: "=1.26.1"
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'dev'}
+  profile: ${file(./config/config.yml):${self:provider.stage}.profile, 'default'}
+  region: ${file(./config/config.yml):${self:provider.stage}.region, 'us-east-1'}
+  memorySize: 1024
+  timeout: 6
+  logRetentionInDays: 14
+  apiKeys:
+    - ${opt:stage, self:provider.stage}-privateApiKey
+  environment:
+    NODE_ENV: ${file(./config/config.yml):${self:provider.stage}.node_env, 'development'}
+    SERVICE_NAME: ${self:custom.service.name}
+    STAGE: ${self:provider.stage}
+    DYNAMODB_TABLE_POLICIES: ${self:custom.service.name}_policies_${self:provider.stage}
+    DYNAMODB_ACCESS_KEY_ID: ${file(./config/config.yml):${self:provider.stage}.aws_access_key_id}
+    DYNAMODB_SECRET_ACCESS_KEY: ${file(./config/config.yml):${self:provider.stage}.aws_secret_access_key}
+    DYNAMODB_REGION: ${self:provider.region}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/*"
+
+package:
+  include:
+    - src/api/**
+    - src/models/**
+    - src/services/**
+
+functions:
+  getPolicies:
+    handler: src/api/handler.getPolicies
+    events:
+      - http:
+          method: get
+          path: policies
+          private: true
+          cors: false
+  getPolicy:
+    handler: src/api/handler.getPolicy
+    events:
+      - http:
+          path: policies/{id}
+          method: get
+          private: true
+          cors: false
+  addPolicy:
+    handler: src/api/handler.addPolicy
+    events:
+      - http:
+          path: policies
+          method: post
+          private: true
+          cors: false
+  removePolicy:
+    handler: src/api/handler.removePolicy
+    events:
+      - http:
+          path: policies/{id}
+          method: delete
+          private: true
+          cors: false
+  updatePolicy:
+    handler: src/api/handler.updatePolicy
+    events:
+      - http:
+          path: policies/{id}
+          method: patch
+          private: true
+          cors: false
+
+# Dynamodb settings
+resources:
+  Resources:
+    policiesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+custom:
+  # Alternative service properties
+  service: *service
+  # Local dynamodb settings
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      test:
+        sources:
+          - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
+            sources: [./test/.seed/fake-policies.json]

@@ -1,0 +1,42 @@
+{
+  "name": "coinietrade-back",
+  "version": "0.0.1",
+  "description": "CoinieTrade back end.",
+  "main": "index.js",
+  "repository": "https://github.com/keidrun/coinietrade-back.git",
+  "author": "keidrun",
+  "license": "No license",
+  "dependencies": {
+    "dynamoose": "^0.8.7",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-eslint": "^8.2.3",
+    "babel-loader": "^7.1.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.6.0",
+    "eslint": "^4.19.1",
+    "eslint-loader": "^2.0.0",
+    "serverless-dynamodb-local": "^0.2.28",
+    "serverless-offline": "^3.20.3",
+    "serverless-webpack": "^3.1.1",
+    "webpack": "^3.3.0"
+  },
+  "scripts": {
+    "start": "sls offline start",
+    "debug": "SLS_DEBUG=* sls offline start",
+    "db:init": "sls dynamodb install",
+    "db:rm": "sls dynamodb remove",
+    "db:start": "sls dynamodb start",
+    "db:migrate": "sls dynamodb migrate",
+    "db:seed": "sls dynamodb seed",
+    "staging:deploy": "sls deploy -s staging",
+    "staging:info": "sls info -s staging",
+    "staging:rm": "sls remove -s staging",
+    "prod:deploy": "sls deploy -s prod",
+    "prod:info": "sls info -s prod",
+    "prod:rm": "sls remove -s prod"
+  }
+}
