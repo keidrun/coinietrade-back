@@ -1,4 +1,4 @@
-import dynamoose from 'dynamoose';
+const dynamoose = require('dynamoose');
 
 let defaultOptions = {
   create: true,
@@ -29,4 +29,4 @@ if (process.env.NODE_ENV === 'production') {
 
 dynamoose.setDefaults(defaultOptions);
 
-export default dynamoose;
+module.exports = dynamoose;

@@ -1,6 +1,11 @@
-import dynamoose from '../services/dynamoose';
+const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
-import { EFFECT } from '../api/policies/policies';
+
+const EFFECTS = {
+  ALLOW: 'allow',
+  DENY: 'deny',
+  CANCELED: 'canceled'
+};
 
 const options = {
   timestamps: true
@@ -15,11 +20,15 @@ const policySchema = new Schema(
     effect: {
       type: String,
       required: true,
-      default: EFFECT.ALLOW
+      default: EFFECTS.ALLOW
     }
   },
   options
 );
 
 const Policy = dynamoose.model('policies', policySchema);
-export default Policy;
+
+module.exports = {
+  Policy,
+  EFFECTS
+};

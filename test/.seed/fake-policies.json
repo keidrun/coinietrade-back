@@ -6,14 +6,8 @@
     "updatedAt": 1524831297800
   },
   {
-    "id": "66948f76-4e9d-4dd5-8449-51eadac2703d",
-    "effect": "allow",
-    "createdAt": 1524831297800,
-    "updatedAt": 1524831297800
-  },
-  {
     "id": "179a6936-6494-4cf9-846f-688a1e01d39f",
-    "effect": "deny",
+    "effect": "allow",
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -25,8 +19,14 @@
   },
   {
     "id": "40edc439-03de-449b-bc0f-ef0e0f4b629d",
-    "effect": "canceled",
+    "effect": "deny",
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
+  },
+  {
+    "id": "66948f76-4e9d-4dd5-8449-51eadac2703d",
+    "effect": "canceled",
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
   }
 ]

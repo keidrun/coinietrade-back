@@ -3,6 +3,7 @@ yarn-debug.log*
 yarn-error.log*
 node_modules/
 .npm
-config/
 .serverless
-.webpack
+config/*
+!config/keys.js
+.env

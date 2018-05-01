@@ -3,7 +3,6 @@ service: &service
   frameworkVersion: "=1.26.1"
 
 plugins:
-  - serverless-webpack
   - serverless-dynamodb-local
   - serverless-offline
 
@@ -49,39 +48,39 @@ functions:
     events:
       - http:
           method: get
-          path: policies
+          path: v1/policies
           private: true
           cors: false
   getPolicy:
     handler: src/api/handler.getPolicy
     events:
       - http:
-          path: policies/{id}
           method: get
+          path: v1/policies/{id}
           private: true
           cors: false
   addPolicy:
     handler: src/api/handler.addPolicy
     events:
       - http:
-          path: policies
           method: post
+          path: v1/policies
           private: true
           cors: false
   removePolicy:
     handler: src/api/handler.removePolicy
     events:
       - http:
-          path: policies/{id}
           method: delete
+          path: v1/policies/{id}
           private: true
           cors: false
   updatePolicy:
     handler: src/api/handler.updatePolicy
     events:
       - http:
-          path: policies/{id}
           method: patch
+          path: v1/policies/{id}
           private: true
           cors: false
 
