@@ -46,6 +46,10 @@ exports.errors = {
     code: 7101,
     message: "Required field policy 'userId' is missing"
   },
+  POLICY_DUPLICATE_USER_ID: {
+    code: 7102,
+    message: "Required field policy 'userId' is duplicated"
+  },
 
   // 8xxx Specific Api Error
   // Policies api errors

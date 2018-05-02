@@ -6,6 +6,5 @@ exports.errors = {
   POLICY_API_MESSAGE_READ_FAILED: 'Read Policy Request Failed',
   POLICY_API_MESSAGE_READ_LIST_FAILED: 'Read Policies Request Failed',
   POLICY_API_MESSAGE_UPDATE_FAILED: 'Update Policy Request Failed',
-  POLICY_API_MESSAGE_DELETE_FAILED: 'Delete Policy Request Failed',
-  POLICY_API_MESSAGE_DATA_NOT_FOUND: 'Policy Data Not Found'
+  POLICY_API_MESSAGE_DELETE_FAILED: 'Delete Policy Request Failed'
 };

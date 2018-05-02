@@ -17,7 +17,7 @@ module.exports.getPolicy = async (event, callback) => {
     } else {
       responseError(
         404,
-        apiMessages.errors.POLICY_API_MESSAGE_DATA_NOT_FOUND,
+        apiMessages.errors.POLICY_API_MESSAGE_READ_FAILED,
         event.httpMethod,
         event.path,
         apiErrors.errors.POLICY_READ_DATA_NOT_FOUND_BY_ID,
