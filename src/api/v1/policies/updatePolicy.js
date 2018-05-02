@@ -1,5 +1,6 @@
 const { Policy } = require('../../../models/Policy');
-const { response } = require('../../utils/response');
+const { response, responseErrorFromDynamodb } = require('../../utils/response');
+const apiMessages = require('../../utils/apiMessages');
 
 module.exports.updatePolicy = (event, callback) => {
   const { id } = event.pathParameters;
@@ -13,9 +14,13 @@ module.exports.updatePolicy = (event, callback) => {
     .catch(err =>
       callback(
         null,
-        response(500, {
-          error: err
-        })
+        responseErrorFromDynamodb(
+          apiMessages.errors.POLICY_API_MESSAGE_UPDATE_FAILED,
+          event.httpMethod,
+          event.path,
+          err,
+          event
+        )
       )
     );
 };

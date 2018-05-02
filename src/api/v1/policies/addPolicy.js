@@ -1,5 +1,11 @@
 const { Policy, EFFECTS } = require('../../../models/Policy');
-const { response } = require('../../utils/response');
+const {
+  response,
+  responseError,
+  responseErrorFromDynamodb
+} = require('../../utils/response');
+const apiMessages = require('../../utils/apiMessages');
+const apiErrors = require('../../utils/apiErrors');
 
 module.exports.addPolicy = (event, callback) => {
   const { userId, effect } = JSON.parse(event.body);
@@ -7,9 +13,14 @@ module.exports.addPolicy = (event, callback) => {
   if (!userId) {
     return callback(
       null,
-      response(400, {
-        error: `The property "userId" is required.`
-      })
+      responseError(
+        400,
+        apiMessages.errors.POLICY_API_MESSAGE_VALIDATION_FAILED,
+        event.httpMethod,
+        event.path,
+        apiErrors.errors.POLICY_MISSING_USER_ID,
+        event
+      )
     );
   }
 
@@ -25,9 +36,14 @@ module.exports.addPolicy = (event, callback) => {
     } else {
       return callback(
         null,
-        response(400, {
-          error: `The format of the property "effect" is wrong: ${effect}`
-        })
+        responseError(
+          400,
+          apiMessages.errors.POLICY_API_MESSAGE_VALIDATION_FAILED,
+          event.httpMethod,
+          event.path,
+          apiErrors.errors.POLICY_FORMAT_KINDS_OF_EFFECT,
+          event
+        )
       );
     }
   }
@@ -35,13 +51,17 @@ module.exports.addPolicy = (event, callback) => {
   const newPolicy = new Policy(policy);
   newPolicy
     .save({ overwrite: false })
-    .then(addedPolicy => callback(null, response(200, addedPolicy)))
+    .then(addedPolicy => callback(null, response(201, addedPolicy)))
     .catch(err =>
       callback(
         null,
-        response(500, {
-          error: err
-        })
+        responseErrorFromDynamodb(
+          apiMessages.errors.POLICY_API_MESSAGE_CREATE_FAILED,
+          event.httpMethod,
+          event.path,
+          err,
+          event
+        )
       )
     );
 };

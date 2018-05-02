@@ -1,5 +1,6 @@
 const { Policy } = require('../../../models/Policy');
-const { response } = require('../../utils/response');
+const { response, responseErrorFromDynamodb } = require('../../utils/response');
+const apiMessages = require('../../utils/apiMessages');
 
 module.exports.getPolicies = (event, callback) => {
   Policy.scan()
@@ -8,9 +9,13 @@ module.exports.getPolicies = (event, callback) => {
     .catch(err =>
       callback(
         null,
-        response(500, {
-          error: err
-        })
+        responseErrorFromDynamodb(
+          apiMessages.errors.POLICY_API_MESSAGE_READ_LIST_FAILED,
+          event.httpMethod,
+          event.path,
+          err,
+          event
+        )
       )
     );
 };
