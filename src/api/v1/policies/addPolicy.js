@@ -1,11 +1,19 @@
-const uuid = require('uuid');
 const { Policy, EFFECTS } = require('../../../models/Policy');
 const { response } = require('../../utils/response');
 
 module.exports.addPolicy = (event, callback) => {
-  const { effect } = JSON.parse(event.body);
+  const { userId, effect } = JSON.parse(event.body);
 
-  let policy = { id: uuid.v4() };
+  if (!userId) {
+    return callback(
+      null,
+      response(400, {
+        error: `The property "userId" is required.`
+      })
+    );
+  }
+
+  let policy = { userId };
   if (effect) {
     const isCorrectEffect =
       [EFFECTS.ALLOW, EFFECTS.DENY, EFFECTS.CANCELED].filter(
@@ -26,7 +34,7 @@ module.exports.addPolicy = (event, callback) => {
 
   const newPolicy = new Policy(policy);
   newPolicy
-    .save()
+    .save({ overwrite: false })
     .then(addedPolicy => callback(null, response(200, addedPolicy)))
     .catch(err =>
       callback(

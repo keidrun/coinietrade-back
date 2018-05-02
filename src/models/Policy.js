@@ -1,3 +1,4 @@
+const uuid = require('uuid');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
@@ -15,7 +16,12 @@ const policySchema = new Schema(
   {
     id: {
       type: String,
-      hashKey: true
+      hashKey: true,
+      default: () => uuid.v4()
+    },
+    userId: {
+      type: String,
+      required: true
     },
     effect: {
       type: String,

@@ -4,6 +4,7 @@ const { response } = require('../../utils/response');
 module.exports.updatePolicy = (event, callback) => {
   const { id } = event.pathParameters;
   const { effect } = JSON.parse(event.body);
+
   let policy = {};
   if (effect) policy.effect = effect;
 

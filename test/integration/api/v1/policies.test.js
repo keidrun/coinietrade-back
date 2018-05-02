@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../../config/keys').get(process.env.NODE_ENV);
@@ -12,7 +13,7 @@ before(() => {
   return Policy.scan()
     .exec()
     .then(existingPolicies => {
-      existingPolicies.forEach(policy => {
+      return existingPolicies.forEach(policy => {
         return Policy.delete({ id: policy.id });
       });
     });
@@ -23,7 +24,7 @@ after(() => {
   return Policy.scan()
     .exec()
     .then(existingPolicies => {
-      existingPolicies.forEach(policy => {
+      return existingPolicies.forEach(policy => {
         return Policy.delete({ id: policy.id });
       });
     });
@@ -35,7 +36,10 @@ describe('policies endpoints', () => {
   describe('POST /v1/policies', () => {
     it('should return added data response of allow', done => {
       axios
-        .post(`/v1/policies`, { effect: 'allow' })
+        .post(`/v1/policies`, {
+          userId: ObjectId().toHexString(),
+          effect: 'allow'
+        })
         .then(response => {
           expect(response.data.effect).to.equal('allow');
           existingPolicies.push(response.data);
@@ -48,7 +52,10 @@ describe('policies endpoints', () => {
 
     it('should return added data response of deny', done => {
       axios
-        .post(`/v1/policies`, { effect: 'deny' })
+        .post(`/v1/policies`, {
+          userId: ObjectId().toHexString(),
+          effect: 'deny'
+        })
         .then(response => {
           expect(response.data.effect).to.equal('deny');
           existingPolicies.push(response.data);
@@ -61,7 +68,10 @@ describe('policies endpoints', () => {
 
     it('should return added data response of canceled', done => {
       axios
-        .post(`/v1/policies`, { effect: 'canceled' })
+        .post(`/v1/policies`, {
+          userId: ObjectId().toHexString(),
+          effect: 'canceled'
+        })
         .then(response => {
           expect(response.data.effect).to.equal('canceled');
           existingPolicies.push(response.data);
@@ -74,7 +84,7 @@ describe('policies endpoints', () => {
 
     it('should return added data response of allow when empty request', done => {
       axios
-        .post(`/v1/policies`, {})
+        .post(`/v1/policies`, { userId: ObjectId().toHexString() })
         .then(response => {
           expect(response.data.effect).to.equal('allow');
           existingPolicies.push(response.data);
@@ -98,6 +108,7 @@ describe('policies endpoints', () => {
           policies.forEach((policy, i) => {
             expect(policy).to.deep.equal({
               id: existingPolicies[i].id,
+              userId: existingPolicies[i].userId,
               effect: existingPolicies[i].effect,
               createdAt: existingPolicies[i].createdAt,
               updatedAt: existingPolicies[i].updatedAt
@@ -120,6 +131,7 @@ describe('policies endpoints', () => {
 
           expect(policy).to.deep.equal({
             id: existingPolicies[0].id,
+            userId: existingPolicies[0].userId,
             effect: existingPolicies[0].effect,
             createdAt: existingPolicies[0].createdAt,
             updatedAt: existingPolicies[0].updatedAt
