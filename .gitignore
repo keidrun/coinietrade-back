@@ -7,3 +7,6 @@ node_modules/
 config/*
 !config/keys.js
 .env
+
+# for test
+src/scheduler/launch.js
