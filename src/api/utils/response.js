@@ -66,10 +66,25 @@ const responseErrorFromDynamodb = (
     errprAwsServiceUnavailable.payload = dbError;
     errors.push(errprAwsServiceUnavailable);
   } else {
-    statusCode = 500;
-    let errorUnknown = apiErrors.errors.UNKNOWN_ERROR;
-    errorUnknown.payload = dbError;
-    errors.push(errorUnknown);
+    if (!dbError.name) {
+      statusCode = 500;
+      let errorUnknown = apiErrors.errors.UNKNOWN_ERROR;
+      errorUnknown.payload = dbError;
+      errors.push(errorUnknown);
+      // Dynamoose Errors
+    } else if (dbError.name === 'ValidationError') {
+      let errorDynamooseModelValidation =
+        apiErrors.errors.DYNAMOOSE_MODEL_VALIDATION_ERROR;
+      errorDynamooseModelValidation.message = dbError.message;
+      errorDynamooseModelValidation.payload = dbError;
+      errors.push(errorDynamooseModelValidation);
+    } else {
+      // SchemaError, ModelError, QueryError, ScanError
+      let errorDynamoose = apiErrors.errors.DYNAMOOSE_ERROR;
+      errorDynamoose.message = dbError.message;
+      errorDynamoose.payload = dbError;
+      errors.push(errorDynamoose);
+    }
   }
   return {
     statusCode,

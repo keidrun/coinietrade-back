@@ -1,4 +1,4 @@
-const { Policy, EFFECTS } = require('../../../models/Policy');
+const { Policy } = require('../../../models/Policy');
 const {
   response,
   responseError,
@@ -25,28 +25,7 @@ module.exports.addPolicy = (event, callback) => {
   }
 
   let policy = { userId };
-  if (effect) {
-    const isCorrectEffect =
-      [EFFECTS.ALLOW, EFFECTS.DENY, EFFECTS.CANCELED].filter(
-        value => effect === value
-      ).length === 1;
-
-    if (isCorrectEffect) {
-      policy.effect = effect;
-    } else {
-      return callback(
-        null,
-        responseError(
-          400,
-          apiMessages.errors.POLICY_API_MESSAGE_VALIDATION_FAILED,
-          event.httpMethod,
-          event.path,
-          apiErrors.errors.POLICY_FORMAT_KINDS_OF_EFFECT,
-          event
-        )
-      );
-    }
-  }
+  if (effect) policy.effect = effect;
 
   const newPolicy = new Policy(policy);
   newPolicy

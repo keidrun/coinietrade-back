@@ -32,14 +32,19 @@ exports.errors = {
   },
 
   // 7xxx Validation Error
+  // Dynamoose errors
+  DYNAMOOSE_ERROR: {
+    code: 7001,
+    message: 'Dynamoose error' // overwrite by dynamoose specific error message
+  },
+  DYNAMOOSE_MODEL_VALIDATION_ERROR: {
+    code: 7002,
+    message: 'Model format is invalid' // overwrite by dynamoose specific error message
+  },
   // Policy model errors
   POLICY_MISSING_USER_ID: {
     code: 7101,
     message: "Required field policy 'userId' is missing"
-  },
-  POLICY_FORMAT_KINDS_OF_EFFECT: {
-    code: 7102,
-    message: "Kinds of 'effect' MUST be 'allow', 'deny' and 'canceled'"
   },
 
   // 8xxx Specific Api Error

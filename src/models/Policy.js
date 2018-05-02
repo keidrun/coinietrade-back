@@ -21,12 +21,15 @@ const policySchema = new Schema(
     },
     userId: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     effect: {
       type: String,
       required: true,
-      default: EFFECTS.ALLOW
+      default: EFFECTS.ALLOW,
+      validate: value =>
+        [EFFECTS.ALLOW, EFFECTS.DENY, EFFECTS.CANCELED].indexOf(value) !== -1
     }
   },
   options
