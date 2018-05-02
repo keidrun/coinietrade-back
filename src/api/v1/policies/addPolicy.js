@@ -7,7 +7,7 @@ const {
 const apiMessages = require('../../utils/apiMessages');
 const apiErrors = require('../../utils/apiErrors');
 
-module.exports.addPolicy = (event, callback) => {
+module.exports.addPolicy = async (event, callback) => {
   const { userId, effect } = JSON.parse(event.body);
 
   if (!userId) {
@@ -28,19 +28,19 @@ module.exports.addPolicy = (event, callback) => {
   if (effect) policy.effect = effect;
 
   const newPolicy = new Policy(policy);
-  newPolicy
-    .save({ overwrite: false })
-    .then(addedPolicy => callback(null, response(201, addedPolicy)))
-    .catch(err =>
-      callback(
-        null,
-        responseErrorFromDynamodb(
-          apiMessages.errors.POLICY_API_MESSAGE_CREATE_FAILED,
-          event.httpMethod,
-          event.path,
-          err,
-          event
-        )
+  try {
+    const addedPolicy = await newPolicy.save({ overwrite: false });
+    callback(null, response(201, addedPolicy));
+  } catch (error) {
+    callback(
+      null,
+      responseErrorFromDynamodb(
+        apiMessages.errors.POLICY_API_MESSAGE_CREATE_FAILED,
+        event.httpMethod,
+        event.path,
+        error,
+        event
       )
     );
+  }
 };

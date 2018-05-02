@@ -4,6 +4,7 @@ service: &service
 
 plugins:
   - serverless-dynamodb-local
+  - serverless-offline-scheduler
   - serverless-offline
 
 provider:
@@ -43,6 +44,7 @@ package:
     - src/services/**
 
 functions:
+  # API
   getPolicies:
     handler: src/api/handler.getPolicies
     events:
@@ -83,6 +85,11 @@ functions:
           path: v1/policies/{id}
           private: true
           cors: false
+  # Scheduler
+  scheduleArbitrage:
+    handler: src/scheduler/handler.scheduleArbitrage
+    events:
+      - schedule: rate(1 minute)
 
 # Dynamodb settings
 resources:
