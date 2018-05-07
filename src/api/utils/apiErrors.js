@@ -44,11 +44,20 @@ exports.errors = {
   // Policy model errors
   POLICY_MISSING_USER_ID: {
     code: 7101,
-    message: "Required field policy 'userId' is missing"
+    message: "Required field Policy 'userId' is missing"
   },
   POLICY_DUPLICATE_USER_ID: {
     code: 7102,
-    message: "Required field policy 'userId' is duplicated"
+    message: "Required field Policy 'userId' is duplicated"
+  },
+  // Secret model errors
+  SECRET_MISSING_USER_ID: {
+    code: 7201,
+    message: "Required field Secret 'userId' is missing"
+  },
+  SECRET_DUPLICATE_USER_ID: {
+    code: 7202,
+    message: "Required field Secret 'userId' is duplicated"
   },
 
   // 8xxx Specific Api Error

@@ -168,9 +168,8 @@ describe('policies endpoints', () => {
       axios
         .delete(`/v1/policies/${expectedToDeletePlicy.id}`)
         .then(response => {
-          const deletedPolicy = response.data;
           expect(response.status).to.equal(204);
-
+          expect(response.data).to.be.empty;
           existingPolicies.pop();
           done();
         })
