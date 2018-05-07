@@ -5,8 +5,15 @@ const { Schema } = dynamoose;
 const EFFECTS = {
   ALLOW: 'allow',
   DENY: 'deny',
-  CANCELED: 'canceled'
+  CANCELED: 'canceled',
+  ERRORED: 'errored'
 };
+const effectList = [
+  EFFECTS.ALLOW,
+  EFFECTS.DENY,
+  EFFECTS.CANCELED,
+  EFFECTS.ERRORED
+];
 
 const options = {
   timestamps: true
@@ -28,8 +35,7 @@ const policySchema = new Schema(
       type: String,
       required: true,
       default: EFFECTS.ALLOW,
-      validate: value =>
-        [EFFECTS.ALLOW, EFFECTS.DENY, EFFECTS.CANCELED].indexOf(value) !== -1
+      validate: value => effectList.indexOf(value) !== -1
     }
   },
   options

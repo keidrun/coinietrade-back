@@ -82,6 +82,22 @@ describe('policies endpoints', () => {
         });
     });
 
+    it('should return added data response of errored', done => {
+      axios
+        .post(`/v1/policies`, {
+          userId: ObjectId().toHexString(),
+          effect: 'errored'
+        })
+        .then(response => {
+          expect(response.data.effect).to.equal('errored');
+          existingPolicies.push(response.data);
+          done();
+        })
+        .catch(error => {
+          done(error);
+        });
+    });
+
     it('should return added data response of allow when empty request', done => {
       axios
         .post(`/v1/policies`, { userId: ObjectId().toHexString() })
@@ -104,7 +120,7 @@ describe('policies endpoints', () => {
           const policies = response.data;
           sortByCreatedAt(policies);
 
-          expect(policies.length).equals(4);
+          expect(policies.length).equals(5);
           policies.forEach((policy, i) => {
             expect(policy).to.deep.equal({
               id: existingPolicies[i].id,
