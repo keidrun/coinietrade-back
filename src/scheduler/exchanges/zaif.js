@@ -8,13 +8,15 @@ const getTicker = () => {
   return axios.get(`${URL}/btc_jpy`);
 };
 
-const BID_KEY = 'bid';
-const ASK_KEY = 'ask';
-const LAST_KEY = 'last';
+const getTickerKeys = () => {
+  return {
+    BID_KEY: 'bid',
+    ASK_KEY: 'ask',
+    LAST_KEY: 'last'
+  };
+};
 
 module.exports = {
   getTicker,
-  BID_KEY,
-  ASK_KEY,
-  LAST_KEY
+  getTickerKeys
 };

@@ -37,6 +37,7 @@
   "scripts": {
     "start": "sls offline start",
     "debug": "SLS_DEBUG=* sls offline start",
+    "lint": "eslint src/**/*.js",
     "test": "mocha test/**/*.test.js",
     "db:init": "sls dynamodb install",
     "db:rm": "sls dynamodb remove",
@@ -44,7 +45,8 @@
     "db:migrate": "sls dynamodb migrate",
     "db:seed": "sls dynamodb seed",
     "dev:start": "yarn start",
-    "dev:test": "sleep 15 && nodemon --exec \"yarn test\"",
+    "dev:lint": "nodemon --exec \"yarn lint\"",
+    "dev:test": "sleep 10 && nodemon --exec \"yarn test\"",
     "dev": "npm-run-all -p dev:*",
     "staging:deploy": "sls deploy -s staging",
     "staging:test": "NODE_ENV='staging' mocha test/integration/**/*.test.js",
