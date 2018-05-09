@@ -59,6 +59,14 @@ exports.errors = {
     code: 7202,
     message: "Required field Secret 'userId' is duplicated"
   },
+  SECRET_MISSING_API_KEY: {
+    code: 7203,
+    message: "Required field Secret 'apiKey' is missing"
+  },
+  SECRET_MISSING_API_SECRET: {
+    code: 7204,
+    message: "Required field Secret 'apiSecret' is missing"
+  },
 
   // 8xxx Specific Api Error
   // Policies api errors

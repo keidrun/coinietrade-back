@@ -3,9 +3,10 @@ const {
   response,
   responseError,
   responseErrorFromDynamodb
-} = require('../../utils/response');
-const apiMessages = require('../../utils/apiMessages');
-const apiErrors = require('../../utils/apiErrors');
+} = require('../../../utils/response');
+const apiMessages = require('../../../utils/apiMessages');
+const apiErrors = require('../../../utils/apiErrors');
+const { encrypt } = require('../../../utils/crypto');
 
 module.exports.addSecret = async (event, callback) => {
   const { userId, apiName, apiKey, apiSecret } = JSON.parse(event.body);
@@ -24,7 +25,40 @@ module.exports.addSecret = async (event, callback) => {
     );
   }
 
-  const secret = { userId, apiName, apiKey, apiSecret };
+  if (!apiKey) {
+    return callback(
+      null,
+      responseError(
+        400,
+        apiMessages.errors.SECRET_API_MESSAGE_CREATE_FAILED,
+        event.httpMethod,
+        event.path,
+        apiErrors.errors.SECRET_MISSING_API_KEY,
+        event
+      )
+    );
+  }
+
+  if (!apiSecret) {
+    return callback(
+      null,
+      responseError(
+        400,
+        apiMessages.errors.SECRET_API_MESSAGE_CREATE_FAILED,
+        event.httpMethod,
+        event.path,
+        apiErrors.errors.SECRET_MISSING_API_SECRET,
+        event
+      )
+    );
+  }
+
+  const secret = {
+    userId,
+    apiName,
+    apiKey: encrypt(apiKey, userId),
+    apiSecret: encrypt(apiSecret, userId)
+  };
   const newSecret = new Secret(secret);
   try {
     const duplicateSecrets = await Secret.scan('userId')

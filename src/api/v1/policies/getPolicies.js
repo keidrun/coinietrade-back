@@ -1,6 +1,9 @@
 const { Policy } = require('../../../models/Policy');
-const { response, responseErrorFromDynamodb } = require('../../utils/response');
-const apiMessages = require('../../utils/apiMessages');
+const {
+  response,
+  responseErrorFromDynamodb
+} = require('../../../utils/response');
+const apiMessages = require('../../../utils/apiMessages');
 
 module.exports.getPolicies = async (event, callback) => {
   try {

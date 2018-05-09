@@ -3,9 +3,9 @@ const {
   response,
   responseError,
   responseErrorFromDynamodb
-} = require('../../utils/response');
-const apiMessages = require('../../utils/apiMessages');
-const apiErrors = require('../../utils/apiErrors');
+} = require('../../../utils/response');
+const apiMessages = require('../../../utils/apiMessages');
+const apiErrors = require('../../../utils/apiErrors');
 
 module.exports.addPolicy = async (event, callback) => {
   const { userId, effect } = JSON.parse(event.body);

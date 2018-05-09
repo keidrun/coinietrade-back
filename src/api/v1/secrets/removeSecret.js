@@ -1,6 +1,9 @@
 const { Secret } = require('../../../models/Secret');
-const { response, responseErrorFromDynamodb } = require('../../utils/response');
-const apiMessages = require('../../utils/apiMessages');
+const {
+  response,
+  responseErrorFromDynamodb
+} = require('../../../utils/response');
+const apiMessages = require('../../../utils/apiMessages');
 
 module.exports.removeSecret = async (event, callback) => {
   const { id } = event.pathParameters;

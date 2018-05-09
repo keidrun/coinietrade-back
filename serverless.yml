@@ -28,6 +28,8 @@ provider:
     # Table names on DynamoDB
     DYNAMODB_TABLE_POLICIES: ${self:custom.service.name}_policies_${self:provider.stage}
     DYNAMODB_TABLE_SECRETS: ${self:custom.service.name}_secrets_${self:provider.stage}
+    # Secret encrypt
+    ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
   iamRoleStatements:
     - Effect: "Allow"
       Action:

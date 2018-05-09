@@ -8,6 +8,7 @@
   "license": "No license",
   "dependencies": {
     "axios": "^0.18.0",
+    "crypto": "^1.0.1",
     "dynamoose": "^0.8.7",
     "uuid": "^3.2.1"
   },

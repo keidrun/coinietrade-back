@@ -3,9 +3,9 @@ const {
   response,
   responseError,
   responseErrorFromDynamodb
-} = require('../../utils/response');
-const apiMessages = require('../../utils/apiMessages');
-const apiErrors = require('../../utils/apiErrors');
+} = require('../../../utils/response');
+const apiMessages = require('../../../utils/apiMessages');
+const apiErrors = require('../../../utils/apiErrors');
 
 module.exports.getPolicy = async (event, callback) => {
   const { id } = event.pathParameters;
