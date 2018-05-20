@@ -8,6 +8,6 @@ exports.errors = {
   POLICY_API_MESSAGE_UPDATE_FAILED: 'Update Policy Request Failed',
   POLICY_API_MESSAGE_DELETE_FAILED: 'Delete Policy Request Failed',
   // Secrets api error messages
-  SECRET_API_MESSAGE_CREATE_FAILED: 'Create Policy Request Failed',
-  SECRET_API_MESSAGE_DELETE_FAILED: 'Delete Policy Request Failed'
+  SECRET_API_MESSAGE_CREATE_FAILED: 'Create Secret Request Failed',
+  SECRET_API_MESSAGE_DELETE_FAILED: 'Delete Secret Request Failed'
 };
