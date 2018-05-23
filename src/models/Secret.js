@@ -4,6 +4,7 @@ const { Schema } = dynamoose;
 const { encrypt, decrypt } = require('../utils/crypto');
 
 const apiNameList = [ 'bitflyer', 'zaif' ];
+const DEFAULT_KIND = 'none';
 
 const options = {
   timestamps: true
@@ -20,6 +21,12 @@ const secretSchema = new Schema(
       type: String,
       required: true,
       trim: true
+    },
+    kind: {
+      type: String,
+      required: true,
+      trim: true,
+      default: DEFAULT_KIND
     },
     apiName: {
       type: String,

@@ -6,7 +6,7 @@ node_modules/
 .serverless
 config/*
 !config/keys.js
-.env
+.env*
 
 # for test
 src/scheduler/launch.js

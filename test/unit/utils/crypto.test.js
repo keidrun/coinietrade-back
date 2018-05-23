@@ -1,23 +1,22 @@
 const expect = require('../../helpers/chai').expect;
 const { encrypt, decrypt } = require('../../../src/utils/crypto');
+require('../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
 
-const userIdAsEncryptKey = 'cb3dc780-484f-11e8-a0b9-c36d84fa8971';
+const encryptKey = process.env.ENCRYPT_KEY;
+console.log(encryptKey);
 
 describe('crypto', () => {
   describe('encrypt', () => {
     it('should encrypt a text', () => {
-      const encrypted = encrypt('text', userIdAsEncryptKey);
+      const encrypted = encrypt('text', encryptKey);
       expect(encrypted).to.be.a('string');
-      expect(encrypted).to.equal('c712f8c8f9ee319411ab1a657dea0c98');
+      expect(encrypted).to.equal('c504ffb1438aa14d2b5dce0fe0f7465e');
     });
   });
 
   describe('decrypt', () => {
     it('should decrypt an encrypted text', () => {
-      const decrypted = decrypt(
-        'c712f8c8f9ee319411ab1a657dea0c98',
-        userIdAsEncryptKey
-      );
+      const decrypted = decrypt('c504ffb1438aa14d2b5dce0fe0f7465e', encryptKey);
       expect(decrypted).to.be.a('string');
       expect(decrypted).to.equal('text');
     });
