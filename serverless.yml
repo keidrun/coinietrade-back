@@ -28,6 +28,7 @@ provider:
     # Table names on DynamoDB
     DYNAMODB_TABLE_POLICIES: ${self:custom.service.name}_policies_${self:provider.stage}
     DYNAMODB_TABLE_SECRETS: ${self:custom.service.name}_secrets_${self:provider.stage}
+    DYNAMODB_TABLE_TICKETS: ${self:custom.service.name}_tickets_${self:provider.stage}
     # Secret encrypt
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
   iamRoleStatements:
@@ -49,7 +50,7 @@ package:
     - src/scheduler/**
 
 functions:
-  # API
+  # Policies API
   getPolicies:
     handler: src/api/handler.getPolicies
     events:
@@ -90,6 +91,7 @@ functions:
           path: v1/policies/{id}
           private: true
           cors: false
+  # Secrets API
   addSecret:
     handler: src/api/handler.addSecret
     events:
@@ -104,6 +106,39 @@ functions:
       - http:
           method: delete
           path: v1/secrets/{id}
+          private: true
+          cors: false
+  # Tickets API
+  getTicket:
+    handler: src/api/handler.getTicket
+    events:
+      - http:
+          method: get
+          path: v1/tickets/{id}
+          private: true
+          cors: false
+  addTicket:
+    handler: src/api/handler.addTicket
+    events:
+      - http:
+          method: post
+          path: v1/tickets
+          private: true
+          cors: false
+  removeTicket:
+    handler: src/api/handler.removeTicket
+    events:
+      - http:
+          method: delete
+          path: v1/tickets/{id}
+          private: true
+          cors: false
+  updateTicket:
+    handler: src/api/handler.updateTicket
+    events:
+      - http:
+          method: patch
+          path: v1/tickets/{id}
           private: true
           cors: false
   # Scheduler
@@ -141,6 +176,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    ticketsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_TICKETS}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 custom:
   # Alternative service properties
@@ -159,3 +207,5 @@ custom:
             sources: [./test/.seed/fake-policies.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
             sources: [./test/.seed/fake-secrets.json]
+          - table: ${self:provider.environment.DYNAMODB_TABLE_TICKETS}
+            sources: [./test/.seed/fake-tickets.json]

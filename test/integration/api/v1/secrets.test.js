@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb');
+const uuid = require('uuid');
 const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../helpers/keys').get(process.env.NODE_ENV);
@@ -31,7 +31,7 @@ describe('secrets endpoints', () => {
     it('should return added data response of bitflyer', (done) => {
       axios
         .post(`/v1/secrets`, {
-          userId: ObjectId().toHexString(),
+          userId: uuid.v4(),
           apiName: 'bitflyer',
           apiKey: 'ANY_API_KEY',
           apiSecret: 'ANY_API_SECRET'
@@ -51,7 +51,7 @@ describe('secrets endpoints', () => {
     it('should return added data response of zaif', (done) => {
       axios
         .post(`/v1/secrets`, {
-          userId: ObjectId().toHexString(),
+          userId: uuid.v4(),
           apiName: 'zaif',
           apiKey: 'ANY_API_KEY',
           apiSecret: 'ANY_API_SECRET'

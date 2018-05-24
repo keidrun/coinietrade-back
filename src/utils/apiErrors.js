@@ -50,6 +50,10 @@ exports.errors = {
     code: 7102,
     message: "Required field Policy 'userId' is duplicated"
   },
+  POLICY_READ_DATA_NOT_FOUND_BY_ID: {
+    code: 7103,
+    message: "Policy data with the provided 'id' NOT found"
+  },
   // Secret model errors
   SECRET_MISSING_USER_ID: {
     code: 7201,
@@ -67,12 +71,18 @@ exports.errors = {
     code: 7204,
     message: "Required field Secret 'apiSecret' is missing"
   },
-
-  // 8xxx Specific Api Error
-  // Policies api errors
-  POLICY_READ_DATA_NOT_FOUND_BY_ID: {
-    code: 8101,
-    message: "Policy data with the provided 'id' NOT found"
+  // Ticket model errors
+  TICKET_MISSING_USER_ID: {
+    code: 7301,
+    message: "Required field Ticket 'userId' is missing"
+  },
+  TICKET_DUPLICATE_USER_ID: {
+    code: 7302,
+    message: "Required field Ticket 'userId' is duplicated"
+  },
+  TICKET_READ_DATA_NOT_FOUND_BY_ID: {
+    code: 7303,
+    message: "Ticket data with the provided 'id' NOT found"
   }
 };
 
