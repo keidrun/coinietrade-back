@@ -29,6 +29,7 @@ exports.errors = {
   POLICY_DUPLICATE_USER_ID: { code: 7102, message: "Required field Policy 'userId' is duplicated" },
   POLICY_READ_DATA_NOT_FOUND_BY_ID: { code: 7103, message: "Policy data with the provided 'id' NOT found" },
   POLICY_DELETE_DATA_NOT_FOUND_BY_ID: { code: 7104, message: "Policy data with the provided 'id' NOT found" },
+  POLICY_UPDATE_DATA_NOT_FOUND_BY_ID: { code: 7105, message: "Policy data with the provided 'id' NOT found" },
   // Secret model errors
   SECRET_MISSING_USER_ID: { code: 7201, message: "Required field Secret 'userId' is missing" },
   SECRET_DUPLICATE_USER_ID: { code: 7202, message: "Required field Secret 'userId' is duplicated" },
