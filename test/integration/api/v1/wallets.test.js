@@ -9,8 +9,8 @@ const { sortByCreatedAt } = require('../../../helpers/testUtils');
 before(() => {
   // Clear all Wallets items
   return Wallet.scan().exec().then((existingWallets) => {
-    return existingWallets.forEach((Wallet) => {
-      return Wallet.delete({ id: Wallet.id });
+    return existingWallets.forEach((wallet) => {
+      return Wallet.delete({ id: wallet.id });
     });
   });
 });
@@ -18,13 +18,13 @@ before(() => {
 after(() => {
   // Clear all Wallets items
   return Wallet.scan().exec().then((existingWallets) => {
-    return existingWallets.forEach((Wallet) => {
-      return Wallet.delete({ id: Wallet.id });
+    return existingWallets.forEach((wallet) => {
+      return Wallet.delete({ id: wallet.id });
     });
   });
 });
 
-describe('Wallets endpoints', () => {
+describe('wallets endpoints', () => {
   const existingWallets = [];
 
   describe('POST /v1/wallets', () => {

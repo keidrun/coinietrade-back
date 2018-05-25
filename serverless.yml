@@ -160,6 +160,23 @@ functions:
           path: v1/wallets/{id}
           private: true
           cors: false
+  # Rules API
+  addRule:
+    handler: src/api/handler.addRule
+    events:
+      - http:
+          method: post
+          path: v1/rules
+          private: true
+          cors: false
+  removeRule:
+    handler: src/api/handler.removeRule
+    events:
+      - http:
+          method: delete
+          path: v1/rules/{id}
+          private: true
+          cors: false
   # Scheduler
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage

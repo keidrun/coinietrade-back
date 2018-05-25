@@ -19,7 +19,11 @@ const COIN_UNITS = {
 };
 const coinList = Object.values(COIN_UNITS);
 
-const exchangeSiteList = [ 'bitflyer', 'zaif' ];
+const EXCHANGE_SITES = {
+  BITFLYER: 'bitflyer',
+  ZAIF: 'zaif'
+};
+const exchangeSiteList = Object.values(EXCHANGE_SITES);
 
 const CURRENCY_UNITS = {
   JPY: 'jpy',
@@ -41,7 +45,6 @@ const ruleSchema = new Schema(
     arbitrageStrategy: {
       type: String,
       required: true,
-      default: ARBITRAGE_STRATEGIES.SIMPLE,
       validate: (value) => arbitrageStrategyList.indexOf(value) !== -1
     },
     orderType: {
@@ -53,64 +56,52 @@ const ruleSchema = new Schema(
     coinUnit: {
       type: String,
       required: true,
-      default: COIN_UNITS.BTC,
       validate: (value) => coinList.indexOf(value) !== -1
     },
     currencyUnit: {
       type: String,
       required: true,
-      default: CURRENCY_UNITS.JPY,
       validate: (value) => moneyUnitList.indexOf(value) !== -1
     },
     orderAmount: {
       type: Number,
       required: true,
-      default: 0,
       validate: (value) => (value > 0 ? true : false)
     },
     orderPrice: {
       type: Number,
       required: true,
-      default: 0,
       validate: (value) => (value > 0 ? true : false)
     },
-    orderPriority: { type: Number, required: true, default: 0 },
+    orderPriority: { type: Number },
     priceDifference: {
       type: Number,
       required: true,
-      default: 0,
       validate: (value) => (value > 0 ? true : false)
     },
-    a: {
-      exchangeSiteName: {
-        type: String,
-        required: true,
-        trim: true,
-        validate: (value) => exchangeSiteList.indexOf(value) !== -1
-      },
-      expectedTransactionFeeRate: { type: Number, required: true },
-      expectedRemittanceFee: { type: Number, required: true }
-    },
-    b: {
-      exchangeSiteName: {
-        type: String,
-        required: true,
-        trim: true,
-        validate: (value) => exchangeSiteList.indexOf(value) !== -1
-      },
-      expectedTransactionFeeRate: { type: Number, required: true },
-      expectedRemittanceFee: { type: Number, required: true }
-    },
+    sites: [
+      // exactly 2 exchange sites
+      {
+        name: {
+          type: String,
+          required: true,
+          validate: (value) => exchangeSiteList.indexOf(value) !== -1
+        },
+        expectedTransactionFeeRate: { type: Number, required: true },
+        expectedRemittanceFee: { type: Number, required: true }
+      }
+    ],
     counts: {
-      executionCount: { type: Number, required: true, default: 0 },
-      successCount: { type: Number, required: true, default: 0 },
-      failureCount: { type: Number, required: true, default: 0 },
-      retryCount: { type: Number, required: true, default: 0 }
+      executionCount: { type: Number, required: true },
+      successCount: { type: Number, required: true },
+      failureCount: { type: Number, required: true },
+      retryCount: { type: Number, required: true }
     },
     expiredAt: {
       type: Number,
       required: true,
-      default: () => moment().add(1, 'month').format('x') // Unix timestamp of 13 digits format
+      // Unix timestamp of 13 digits format
+      default: () => moment().add(1, 'month').format('x')
     }
   },
   options
@@ -123,5 +114,6 @@ module.exports = {
   ORDER_TYPES,
   COIN_UNITS,
   CURRENCY_UNITS,
+  EXCHANGE_SITES,
   Rule
 };

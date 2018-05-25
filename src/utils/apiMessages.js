@@ -18,10 +18,7 @@ exports.errors = {
   // Wallets api error messages
   WALLET_API_MESSAGE_CREATE_FAILED: 'Create Wallet Request Failed',
   WALLET_API_MESSAGE_DELETE_FAILED: 'Delete Wallet Request Failed',
-  // Wallet model errors
-  WALLET_MISSING_USER_ID: { code: 7301, message: "Required field Wallet 'userId' is missing" },
-  WALLET_DUPLICATE_USER_ID: { code: 7302, message: "Required field Wallet 'userId' is duplicated" },
-  WALLET_MISSING_COMPANY: { code: 7303, message: "Required field Wallet 'company' is missing" },
-  WALLET_MISSING_ADDRESS_TYPE: { code: 7304, message: "Required field Wallet 'addressType' is missing" },
-  WALLET_MISSING_ADDRESS: { code: 7305, message: "Required field Wallet 'address' is missing" }
+  // Rules api error messages
+  RULE_API_MESSAGE_CREATE_FAILED: 'Create Rule Request Failed',
+  RULE_API_MESSAGE_DELETE_FAILED: 'Delete Rule Request Failed'
 };

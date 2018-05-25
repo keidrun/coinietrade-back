@@ -10,16 +10,18 @@
     "orderPrice": 800000,
     "orderPriority": 0,
     "priceDifference": 10000,
-    "a": {
-      "exchangeSiteName": "bitflyer",
-      "expectedTransactionFeeRate": 0.001,
-      "expectedRemittanceFee": 0.0004
-    },
-    "b": {
-      "exchangeSiteName": "zaif",
-      "expectedTransactionFeeRate": -0.01,
-      "expectedRemittanceFee": 0.0004
-    },
+    "sites": [
+      {
+        "name": "bitflyer",
+        "expectedTransactionFeeRate": 0.001,
+        "expectedRemittanceFee": 0.0004
+      },
+      {
+        "name": "zaif",
+        "expectedTransactionFeeRate": -0.01,
+        "expectedRemittanceFee": 0.0004
+      }
+    ],
     "counts": {
       "executionCount": 0,
       "successCount": 0,
@@ -41,16 +43,18 @@
     "orderPrice": 850000,
     "orderPriority": 1,
     "priceDifference": 50000,
-    "a": {
-      "exchangeSite": "zaif",
-      "expectedTransactionFeeRate": -0.01,
-      "expectedRemittanceFee": 0.0004
-    },
-    "b": {
-      "exchangeSite": "bitflyer",
-      "expectedTransactionFeeRate": 0.001,
-      "expectedRemittanceFee": 0.0004
-    },
+    "sites": [
+      {
+        "name": "zaif",
+        "expectedTransactionFeeRate": -0.01,
+        "expectedRemittanceFee": 0.0004
+      },
+      {
+        "name": "bitflyer",
+        "expectedTransactionFeeRate": 0.001,
+        "expectedRemittanceFee": 0.0004
+      }
+    ],
     "counts": {
       "executionCount": 0,
       "successCount": 0,
