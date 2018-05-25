@@ -9,6 +9,12 @@ const EFFECTS = {
   ERRORED: 'errored'
 };
 const effectList = [ EFFECTS.ALLOW, EFFECTS.DENY, EFFECTS.CANCELED, EFFECTS.ERRORED ];
+const USER_GRADE = {
+  FREE: 'free',
+  PRO: 'professional',
+  ULTIMATE: 'ultimate'
+};
+const userGradeList = [ USER_GRADE.FREE, USER_GRADE.PRO, USER_GRADE.ULTIMATE ];
 
 const options = {
   timestamps: true
@@ -31,6 +37,17 @@ const policySchema = new Schema(
       required: true,
       default: EFFECTS.ALLOW,
       validate: (value) => effectList.indexOf(value) !== -1
+    },
+    grade: {
+      type: String,
+      required: true,
+      default: USER_GRADE.FREE,
+      validate: (value) => userGradeList.indexOf(value) !== -1
+    },
+    ruleLimit: {
+      type: Number,
+      required: true,
+      default: 1
     }
   },
   options
@@ -39,6 +56,7 @@ const policySchema = new Schema(
 const Policy = dynamoose.model('policies', policySchema);
 
 module.exports = {
-  Policy,
-  EFFECTS
+  EFFECTS,
+  USER_GRADE,
+  Policy
 };

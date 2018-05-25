@@ -3,6 +3,8 @@
     "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8971",
     "userId": "5aa62de706df15492dcc7177",
     "effect": "allow",
+    "grade": "free",
+    "ruleLimit": 1,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   },
@@ -10,6 +12,8 @@
     "id": "179a6936-6494-4cf9-846f-688a1e01d39f",
     "userId": "5aa6ca962aed5c6fefaa7b31",
     "effect": "allow",
+    "grade": "professional",
+    "ruleLimit": 10,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -17,6 +21,8 @@
     "id": "811fdb9c-c7be-41f8-bd68-3639d0508272",
     "userId": "5aa6ca962aed5c6fefaa7b32",
     "effect": "deny",
+    "grade": "free",
+    "ruleLimit": 5,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -24,6 +30,8 @@
     "id": "40edc439-03de-449b-bc0f-ef0e0f4b629d",
     "userId": "5aa9354c4bce218779332fa7",
     "effect": "deny",
+    "grade": "free",
+    "ruleLimit": 100,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -31,6 +39,8 @@
     "id": "66948f76-4e9d-4dd5-8449-51eadac2703d",
     "userId": "5aa9354c4bce218779332fa8",
     "effect": "canceled",
+    "grade": "ultimate",
+    "ruleLimit": 1,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   }

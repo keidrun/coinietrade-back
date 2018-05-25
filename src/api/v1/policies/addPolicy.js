@@ -1,14 +1,10 @@
 const { Policy } = require('../../../models/Policy');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb
-} = require('../../../utils/response');
+const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
 const apiMessages = require('../../../utils/apiMessages');
 const apiErrors = require('../../../utils/apiErrors');
 
 module.exports.addPolicy = async (event, callback) => {
-  const { userId, effect } = JSON.parse(event.body);
+  const { userId, effect, grade, ruleLimit } = JSON.parse(event.body);
 
   if (!userId) {
     return callback(
@@ -26,12 +22,12 @@ module.exports.addPolicy = async (event, callback) => {
 
   let policy = { userId };
   if (effect) policy.effect = effect;
+  if (grade) policy.grade = grade;
+  if (ruleLimit) policy.ruleLimit = ruleLimit;
 
   const newPolicy = new Policy(policy);
   try {
-    const duplicatePolicies = await Policy.scan('userId')
-      .contains(userId)
-      .exec();
+    const duplicatePolicies = await Policy.scan('userId').contains(userId).exec();
     if (duplicatePolicies.count <= 0) {
       const addedPolicy = await newPolicy.save({ overwrite: false });
       callback(null, response(201, addedPolicy));
