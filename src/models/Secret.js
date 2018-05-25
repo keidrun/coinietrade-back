@@ -44,6 +44,11 @@ const secretSchema = new Schema(
       type: String,
       required: true,
       trim: true
+    },
+    version: {
+      type: Number,
+      required: true,
+      default: 0
     }
   },
   options

@@ -9,7 +9,8 @@ module.exports.removeRule = async (event, callback) => {
   try {
     const existingRule = await Rule.get(id);
     if (existingRule) {
-      await Rule.delete({ id });
+      const version = existingRule.version;
+      await Rule.delete({ id, version });
       callback(null, response(204));
     } else {
       responseError(

@@ -9,7 +9,8 @@ module.exports.removeSecret = async (event, callback) => {
   try {
     const existingSecret = await Secret.get(id);
     if (existingSecret) {
-      await Secret.delete({ id });
+      const version = existingSecret.version;
+      await Secret.delete({ id, version });
       callback(null, response(204));
     } else {
       responseError(

@@ -102,6 +102,11 @@ const ruleSchema = new Schema(
       required: true,
       // Unix timestamp of 13 digits format
       default: () => moment().add(1, 'month').format('x')
+    },
+    version: {
+      type: Number,
+      required: true,
+      default: 0
     }
   },
   options

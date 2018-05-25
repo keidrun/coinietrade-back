@@ -15,7 +15,9 @@ module.exports.updatePolicy = async (event, callback) => {
   try {
     const existingPolicy = await Policy.get(id);
     if (existingPolicy) {
-      const updatedPolicy = await Policy.update({ id }, { $PUT: policy });
+      const version = existingPolicy.version;
+      policy.version = version + 1;
+      const updatedPolicy = await Policy.update({ id, version }, { $PUT: policy });
       callback(null, response(200, updatedPolicy));
     } else {
       responseError(

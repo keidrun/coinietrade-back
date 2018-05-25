@@ -113,6 +113,7 @@ describe('policies endpoints', () => {
               effect: existingPolicies[i].effect,
               grade: existingPolicies[i].grade,
               ruleLimit: existingPolicies[i].ruleLimit,
+              version: existingPolicies[i].version,
               createdAt: existingPolicies[i].createdAt,
               updatedAt: existingPolicies[i].updatedAt
             });
@@ -138,6 +139,7 @@ describe('policies endpoints', () => {
             effect: existingPolicies[0].effect,
             grade: existingPolicies[0].grade,
             ruleLimit: existingPolicies[0].ruleLimit,
+            version: existingPolicies[0].version,
             createdAt: existingPolicies[0].createdAt,
             updatedAt: existingPolicies[0].updatedAt
           });
@@ -178,11 +180,13 @@ describe('policies endpoints', () => {
           expectedToUpdatePolicy.effect = 'deny';
           expectedToUpdatePolicy.grade = 'professional';
           expectedToUpdatePolicy.ruleLimit = 777;
+          expectedToUpdatePolicy.version = 1;
 
           expect(updatedPolicy.id).to.equal(expectedToUpdatePolicy.id);
           expect(updatedPolicy.effect).to.equal(expectedToUpdatePolicy.effect);
           expect(updatedPolicy.grade).to.equal(expectedToUpdatePolicy.grade);
           expect(updatedPolicy.ruleLimit).to.equal(expectedToUpdatePolicy.ruleLimit);
+          expect(updatedPolicy.version).to.equal(expectedToUpdatePolicy.version);
           done();
         })
         .catch((error) => {

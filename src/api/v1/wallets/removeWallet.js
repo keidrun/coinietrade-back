@@ -9,7 +9,8 @@ module.exports.removeWallet = async (event, callback) => {
   try {
     const existingWallet = await Wallet.get(id);
     if (existingWallet) {
-      await Wallet.delete({ id });
+      const version = existingWallet.version;
+      await Wallet.delete({ id, version });
       callback(null, response(204));
     } else {
       responseError(

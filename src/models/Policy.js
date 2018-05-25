@@ -50,6 +50,11 @@ const policySchema = new Schema(
       type: Number,
       required: true,
       default: 1
+    },
+    version: {
+      type: Number,
+      required: true,
+      default: 0
     }
   },
   options
