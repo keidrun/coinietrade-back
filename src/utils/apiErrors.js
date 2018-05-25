@@ -34,10 +34,6 @@ exports.errors = {
   SECRET_MISSING_API_PROVIDER: { code: 7203, message: "Required field Secret 'apiProvider' is missing" },
   SECRET_MISSING_API_KEY: { code: 7204, message: "Required field Secret 'apiKey' is missing" },
   SECRET_MISSING_API_SECRET: { code: 7205, message: "Required field Secret 'apiSecret' is missing" },
-  // Ticket model errors
-  TICKET_MISSING_USER_ID: { code: 7301, message: "Required field Ticket 'userId' is missing" },
-  TICKET_DUPLICATE_USER_ID: { code: 7302, message: "Required field Ticket 'userId' is duplicated" },
-  TICKET_READ_DATA_NOT_FOUND_BY_ID: { code: 7303, message: "Ticket data with the provided 'id' NOT found" },
   // Wallet model errors
   WALLET_MISSING_USER_ID: { code: 7301, message: "Required field Wallet 'userId' is missing" },
   WALLET_DUPLICATE_USER_ID: { code: 7302, message: "Required field Wallet 'userId' is duplicated" },
