@@ -8,13 +8,13 @@ const EFFECTS = {
   CANCELED: 'canceled',
   ERRORED: 'errored'
 };
-const effectList = [ EFFECTS.ALLOW, EFFECTS.DENY, EFFECTS.CANCELED, EFFECTS.ERRORED ];
-const USER_GRADE = {
+const effectList = Object.values(EFFECTS);
+const USER_GRADES = {
   FREE: 'free',
   PRO: 'professional',
   ULTIMATE: 'ultimate'
 };
-const userGradeList = [ USER_GRADE.FREE, USER_GRADE.PRO, USER_GRADE.ULTIMATE ];
+const userGradeList = Object.values(USER_GRADES);
 
 const options = {
   timestamps: true
@@ -41,7 +41,7 @@ const policySchema = new Schema(
     grade: {
       type: String,
       required: true,
-      default: USER_GRADE.FREE,
+      default: USER_GRADES.FREE,
       validate: (value) => userGradeList.indexOf(value) !== -1
     },
     ruleLimit: {
@@ -57,6 +57,6 @@ const Policy = dynamoose.model('policies', policySchema);
 
 module.exports = {
   EFFECTS,
-  USER_GRADE,
+  USER_GRADES,
   Policy
 };
