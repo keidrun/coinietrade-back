@@ -1,7 +1,7 @@
 const { Wallet } = require('../../../models/Wallet');
 const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
-const apiMessages = require('../../../utils/apiMessages');
-const apiErrors = require('../../../utils/apiErrors');
+const apiMessages = require('../../../messages/apiMessages');
+const apiErrors = require('../../../messages/apiErrors');
 
 module.exports.removeWallet = async (event, callback) => {
   const { id } = event.pathParameters;

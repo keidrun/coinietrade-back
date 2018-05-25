@@ -1,4 +1,4 @@
-const apiErrors = require('./apiErrors');
+const apiErrors = require('../messages/apiErrors');
 
 const response = (statusCode, body) => {
   return !body
@@ -9,32 +9,17 @@ const response = (statusCode, body) => {
       };
 };
 
-const responseError = (
-  statusCode,
-  message,
-  method,
-  endpoint,
-  validationError,
-  payload
-) => {
-  const errors = [validationError];
+const responseError = (statusCode, message, method, endpoint, validationError, payload) => {
+  const errors = [ validationError ];
   if (!payload) payload = {};
 
   return {
     statusCode,
-    body: JSON.stringify(
-      apiErrors.createBody(message, method, endpoint, errors, payload)
-    )
+    body: JSON.stringify(apiErrors.createBody(message, method, endpoint, errors, payload))
   };
 };
 
-const responseErrorFromDynamodb = (
-  message,
-  method,
-  endpoint,
-  dbError,
-  payload
-) => {
+const responseErrorFromDynamodb = (message, method, endpoint, dbError, payload) => {
   let statusCode = 400;
   let errors = [];
   if (!payload) payload = {};
@@ -42,8 +27,7 @@ const responseErrorFromDynamodb = (
   if (dbError.statusCode === 400) {
     if (dbError.code === apiErrors.dynamodbKinds.CONDITIONAL_CHECK_FAILED) {
       statusCode = 409;
-      let errorDynamodbDuplicateData =
-        apiErrors.errors.DYNAMODB_DUPLICATE_DATE_ERROR;
+      let errorDynamodbDuplicateData = apiErrors.errors.DYNAMODB_DUPLICATE_DATE_ERROR;
       errorDynamodbDuplicateData.payload = dbError;
       errors.push(errorDynamodbDuplicateData);
     } else if (dbError.code === apiErrors.dynamodbKinds.VALIDATION) {
@@ -73,8 +57,7 @@ const responseErrorFromDynamodb = (
       errors.push(errorUnknown);
       // Dynamoose Errors
     } else if (dbError.name === 'ValidationError') {
-      let errorDynamooseModelValidation =
-        apiErrors.errors.DYNAMOOSE_MODEL_VALIDATION_ERROR;
+      let errorDynamooseModelValidation = apiErrors.errors.DYNAMOOSE_MODEL_VALIDATION_ERROR;
       errorDynamooseModelValidation.message = dbError.message;
       errorDynamooseModelValidation.payload = dbError;
       errors.push(errorDynamooseModelValidation);
@@ -88,9 +71,7 @@ const responseErrorFromDynamodb = (
   }
   return {
     statusCode,
-    body: JSON.stringify(
-      apiErrors.createBody(message, method, endpoint, errors, payload)
-    )
+    body: JSON.stringify(apiErrors.createBody(message, method, endpoint, errors, payload))
   };
 };
 
