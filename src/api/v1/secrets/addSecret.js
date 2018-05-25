@@ -4,7 +4,7 @@ const apiMessages = require('../../../utils/apiMessages');
 const apiErrors = require('../../../utils/apiErrors');
 
 module.exports.addSecret = async (event, callback) => {
-  const { userId, apiName, apiKey, apiSecret } = JSON.parse(event.body);
+  const { userId, apiProvider, apiKey, apiSecret } = JSON.parse(event.body);
 
   if (!userId) {
     return callback(
@@ -15,6 +15,20 @@ module.exports.addSecret = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.SECRET_MISSING_USER_ID,
+        event
+      )
+    );
+  }
+
+  if (!apiProvider) {
+    return callback(
+      null,
+      responseError(
+        400,
+        apiMessages.errors.SECRET_API_MESSAGE_CREATE_FAILED,
+        event.httpMethod,
+        event.path,
+        apiErrors.errors.SECRET_MISSING_API_PROVIDER,
         event
       )
     );
@@ -48,12 +62,7 @@ module.exports.addSecret = async (event, callback) => {
     );
   }
 
-  const secret = {
-    userId,
-    apiName,
-    apiKey,
-    apiSecret
-  };
+  const secret = { userId, apiProvider, apiKey, apiSecret };
   const newSecret = new Secret(secret);
   try {
     const duplicateSecrets = await Secret.scan('userId').contains(userId).exec();
@@ -64,7 +73,7 @@ module.exports.addSecret = async (event, callback) => {
         response(201, {
           id: addedSecret.id,
           userId: addedSecret.userId,
-          apiName: addedSecret.apiName,
+          apiProvider: addedSecret.apiProvider,
           createdAt: addedSecret.createdAt,
           updatedAt: addedSecret.updatedAt
         })

@@ -3,7 +3,7 @@ const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 const { encrypt, decrypt } = require('../utils/crypto');
 
-const apiNameList = [ 'bitflyer', 'zaif' ];
+const apiProviderList = [ 'bitflyer', 'zaif' ];
 const DEFAULT_KIND = 'none';
 
 const options = {
@@ -28,10 +28,10 @@ const secretSchema = new Schema(
       trim: true,
       default: DEFAULT_KIND
     },
-    apiName: {
+    apiProvider: {
       type: String,
       required: true,
-      validate: (value) => apiNameList.indexOf(value) !== -1
+      validate: (value) => apiProviderList.indexOf(value) !== -1
     },
     apiKey: {
       type: String,

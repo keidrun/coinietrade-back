@@ -32,12 +32,12 @@ describe('secrets endpoints', () => {
       axios
         .post(`/v1/secrets`, {
           userId: uuid.v4(),
-          apiName: 'bitflyer',
+          apiProvider: 'bitflyer',
           apiKey: 'ANY_API_KEY',
           apiSecret: 'ANY_API_SECRET'
         })
         .then((response) => {
-          expect(response.data.apiName).to.equal('bitflyer');
+          expect(response.data.apiProvider).to.equal('bitflyer');
           expect(response.data.apiKey).to.be.undefined;
           expect(response.data.apiSecret).to.be.undefined;
           existingSecrets.push(response.data);
@@ -52,12 +52,12 @@ describe('secrets endpoints', () => {
       axios
         .post(`/v1/secrets`, {
           userId: uuid.v4(),
-          apiName: 'zaif',
+          apiProvider: 'zaif',
           apiKey: 'ANY_API_KEY',
           apiSecret: 'ANY_API_SECRET'
         })
         .then((response) => {
-          expect(response.data.apiName).to.equal('zaif');
+          expect(response.data.apiProvider).to.equal('zaif');
           expect(response.data.apiKey).to.be.undefined;
           expect(response.data.apiSecret).to.be.undefined;
           existingSecrets.push(response.data);

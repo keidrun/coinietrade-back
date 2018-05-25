@@ -1,0 +1,29 @@
+[
+  {
+    "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8981",
+    "userId": "5aa62de706df15492dcc7181",
+    "company": "bitflyer",
+    "addressType": "btc",
+    "address": "2LIUBYkg6tbrvDcviKnlJ6hgVCvf9bKCfv",
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  },
+  {
+    "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8982",
+    "userId": "5aa62de706df15492dcc7181",
+    "company": "zaif",
+    "addressType": "btc",
+    "address": "9NHKtfgCk6j6D6c8IiRxj3cuwVDGY8buf3",
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  },
+  {
+    "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8983",
+    "userId": "6aa62de706df15492dcc7182",
+    "company": "bitflyer",
+    "addressType": "btc",
+    "address": "78Bytvrcu5VbvbJTMNTCym456UJvfu5gfD",
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  }
+]

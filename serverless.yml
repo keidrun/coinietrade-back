@@ -29,6 +29,7 @@ provider:
     DYNAMODB_TABLE_POLICIES: ${self:custom.service.name}_policies_${self:provider.stage}
     DYNAMODB_TABLE_SECRETS: ${self:custom.service.name}_secrets_${self:provider.stage}
     DYNAMODB_TABLE_TICKETS: ${self:custom.service.name}_tickets_${self:provider.stage}
+    DYNAMODB_TABLE_WALLETS: ${self:custom.service.name}_wallets_${self:provider.stage}
     # Secret encrypt
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
   iamRoleStatements:
@@ -141,6 +142,23 @@ functions:
           path: v1/tickets/{id}
           private: true
           cors: false
+  # Wallets API
+  addWallet:
+    handler: src/api/handler.addWallet
+    events:
+      - http:
+          method: post
+          path: v1/wallets
+          private: true
+          cors: false
+  removeWallet:
+    handler: src/api/handler.removeWallet
+    events:
+      - http:
+          method: delete
+          path: v1/wallets/{id}
+          private: true
+          cors: false
   # Scheduler
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage
@@ -189,6 +207,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    walletsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_WALLETS}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 custom:
   # Alternative service properties
@@ -201,7 +232,7 @@ custom:
       migrate: true
       seed: true
     seed:
-      test:
+      dev:
         sources:
           - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
             sources: [./test/.seed/fake-policies.json]
@@ -209,3 +240,5 @@ custom:
             sources: [./test/.seed/fake-secrets.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_TICKETS}
             sources: [./test/.seed/fake-tickets.json]
+          - table: ${self:provider.environment.DYNAMODB_TABLE_WALLETS}
+            sources: [./test/.seed/fake-wallets.json]

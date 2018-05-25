@@ -9,6 +9,8 @@ const { getTicket } = require('./v1/tickets/getTicket');
 const { addTicket } = require('./v1/tickets/addTicket');
 const { removeTicket } = require('./v1/tickets/removeTicket');
 const { updateTicket } = require('./v1/tickets/updateTicket');
+const { addWallet } = require('./v1/wallets/addWallet');
+const { removeWallet } = require('./v1/wallets/removeWallet');
 
 // Policies API
 module.exports.getPolicies = (event, context, callback) => getPolicies(event, callback);
@@ -26,3 +28,7 @@ module.exports.getTicket = (event, context, callback) => getTicket(event, callba
 module.exports.addTicket = (event, context, callback) => addTicket(event, callback);
 module.exports.removeTicket = (event, context, callback) => removeTicket(event, callback);
 module.exports.updateTicket = (event, context, callback) => updateTicket(event, callback);
+
+// Wallets API
+module.exports.addWallet = (event, context, callback) => addWallet(event, callback);
+module.exports.removeWallet = (event, context, callback) => removeWallet(event, callback);
