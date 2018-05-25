@@ -2,6 +2,7 @@ const { Secret } = require('../../../models/Secret');
 const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
 const apiMessages = require('../../../utils/apiMessages');
 const apiErrors = require('../../../utils/apiErrors');
+const encryptKey = process.env.ENCRYPT_KEY;
 
 module.exports.addSecret = async (event, callback) => {
   const { userId, apiProvider, apiKey, apiSecret } = JSON.parse(event.body);
@@ -67,7 +68,7 @@ module.exports.addSecret = async (event, callback) => {
   try {
     const duplicateSecrets = await Secret.scan('userId').contains(userId).exec();
     if (duplicateSecrets.count <= 0) {
-      const addedSecret = await newSecret.encryptAndSave(userId, { overwrite: false });
+      const addedSecret = await newSecret.encryptAndSave(encryptKey, { overwrite: false });
       callback(
         null,
         response(201, {

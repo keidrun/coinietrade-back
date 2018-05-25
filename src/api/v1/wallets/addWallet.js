@@ -2,6 +2,7 @@ const { Wallet } = require('../../../models/Wallet');
 const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
 const apiMessages = require('../../../utils/apiMessages');
 const apiErrors = require('../../../utils/apiErrors');
+const encryptKey = process.env.ENCRYPT_KEY;
 
 module.exports.addWallet = async (event, callback) => {
   const { userId, company, addressType, address } = JSON.parse(event.body);
@@ -67,7 +68,7 @@ module.exports.addWallet = async (event, callback) => {
   try {
     const duplicateWallets = await Wallet.scan('userId').contains(userId).exec();
     if (duplicateWallets.count <= 0) {
-      const addedWallet = await newWallet.encryptAndSave(userId, { overwrite: false });
+      const addedWallet = await newWallet.encryptAndSave(encryptKey, { overwrite: false });
       callback(
         null,
         response(201, {
