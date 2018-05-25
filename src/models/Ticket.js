@@ -4,7 +4,9 @@ const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
 const options = {
-  timestamps: true
+  timestamps: true,
+  useNativeBooleans: true,
+  useDocumentTypes: true
 };
 
 const ticketSchema = new Schema(

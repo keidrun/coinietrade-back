@@ -7,7 +7,9 @@ const apiProviderList = [ 'bitflyer', 'zaif' ];
 const DEFAULT_KIND = 'none';
 
 const options = {
-  timestamps: true
+  timestamps: true,
+  useNativeBooleans: true,
+  useDocumentTypes: true
 };
 
 const secretSchema = new Schema(

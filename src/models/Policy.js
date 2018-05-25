@@ -17,7 +17,9 @@ const USER_GRADES = {
 const userGradeList = Object.values(USER_GRADES);
 
 const options = {
-  timestamps: true
+  timestamps: true,
+  useNativeBooleans: true,
+  useDocumentTypes: true
 };
 
 const policySchema = new Schema(
