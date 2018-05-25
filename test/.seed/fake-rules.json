@@ -1,0 +1,64 @@
+[
+  {
+    "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8971",
+    "userId": "5aa62de706df15492dcc7177",
+    "arbitrageStrategy": "simple",
+    "orderType": "limit_order",
+    "coinUnit": "btc",
+    "currencyUnit": "jpy",
+    "orderAmount": 0.0005,
+    "orderPrice": 800000,
+    "orderPriority": 0,
+    "priceDifference": 10000,
+    "a": {
+      "exchangeSiteName": "bitflyer",
+      "expectedTransactionFeeRate": 0.001,
+      "expectedRemittanceFee": 0.0004
+    },
+    "b": {
+      "exchangeSiteName": "zaif",
+      "expectedTransactionFeeRate": -0.01,
+      "expectedRemittanceFee": 0.0004
+    },
+    "counts": {
+      "executionCount": 0,
+      "successCount": 0,
+      "failureCount": 0,
+      "retryCount": 0
+    },
+    "expiredAt": 1530101697000,
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  },
+  {
+    "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8972",
+    "userId": "5aa62de706df15492dcc7177",
+    "arbitrageStrategy": "simple",
+    "orderType": "market_order",
+    "coinUnit": "btc",
+    "currencyUnit": "jpy",
+    "orderAmount": 0.0005,
+    "orderPrice": 850000,
+    "orderPriority": 1,
+    "priceDifference": 50000,
+    "a": {
+      "exchangeSite": "zaif",
+      "expectedTransactionFeeRate": -0.01,
+      "expectedRemittanceFee": 0.0004
+    },
+    "b": {
+      "exchangeSite": "bitflyer",
+      "expectedTransactionFeeRate": 0.001,
+      "expectedRemittanceFee": 0.0004
+    },
+    "counts": {
+      "executionCount": 0,
+      "successCount": 0,
+      "failureCount": 0,
+      "retryCount": 0
+    },
+    "expiredAt": 1530101697000,
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  }
+]

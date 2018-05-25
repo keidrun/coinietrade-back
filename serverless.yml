@@ -30,6 +30,7 @@ provider:
     DYNAMODB_TABLE_SECRETS: ${self:custom.service.name}_secrets_${self:provider.stage}
     DYNAMODB_TABLE_TICKETS: ${self:custom.service.name}_tickets_${self:provider.stage}
     DYNAMODB_TABLE_WALLETS: ${self:custom.service.name}_wallets_${self:provider.stage}
+    DYNAMODB_TABLE_RULES: ${self:custom.service.name}_rules_${self:provider.stage}
     # Secret encrypt
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
   iamRoleStatements:
@@ -220,6 +221,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    rulesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_RULES}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
 custom:
   # Alternative service properties
@@ -242,3 +256,5 @@ custom:
             sources: [./test/.seed/fake-tickets.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_WALLETS}
             sources: [./test/.seed/fake-wallets.json]
+          - table: ${self:provider.environment.DYNAMODB_TABLE_RULES}
+            sources: [./test/.seed/fake-rules.json]
