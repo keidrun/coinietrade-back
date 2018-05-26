@@ -4,7 +4,7 @@ const apiMessages = require('../../../messages/apiMessages');
 
 module.exports.getPolicies = async (event, callback) => {
   try {
-    const policies = await Policy.scan().exec();
+    const policies = await Policy.getAll();
     callback(null, response(200, policies));
   } catch (error) {
     callback(

@@ -61,6 +61,10 @@ walletSchema.statics.getAndDecrypt = async function(id, encryptKey) {
   }
 };
 
+walletSchema.statics.getAll = function() {
+  return this.scan().exec();
+};
+
 const Wallet = dynamoose.model('walllets', walletSchema);
 
 module.exports = { Wallet };

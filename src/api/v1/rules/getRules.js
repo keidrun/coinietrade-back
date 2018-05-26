@@ -4,7 +4,7 @@ const apiMessages = require('../../../messages/apiMessages');
 
 module.exports.getRules = async (event, callback) => {
   try {
-    const rules = await Rule.scan().exec();
+    const rules = await Rule.getAll();
     callback(null, response(200, rules));
   } catch (error) {
     callback(

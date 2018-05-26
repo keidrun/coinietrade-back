@@ -109,6 +109,10 @@ const ruleSchema = new Schema(
   options
 );
 
+ruleSchema.statics.getAll = function() {
+  return this.scan().exec();
+};
+
 const Rule = dynamoose.model('rules', ruleSchema);
 
 module.exports = {

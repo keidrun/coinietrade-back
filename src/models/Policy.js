@@ -60,6 +60,10 @@ const policySchema = new Schema(
   options
 );
 
+policySchema.statics.getAll = function() {
+  return this.scan().exec();
+};
+
 const Policy = dynamoose.model('policies', policySchema);
 
 module.exports = {

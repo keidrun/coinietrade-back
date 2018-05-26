@@ -71,6 +71,10 @@ secretSchema.statics.getAndDecrypt = async function(id, encryptKey) {
   }
 };
 
+secretSchema.statics.getAll = function() {
+  return this.scan().exec();
+};
+
 const Secret = dynamoose.model('secrets', secretSchema);
 
 module.exports = {
