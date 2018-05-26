@@ -7,6 +7,7 @@ const apiErrors = require('../../../messages/apiErrors');
 module.exports.addRule = async (event, callback) => {
   let {
     userId,
+    priority,
     arbitrageStrategy,
     orderType,
     coinUnit,
@@ -195,8 +196,10 @@ module.exports.addRule = async (event, callback) => {
   }
 
   if (expiredAt) {
-    expiredAt = moment(expiredAt, moment.ISO_8601).unix() * 1000;
-    if (isNaN(expiredAt)) {
+    const m = moment(expiredAt, moment.ISO_8601);
+    if (m.isValid()) {
+      expiredAt = m.toISOString();
+    } else {
       return callback(
         null,
         responseError(
@@ -213,6 +216,7 @@ module.exports.addRule = async (event, callback) => {
 
   const rule = {
     userId,
+    priority,
     arbitrageStrategy,
     orderType,
     coinUnit,
@@ -231,7 +235,6 @@ module.exports.addRule = async (event, callback) => {
     const duplicateRules = await Rule.scan('userId').contains(userId).exec();
     if (duplicateRules.count <= 0) {
       const addedRule = await newRule.save({ overwrite: false });
-      addedRule.expiredAt = moment.unix(addedRule.expiredAt / 1000);
       callback(null, response(201, addedRule));
     } else {
       callback(

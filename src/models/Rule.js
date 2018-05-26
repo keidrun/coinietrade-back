@@ -42,6 +42,7 @@ const ruleSchema = new Schema(
   {
     id: { type: String, hashKey: true, default: () => uuid.v4() },
     userId: { type: String, required: true, trim: true },
+    priority: { type: Number, required: true, default: 0 },
     arbitrageStrategy: {
       type: String,
       required: true,
@@ -73,7 +74,7 @@ const ruleSchema = new Schema(
       required: true,
       validate: (value) => (value > 0 ? true : false)
     },
-    orderPriority: { type: Number },
+    orderPriority: { type: Number, required: true, default: 0 },
     priceDifference: {
       type: Number,
       required: true,
@@ -92,22 +93,18 @@ const ruleSchema = new Schema(
       }
     ],
     counts: {
+      // Initialize all to 0 in api because the dynamoose cannot define defaults in an object
       executionCount: { type: Number, required: true },
       successCount: { type: Number, required: true },
       failureCount: { type: Number, required: true },
       retryCount: { type: Number, required: true }
     },
     expiredAt: {
-      type: Number,
+      type: Date,
       required: true,
-      // Unix timestamp of 13 digits format
-      default: () => moment().add(1, 'month').format('x')
+      default: () => moment().add(1, 'month').toISOString()
     },
-    version: {
-      type: Number,
-      required: true,
-      default: 0
-    }
+    version: { type: Number, required: true, default: 0 }
   },
   options
 );

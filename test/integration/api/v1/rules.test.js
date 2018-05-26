@@ -32,6 +32,7 @@ describe('rules endpoints', () => {
       axios
         .post(`/v1/rules`, {
           userId: uuid.v4(),
+          priority: 1,
           arbitrageStrategy: 'simple',
           orderType: 'limit_order',
           coinUnit: 'btc',
@@ -58,9 +59,10 @@ describe('rules endpoints', () => {
             failureCount: 2,
             retryCount: 1
           },
-          expiredAt: '2018-05-25T19:40:29.000Z'
+          expiredAt: '2018-05-25T19:40:29.123Z'
         })
         .then((response) => {
+          expect(response.data.priority).to.equal(1);
           expect(response.data.arbitrageStrategy).to.equal('simple');
           expect(response.data.orderType).to.equal('limit_order');
           expect(response.data.coinUnit).to.equal('btc');
@@ -86,7 +88,7 @@ describe('rules endpoints', () => {
             failureCount: 2,
             retryCount: 1
           });
-          expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.000Z');
+          expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.123Z');
           existingRules.push(response.data);
           done();
         })
@@ -119,13 +121,14 @@ describe('rules endpoints', () => {
           ]
         })
         .then((response) => {
+          expect(response.data.priority).to.equal(0);
           expect(response.data.arbitrageStrategy).to.equal('simple');
           expect(response.data.orderType).to.equal('limit_order');
           expect(response.data.coinUnit).to.equal('btc');
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderAmount).to.equal(0.001);
           expect(response.data.orderPrice).to.equal(999999);
-          expect(response.data.orderPriority).to.be.undefined;
+          expect(response.data.orderPriority).to.equal(0);
           expect(response.data.priceDifference).to.equal(777);
           expect(response.data.sites.length).to.equal(2);
           expect(response.data.sites[0]).to.deep.equal({
