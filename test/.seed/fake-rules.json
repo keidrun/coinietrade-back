@@ -2,6 +2,7 @@
   {
     "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8971",
     "userId": "5aa62de706df15492dcc7177",
+    "priority": 0,
     "arbitrageStrategy": "simple",
     "orderType": "limit_order",
     "coinUnit": "btc",
@@ -35,6 +36,7 @@
   {
     "id": "cb3dc780-484f-11e8-a0b9-c36d84fa8972",
     "userId": "5aa62de706df15492dcc7177",
+    "priority": 1,
     "arbitrageStrategy": "simple",
     "orderType": "market_order",
     "coinUnit": "btc",

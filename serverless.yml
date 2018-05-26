@@ -127,6 +127,14 @@ functions:
           private: true
           cors: false
   # Rules API
+  getRules:
+    handler: src/api/handler.getRules
+    events:
+      - http:
+          method: get
+          path: v1/rules
+          private: true
+          cors: false
   addRule:
     handler: src/api/handler.addRule
     events:

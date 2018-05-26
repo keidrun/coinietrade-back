@@ -15,5 +15,6 @@ exports.errors = {
   WALLET_API_MESSAGE_DELETE_FAILED: 'Delete Wallet Request Failed',
   // Rules api error messages
   RULE_API_MESSAGE_CREATE_FAILED: 'Create Rule Request Failed',
+  RULE_API_MESSAGE_READ_LIST_FAILED: 'Read Rules Request Failed',
   RULE_API_MESSAGE_DELETE_FAILED: 'Delete Rule Request Failed'
 };

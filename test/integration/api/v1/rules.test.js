@@ -156,6 +156,44 @@ describe('rules endpoints', () => {
     });
   });
 
+  describe('GET /v1/rules', () => {
+    it('should return all data response', (done) => {
+      axios
+        .get(`/v1/rules`)
+        .then((response) => {
+          const rules = response.data;
+          sortByCreatedAt(rules);
+
+          expect(rules.length).equals(2);
+          rules.forEach((rule, i) => {
+            expect(rule).to.deep.equal({
+              id: existingRules[i].id,
+              userId: existingRules[i].userId,
+              priority: existingRules[i].priority,
+              arbitrageStrategy: existingRules[i].arbitrageStrategy,
+              orderType: existingRules[i].orderType,
+              coinUnit: existingRules[i].coinUnit,
+              currencyUnit: existingRules[i].currencyUnit,
+              orderAmount: existingRules[i].orderAmount,
+              orderPrice: existingRules[i].orderPrice,
+              orderPriority: existingRules[i].orderPriority,
+              priceDifference: existingRules[i].priceDifference,
+              sites: existingRules[i].sites,
+              counts: existingRules[i].counts,
+              expiredAt: existingRules[i].expiredAt,
+              version: existingRules[i].version,
+              createdAt: existingRules[i].createdAt,
+              updatedAt: existingRules[i].updatedAt
+            });
+          });
+          done();
+        })
+        .catch((error) => {
+          done(error);
+        });
+    });
+  });
+
   describe('DELETE /v1/rules/{id}', () => {
     it('should return 204 status', (done) => {
       const expectedToDeleteRule = existingRules[existingRules.length - 1];
