@@ -1,4 +1,5 @@
 const uuid = require('uuid');
+const moment = require('moment');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
@@ -36,6 +37,11 @@ const policySchema = new Schema(
       validate: (value) => Object.values(USER_GRADES).indexOf(value) !== -1
     },
     ruleLimit: { type: Number, required: true, default: 1 },
+    expiredAt: {
+      type: Date,
+      required: true,
+      default: () => moment().add(1, 'month').toISOString()
+    },
     version: { type: Number, required: true, default: 0 }
   },
   options

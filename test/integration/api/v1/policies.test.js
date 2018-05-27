@@ -30,11 +30,18 @@ describe('policies endpoints', () => {
   describe('POST /v1/policies', () => {
     it('should return added data response of allow', (done) => {
       axios
-        .post(`/v1/policies`, { userId: uuid.v4(), effect: 'allow', grade: 'free', ruleLimit: 10 })
+        .post(`/v1/policies`, {
+          userId: uuid.v4(),
+          effect: 'allow',
+          grade: 'free',
+          ruleLimit: 10,
+          expiredAt: '2018-05-25T19:40:29.123Z'
+        })
         .then((response) => {
           expect(response.data.effect).to.equal('allow');
           expect(response.data.grade).to.equal('free');
           expect(response.data.ruleLimit).to.equal(10);
+          expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.123Z');
 
           existingPolicies.push(response.data);
           done();
@@ -87,6 +94,7 @@ describe('policies endpoints', () => {
               effect: existingPolicies[i].effect,
               grade: existingPolicies[i].grade,
               ruleLimit: existingPolicies[i].ruleLimit,
+              expiredAt: existingPolicies[i].expiredAt,
               version: existingPolicies[i].version,
               createdAt: existingPolicies[i].createdAt,
               updatedAt: existingPolicies[i].updatedAt
@@ -113,6 +121,7 @@ describe('policies endpoints', () => {
             effect: existingPolicies[0].effect,
             grade: existingPolicies[0].grade,
             ruleLimit: existingPolicies[0].ruleLimit,
+            expiredAt: existingPolicies[0].expiredAt,
             version: existingPolicies[0].version,
             createdAt: existingPolicies[0].createdAt,
             updatedAt: existingPolicies[0].updatedAt

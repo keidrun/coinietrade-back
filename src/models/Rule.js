@@ -1,5 +1,4 @@
 const uuid = require('uuid');
-const moment = require('moment');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
@@ -92,17 +91,13 @@ const ruleSchema = new Schema(
         expectedRemittanceFee: { type: Number, required: true }
       }
     ],
+    profitPrice: { type: Number, required: true, default: 0 },
     counts: {
       // Initialize all to 0 in api because the dynamoose cannot define
       // defaults in an object
       executionCount: { type: Number, required: true },
       successCount: { type: Number, required: true },
       failureCount: { type: Number, required: true }
-    },
-    expiredAt: {
-      type: Date,
-      required: true,
-      default: () => moment().add(1, 'month').toISOString()
     },
     status: {
       type: String,

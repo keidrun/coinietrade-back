@@ -1,4 +1,3 @@
-const moment = require('moment');
 const { Rule } = require('../../../models/Rule');
 const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
@@ -16,18 +15,10 @@ module.exports.addRule = async (event, callback) => {
     orderPrice,
     orderPriority,
     priceDifference,
-    sites,
-    counts,
-    expiredAt,
-    status
+    sites
   } = JSON.parse(event.body);
 
   sites = sites || [];
-  counts = counts || {
-    executionCount: 0,
-    successCount: 0,
-    failureCount: 0
-  };
 
   if (!userId) {
     return callback(
@@ -195,25 +186,6 @@ module.exports.addRule = async (event, callback) => {
     );
   }
 
-  if (expiredAt) {
-    const m = moment(expiredAt, moment.ISO_8601);
-    if (m.isValid()) {
-      expiredAt = m.toISOString();
-    } else {
-      return callback(
-        null,
-        responseError(
-          400,
-          apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-          event.httpMethod,
-          event.path,
-          apiErrors.errors.RULE_INVALID_EXPIRED_AT,
-          event
-        )
-      );
-    }
-  }
-
   const rule = {
     userId,
     priority,
@@ -226,9 +198,7 @@ module.exports.addRule = async (event, callback) => {
     orderPriority,
     priceDifference,
     sites,
-    counts,
-    expiredAt,
-    status
+    counts: { executionCount: 0, successCount: 0, failureCount: 0 }
   };
   const newRule = new Rule(rule);
 

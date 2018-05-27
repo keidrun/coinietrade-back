@@ -23,13 +23,13 @@
         "expectedRemittanceFee": 0.0004
       }
     ],
+    "profitPrice": 10000,
     "counts": {
       "executionCount": 0,
       "successCount": 0,
       "failureCount": 0,
       "retryCount": 0
     },
-    "expiredAt": 1530101697000,
     "status": "available",
     "version": 0,
     "createdAt": 1524831297800,
@@ -59,13 +59,13 @@
         "expectedRemittanceFee": 0.0004
       }
     ],
+    "profitPrice": 10000,
     "counts": {
       "executionCount": 0,
       "successCount": 0,
       "failureCount": 0,
       "retryCount": 0
     },
-    "expiredAt": 1530101697000,
     "status": "unavailable",
     "version": 1,
     "createdAt": 1524831297800,

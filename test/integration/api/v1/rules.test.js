@@ -52,14 +52,7 @@ describe('rules endpoints', () => {
               expectedTransactionFeeRate: -0.01,
               expectedRemittanceFee: 0.0004
             }
-          ],
-          counts: {
-            executionCount: 4,
-            successCount: 3,
-            failureCount: 2
-          },
-          expiredAt: '2018-05-25T19:40:29.123Z',
-          status: 'unavailable'
+          ]
         })
         .then((response) => {
           expect(response.data.priority).to.equal(1);
@@ -83,12 +76,11 @@ describe('rules endpoints', () => {
             expectedRemittanceFee: 0.0004
           });
           expect(response.data.counts).to.deep.equal({
-            executionCount: 4,
-            successCount: 3,
-            failureCount: 2
+            executionCount: 0,
+            successCount: 0,
+            failureCount: 0
           });
-          expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.123Z');
-          expect(response.data.status).to.equal('unavailable');
+          expect(response.data.status).to.equal('available');
           existingRules.push(response.data);
           done();
         })
@@ -178,8 +170,8 @@ describe('rules endpoints', () => {
               orderPriority: existingRules[i].orderPriority,
               priceDifference: existingRules[i].priceDifference,
               sites: existingRules[i].sites,
+              profitPrice: existingRules[i].profitPrice,
               counts: existingRules[i].counts,
-              expiredAt: existingRules[i].expiredAt,
               status: existingRules[i].status,
               version: existingRules[i].version,
               createdAt: existingRules[i].createdAt,

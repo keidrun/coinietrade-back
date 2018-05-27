@@ -5,6 +5,7 @@
     "effect": "allow",
     "grade": "free",
     "ruleLimit": 1,
+    "expiredAt": 1530101697000,
     "version": 0,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
@@ -15,6 +16,7 @@
     "effect": "allow",
     "grade": "professional",
     "ruleLimit": 10,
+    "expiredAt": 1530101697000,
     "version": 0,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
@@ -25,6 +27,7 @@
     "effect": "deny",
     "grade": "free",
     "ruleLimit": 5,
+    "expiredAt": 1530101697000,
     "version": 1,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
