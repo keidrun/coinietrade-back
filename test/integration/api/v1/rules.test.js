@@ -56,10 +56,10 @@ describe('rules endpoints', () => {
           counts: {
             executionCount: 4,
             successCount: 3,
-            failureCount: 2,
-            retryCount: 1
+            failureCount: 2
           },
-          expiredAt: '2018-05-25T19:40:29.123Z'
+          expiredAt: '2018-05-25T19:40:29.123Z',
+          status: 'unavailable'
         })
         .then((response) => {
           expect(response.data.priority).to.equal(1);
@@ -85,10 +85,10 @@ describe('rules endpoints', () => {
           expect(response.data.counts).to.deep.equal({
             executionCount: 4,
             successCount: 3,
-            failureCount: 2,
-            retryCount: 1
+            failureCount: 2
           });
           expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.123Z');
+          expect(response.data.status).to.equal('unavailable');
           existingRules.push(response.data);
           done();
         })
@@ -144,8 +144,7 @@ describe('rules endpoints', () => {
           expect(response.data.counts).to.deep.equal({
             executionCount: 0,
             successCount: 0,
-            failureCount: 0,
-            retryCount: 0
+            failureCount: 0
           });
           existingRules.push(response.data);
           done();
@@ -181,6 +180,7 @@ describe('rules endpoints', () => {
               sites: existingRules[i].sites,
               counts: existingRules[i].counts,
               expiredAt: existingRules[i].expiredAt,
+              status: existingRules[i].status,
               version: existingRules[i].version,
               createdAt: existingRules[i].createdAt,
               updatedAt: existingRules[i].updatedAt

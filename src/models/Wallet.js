@@ -3,8 +3,14 @@ const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 const { encrypt, decrypt } = require('../utils/crypto');
 
-const companyList = [ 'bitflyer', 'zaif' ];
-const addressTypeList = [ 'btc' ];
+const WALLET_COMPANIES = {
+  BITFLYER: 'bitflyer',
+  ZAIF: 'zaif'
+};
+
+const WALLET_ADDRESS_TYPES = {
+  BTC: 'btc'
+};
 
 const options = {
   timestamps: true
@@ -12,36 +18,20 @@ const options = {
 
 const walletSchema = new Schema(
   {
-    id: {
-      type: String,
-      hashKey: true,
-      default: () => uuid.v4()
-    },
-    userId: {
-      type: String,
-      required: true,
-      trim: true
-    },
+    id: { type: String, hashKey: true, default: () => uuid.v4() },
+    userId: { type: String, required: true, trim: true },
     company: {
       type: String,
       required: true,
-      validate: (value) => companyList.indexOf(value) !== -1
+      validate: (value) => Object.values(WALLET_COMPANIES).indexOf(value) !== -1
     },
     addressType: {
       type: String,
       required: true,
-      validate: (value) => addressTypeList.indexOf(value) !== -1
+      validate: (value) => Object.values(WALLET_ADDRESS_TYPES).indexOf(value) !== -1
     },
-    address: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    version: {
-      type: Number,
-      required: true,
-      default: 0
-    }
+    address: { type: String, required: true, trim: true },
+    version: { type: Number, required: true, default: 0 }
   },
   options
 );
@@ -61,10 +51,18 @@ walletSchema.statics.getAndDecrypt = async function(id, encryptKey) {
   }
 };
 
-walletSchema.statics.getAll = function() {
-  return this.scan().exec();
+walletSchema.statics.getAll = async function() {
+  let results = await this.scan().exec();
+  while (results.lastKey) {
+    results = await this.scan().startKey(results.startKey).exec();
+  }
+  return results;
 };
 
 const Wallet = dynamoose.model('walllets', walletSchema);
 
-module.exports = { Wallet };
+module.exports = {
+  WALLET_COMPANIES,
+  WALLET_ADDRESS_TYPES,
+  Wallet
+};

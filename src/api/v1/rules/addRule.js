@@ -18,15 +18,15 @@ module.exports.addRule = async (event, callback) => {
     priceDifference,
     sites,
     counts,
-    expiredAt
+    expiredAt,
+    status
   } = JSON.parse(event.body);
 
   sites = sites || [];
   counts = counts || {
     executionCount: 0,
     successCount: 0,
-    failureCount: 0,
-    retryCount: 0
+    failureCount: 0
   };
 
   if (!userId) {
@@ -227,7 +227,8 @@ module.exports.addRule = async (event, callback) => {
     priceDifference,
     sites,
     counts,
-    expiredAt
+    expiredAt,
+    status
   };
   const newRule = new Rule(rule);
 

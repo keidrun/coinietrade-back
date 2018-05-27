@@ -5,6 +5,7 @@
     "effect": "allow",
     "grade": "free",
     "ruleLimit": 1,
+    "version": 0,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   },
@@ -14,6 +15,7 @@
     "effect": "allow",
     "grade": "professional",
     "ruleLimit": 10,
+    "version": 0,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -23,6 +25,7 @@
     "effect": "deny",
     "grade": "free",
     "ruleLimit": 5,
+    "version": 1,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -32,6 +35,7 @@
     "effect": "deny",
     "grade": "free",
     "ruleLimit": 100,
+    "version": 2,
     "createdAt": 1524831833039,
     "updatedAt": 1524831833039
   },
@@ -41,6 +45,7 @@
     "effect": "canceled",
     "grade": "ultimate",
     "ruleLimit": 1,
+    "version": 0,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   }

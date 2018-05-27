@@ -5,6 +5,7 @@
     "company": "bitflyer",
     "addressType": "btc",
     "address": "2LIUBYkg6tbrvDcviKnlJ6hgVCvf9bKCfv",
+    "version": 0,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   },
@@ -14,6 +15,7 @@
     "company": "zaif",
     "addressType": "btc",
     "address": "9NHKtfgCk6j6D6c8IiRxj3cuwVDGY8buf3",
+    "version": 1,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   },
@@ -23,6 +25,7 @@
     "company": "bitflyer",
     "addressType": "btc",
     "address": "78Bytvrcu5VbvbJTMNTCym456UJvfu5gfD",
+    "version": 2,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   }

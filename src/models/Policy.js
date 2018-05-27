@@ -4,17 +4,14 @@ const { Schema } = dynamoose;
 
 const EFFECTS = {
   ALLOW: 'allow',
-  DENY: 'deny',
-  CANCELED: 'canceled',
-  ERRORED: 'errored'
+  DENY: 'deny'
 };
-const effectList = Object.values(EFFECTS);
+
 const USER_GRADES = {
   FREE: 'free',
   PRO: 'professional',
   ULTIMATE: 'ultimate'
 };
-const userGradeList = Object.values(USER_GRADES);
 
 const options = {
   timestamps: true,
@@ -24,44 +21,32 @@ const options = {
 
 const policySchema = new Schema(
   {
-    id: {
-      type: String,
-      hashKey: true,
-      default: () => uuid.v4()
-    },
-    userId: {
-      type: String,
-      required: true,
-      trim: true
-    },
+    id: { type: String, hashKey: true, default: () => uuid.v4() },
+    userId: { type: String, required: true, trim: true },
     effect: {
       type: String,
       required: true,
       default: EFFECTS.ALLOW,
-      validate: (value) => effectList.indexOf(value) !== -1
+      validate: (value) => Object.values(EFFECTS).indexOf(value) !== -1
     },
     grade: {
       type: String,
       required: true,
       default: USER_GRADES.FREE,
-      validate: (value) => userGradeList.indexOf(value) !== -1
+      validate: (value) => Object.values(USER_GRADES).indexOf(value) !== -1
     },
-    ruleLimit: {
-      type: Number,
-      required: true,
-      default: 1
-    },
-    version: {
-      type: Number,
-      required: true,
-      default: 0
-    }
+    ruleLimit: { type: Number, required: true, default: 1 },
+    version: { type: Number, required: true, default: 0 }
   },
   options
 );
 
-policySchema.statics.getAll = function() {
-  return this.scan().exec();
+policySchema.statics.getAll = async function() {
+  let results = await this.scan().exec();
+  while (results.lastKey) {
+    results = await this.scan().startKey(results.startKey).exec();
+  }
+  return results;
 };
 
 const Policy = dynamoose.model('policies', policySchema);

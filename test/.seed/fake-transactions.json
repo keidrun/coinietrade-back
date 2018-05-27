@@ -1,0 +1,89 @@
+[
+  {
+    "id": "zb3dc780-484f-11e8-a0b9-c36d84fa8971",
+    "userId": "2aa62de706df15492dcc7177",
+    "ruleId": "wb3dc780-484f-11e8-a0b9-c36d84fa8971",
+    "arbitrageStrategy": "simple",
+    "source": {
+      "name": "bitflyer",
+      "coinUnit": "btc",
+      "currencyUnit": "jpy",
+      "orderType": "limit_order",
+      "orderAmount": 0.0005,
+      "orderPrice": 800000,
+      "orderPriority": 0
+    },
+    "destination": {
+      "name": "zaif",
+      "coinUnit": "btc",
+      "currencyUnit": "jpy",
+      "orderType": "limit_order",
+      "orderAmount": 0.0005,
+      "orderPrice": 850000,
+      "orderPriority": 0
+    },
+    "state": "initial",
+    "modifiedAt": 1530101697000,
+    "version": 0,
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  },
+  {
+    "id": "zb3dc780-484f-11e8-a0b9-c36d84fa8972",
+    "userId": "2aa62de706df15492dcc7177",
+    "ruleId": "wb3dc780-484f-11e8-a0b9-c36d84fa8971",
+    "arbitrageStrategy": "simple",
+    "source": {
+      "name": "bitflyer",
+      "coinUnit": "btc",
+      "currencyUnit": "jpy",
+      "orderType": "limit_order",
+      "orderAmount": 0.0005,
+      "orderPrice": 800000,
+      "orderPriority": 0
+    },
+    "destination": {
+      "name": "zaif",
+      "coinUnit": "btc",
+      "currencyUnit": "jpy",
+      "orderType": "limit_order",
+      "orderAmount": 0.0005,
+      "orderPrice": 850000,
+      "orderPriority": 0
+    },
+    "state": "sending",
+    "modifiedAt": 1530101697000,
+    "version": 0,
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  },
+  {
+    "id": "zb3dc780-484f-11e8-a0b9-c36d84fa8973",
+    "userId": "2aa62de706df15492dcc7177",
+    "ruleId": "wb3dc780-484f-11e8-a0b9-c36d84fa8971",
+    "arbitrageStrategy": "simple",
+    "source": {
+      "name": "bitflyer",
+      "coinUnit": "btc",
+      "currencyUnit": "jpy",
+      "orderType": "limit_order",
+      "orderAmount": 0.0005,
+      "orderPrice": 800000,
+      "orderPriority": 0
+    },
+    "destination": {
+      "name": "zaif",
+      "coinUnit": "btc",
+      "currencyUnit": "jpy",
+      "orderType": "limit_order",
+      "orderAmount": 0.0005,
+      "orderPrice": 850000,
+      "orderPriority": 0
+    },
+    "state": "succeeded",
+    "modifiedAt": 1530101697000,
+    "version": 0,
+    "createdAt": 1524831297800,
+    "updatedAt": 1524831297800
+  }
+]

@@ -57,32 +57,6 @@ describe('policies endpoints', () => {
         });
     });
 
-    it('should return added data response of canceled', (done) => {
-      axios
-        .post(`/v1/policies`, { userId: uuid.v4(), effect: 'canceled', grade: 'ultimate' })
-        .then((response) => {
-          expect(response.data.effect).to.equal('canceled');
-          existingPolicies.push(response.data);
-          done();
-        })
-        .catch((error) => {
-          done(error);
-        });
-    });
-
-    it('should return added data response of errored', (done) => {
-      axios
-        .post(`/v1/policies`, { userId: uuid.v4(), effect: 'errored' })
-        .then((response) => {
-          expect(response.data.effect).to.equal('errored');
-          existingPolicies.push(response.data);
-          done();
-        })
-        .catch((error) => {
-          done(error);
-        });
-    });
-
     it('should return added data response of allow when empty request', (done) => {
       axios
         .post(`/v1/policies`, { userId: uuid.v4() })
@@ -105,7 +79,7 @@ describe('policies endpoints', () => {
           const policies = response.data;
           sortByCreatedAt(policies);
 
-          expect(policies.length).equals(5);
+          expect(policies.length).equals(3);
           policies.forEach((policy, i) => {
             expect(policy).to.deep.equal({
               id: existingPolicies[i].id,
@@ -187,24 +161,6 @@ describe('policies endpoints', () => {
           expect(updatedPolicy.grade).to.equal(expectedToUpdatePolicy.grade);
           expect(updatedPolicy.ruleLimit).to.equal(expectedToUpdatePolicy.ruleLimit);
           expect(updatedPolicy.version).to.equal(expectedToUpdatePolicy.version);
-          done();
-        })
-        .catch((error) => {
-          done(error);
-        });
-    });
-
-    it('should return data response updated only effect field', (done) => {
-      const expectedToUpdatePolicy = existingPolicies[0];
-
-      axios
-        .patch(`/v1/policies/${expectedToUpdatePolicy.id}`, { effect: 'errored' })
-        .then((response) => {
-          const updatedPolicy = response.data;
-          expectedToUpdatePolicy.effect = 'errored';
-
-          expect(updatedPolicy.id).to.equal(expectedToUpdatePolicy.id);
-          expect(updatedPolicy.effect).to.equal(expectedToUpdatePolicy.effect);
           done();
         })
         .catch((error) => {

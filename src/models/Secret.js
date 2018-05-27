@@ -3,8 +3,10 @@ const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 const { encrypt, decrypt } = require('../utils/crypto');
 
-const apiProviderList = [ 'bitflyer', 'zaif' ];
-const DEFAULT_KIND = 'none';
+const API_PROVIDERS = {
+  BITFLYER: 'bitflyer',
+  ZAIF: 'zaif'
+};
 
 const options = {
   timestamps: true,
@@ -14,42 +16,17 @@ const options = {
 
 const secretSchema = new Schema(
   {
-    id: {
-      type: String,
-      hashKey: true,
-      default: () => uuid.v4()
-    },
-    userId: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    kind: {
-      type: String,
-      required: true,
-      trim: true,
-      default: DEFAULT_KIND
-    },
+    id: { type: String, hashKey: true, default: () => uuid.v4() },
+    userId: { type: String, required: true, trim: true },
+    kind: { type: String, trim: true },
     apiProvider: {
       type: String,
       required: true,
-      validate: (value) => apiProviderList.indexOf(value) !== -1
+      validate: (value) => Object.values(API_PROVIDERS).indexOf(value) !== -1
     },
-    apiKey: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    apiSecret: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    version: {
-      type: Number,
-      required: true,
-      default: 0
-    }
+    apiKey: { type: String, required: true, trim: true },
+    apiSecret: { type: String, required: true, trim: true },
+    version: { type: Number, required: true, default: 0 }
   },
   options
 );
@@ -71,8 +48,12 @@ secretSchema.statics.getAndDecrypt = async function(id, encryptKey) {
   }
 };
 
-secretSchema.statics.getAll = function() {
-  return this.scan().exec();
+secretSchema.statics.getAll = async function() {
+  let results = await this.scan().exec();
+  while (results.lastKey) {
+    results = await this.scan().startKey(results.startKey).exec();
+  }
+  return results;
 };
 
 const Secret = dynamoose.model('secrets', secretSchema);

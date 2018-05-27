@@ -4,9 +4,9 @@
     "userId": "5aa62de706df15492dcc7177",
     "priority": 0,
     "arbitrageStrategy": "simple",
-    "orderType": "limit_order",
     "coinUnit": "btc",
     "currencyUnit": "jpy",
+    "orderType": "limit_order",
     "orderAmount": 0.0005,
     "orderPrice": 800000,
     "orderPriority": 0,
@@ -30,6 +30,8 @@
       "retryCount": 0
     },
     "expiredAt": 1530101697000,
+    "status": "available",
+    "version": 0,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   },
@@ -38,9 +40,9 @@
     "userId": "5aa62de706df15492dcc7177",
     "priority": 1,
     "arbitrageStrategy": "simple",
-    "orderType": "market_order",
     "coinUnit": "btc",
     "currencyUnit": "jpy",
+    "orderType": "market_order",
     "orderAmount": 0.0005,
     "orderPrice": 850000,
     "orderPriority": 1,
@@ -64,6 +66,8 @@
       "retryCount": 0
     },
     "expiredAt": 1530101697000,
+    "status": "unavailable",
+    "version": 1,
     "createdAt": 1524831297800,
     "updatedAt": 1524831297800
   }
