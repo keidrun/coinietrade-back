@@ -8,17 +8,16 @@ module.exports.addRule = async (event, callback) => {
     userId,
     priority,
     arbitrageStrategy,
-    orderType,
     coinUnit,
     currencyUnit,
-    orderAmount,
-    orderPrice,
-    orderPriority,
-    priceDifference,
-    sites
+    orderType,
+    assetRange,
+    commitmentTimeLimit,
+    buyWeightRate,
+    sellWeightRate,
+    oneSiteName,
+    otherSiteName
   } = JSON.parse(event.body);
-
-  sites = sites || [];
 
   if (!userId) {
     return callback(
@@ -76,7 +75,7 @@ module.exports.addRule = async (event, callback) => {
     );
   }
 
-  if (!orderAmount) {
+  if (!assetRange) {
     return callback(
       null,
       responseError(
@@ -84,13 +83,13 @@ module.exports.addRule = async (event, callback) => {
         apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.RULE_MISSING_ORDER_AMOUNT,
+        apiErrors.errors.RULE_MISSING_ASSET_RANGE,
         event
       )
     );
   }
 
-  if (!orderPrice) {
+  if (!commitmentTimeLimit) {
     return callback(
       null,
       responseError(
@@ -98,13 +97,13 @@ module.exports.addRule = async (event, callback) => {
         apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.RULE_MISSING_ORDER_PRICE,
+        apiErrors.errors.RULE_MISSING_COMMITMENT_TIME_LIMIT,
         event
       )
     );
   }
 
-  if (!priceDifference) {
+  if (!oneSiteName) {
     return callback(
       null,
       responseError(
@@ -112,55 +111,13 @@ module.exports.addRule = async (event, callback) => {
         apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.RULE_MISSING_PRICE_DIFFERENCE,
+        apiErrors.errors.RULE_MISSING_ONE_SITE_NAME,
         event
       )
     );
   }
 
-  if (sites.length === 2) {
-    sites.forEach((site) => {
-      if (!site.name) {
-        return callback(
-          null,
-          responseError(
-            400,
-            apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-            event.httpMethod,
-            event.path,
-            apiErrors.errors.RULE_MISSING_SITE_NAME,
-            event
-          )
-        );
-      }
-      if (!site.expectedTransactionFeeRate) {
-        return callback(
-          null,
-          responseError(
-            400,
-            apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-            event.httpMethod,
-            event.path,
-            apiErrors.errors.RULE_MISSING_SITE_EXPECTED_TRANSACTION_FEE_RATE,
-            event
-          )
-        );
-      }
-      if (!site.expectedRemittanceFee) {
-        return callback(
-          null,
-          responseError(
-            400,
-            apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-            event.httpMethod,
-            event.path,
-            apiErrors.errors.RULE_MISSING_SITE_EXPECTED_REMITTANCE_FEE,
-            event
-          )
-        );
-      }
-    });
-  } else if (sites.length === 0) {
+  if (!otherSiteName) {
     return callback(
       null,
       responseError(
@@ -168,19 +125,7 @@ module.exports.addRule = async (event, callback) => {
         apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.RULE_MISSING_SITES,
-        event
-      )
-    );
-  } else {
-    return callback(
-      null,
-      responseError(
-        400,
-        apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.RULE_INVALID_SITES,
+        apiErrors.errors.RULE_MISSING_OTHER_SITE_NAME,
         event
       )
     );
@@ -190,16 +135,22 @@ module.exports.addRule = async (event, callback) => {
     userId,
     priority,
     arbitrageStrategy,
-    orderType,
     coinUnit,
     currencyUnit,
-    orderAmount,
-    orderPrice,
-    orderPriority,
-    priceDifference,
-    sites,
-    counts: { executionCount: 0, successCount: 0, failureCount: 0 }
+    assetRange,
+    commitmentTimeLimit,
+    oneSiteName,
+    otherSiteName,
+    counts: {
+      executionCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      cancellationCount: 0
+    }
   };
+  if (orderType) rule.orderType = orderType;
+  if (buyWeightRate) rule.buyWeightRate = buyWeightRate;
+  if (sellWeightRate) rule.sellWeightRate = sellWeightRate;
   const newRule = new Rule(rule);
 
   try {

@@ -30,6 +30,7 @@ exports.errors = {
   POLICY_READ_DATA_NOT_FOUND_BY_ID: { code: 7103, message: "Policy data with the provided 'id' NOT found" },
   POLICY_DELETE_DATA_NOT_FOUND_BY_ID: { code: 7104, message: "Policy data with the provided 'id' NOT found" },
   POLICY_UPDATE_DATA_NOT_FOUND_BY_ID: { code: 7105, message: "Policy data with the provided 'id' NOT found" },
+  POLICY_INVALID_EXPIRED_AT: { code: 7106, message: "Required field Policy 'expiredAt' is invalid" },
   // Secret model errors
   SECRET_MISSING_USER_ID: { code: 7201, message: "Required field Secret 'userId' is missing" },
   SECRET_DUPLICATE_USER_ID: { code: 7202, message: "Required field Secret 'userId' is duplicated" },
@@ -37,13 +38,6 @@ exports.errors = {
   SECRET_MISSING_API_KEY: { code: 7204, message: "Required field Secret 'apiKey' is missing" },
   SECRET_MISSING_API_SECRET: { code: 7205, message: "Required field Secret 'apiSecret' is missing" },
   SECRET_DELETE_DATA_NOT_FOUND_BY_ID: { code: 7206, message: "Secret data with the provided 'id' NOT found" },
-  // Wallet model errors
-  WALLET_MISSING_USER_ID: { code: 7301, message: "Required field Wallet 'userId' is missing" },
-  WALLET_DUPLICATE_USER_ID: { code: 7302, message: "Required field Wallet 'userId' is duplicated" },
-  WALLET_MISSING_COMPANY: { code: 7303, message: "Required field Wallet 'company' is missing" },
-  WALLET_MISSING_ADDRESS_TYPE: { code: 7304, message: "Required field Wallet 'addressType' is missing" },
-  WALLET_MISSING_ADDRESS: { code: 7305, message: "Required field Wallet 'address' is missing" },
-  WALLET_DELETE_DATA_NOT_FOUND_BY_ID: { code: 7306, message: "Wallet data with the provided 'id' NOT found" },
   // Rule model errors
   RULE_MISSING_USER_ID: { code: 7401, message: "Required field Rule 'userId' is missing" },
   RULE_DUPLICATE_USER_ID: { code: 7402, message: "Required field Rule 'userId' is duplicated" },
@@ -53,25 +47,14 @@ exports.errors = {
   },
   RULE_MISSING_COIN_UNIT: { code: 7404, message: "Required field Rule 'coinUnit' is missing" },
   RULE_MISSING_CURRENCY_UNIT: { code: 7405, message: "Required field Rule 'currencyUnit' is missing" },
-  RULE_MISSING_ORDER_AMOUNT: { code: 7406, message: "Required field Rule 'orderAmount' is missing" },
-  RULE_MISSING_ORDER_PRICE: { code: 7407, message: "Required field Rule 'orderPrice' is missing" },
-  RULE_MISSING_PRICE_DIFFERENCE: {
-    code: 7408,
-    message: "Required field Rule 'priceDifference' is missing"
+  RULE_MISSING_ASSET_RANGE: { code: 7406, message: "Required field Rule 'assetRange' is missing" },
+  RULE_MISSING_COMMITMENT_TIME_LIMIT: {
+    code: 7407,
+    message: "Required field Rule 'commitmentTimeLimit' is missing"
   },
-  RULE_MISSING_SITES: { code: 7409, message: "Required field Rule 'sites' is missing" },
-  RULE_INVALID_SITES: { code: 7410, message: "Required field Rule 'sites' is invalid" },
-  RULE_MISSING_SITE_NAME: { code: 7411, message: "Required field Rule 'sites[].name' is missing" },
-  RULE_MISSING_SITE_EXPECTED_TRANSACTION_FEE_RATE: {
-    code: 7412,
-    message: "Required field Rule 'sites[].expectedTransactionFeeRate' is missing"
-  },
-  RULE_MISSING_SITE_EXPECTED_REMITTANCE_FEE: {
-    code: 7413,
-    message: "Required field Rule 'sites[].expectedRemittanceFee' is missing"
-  },
-  RULE_INVALID_EXPIRED_AT: { code: 7414, message: "Required field Rule 'expiredAt' is invalid" },
-  RULE_DELETE_DATA_NOT_FOUND_BY_ID: { code: 7105, message: "Rule data with the provided 'id' NOT found" }
+  RULE_MISSING_ONE_SITE_NAME: { code: 7408, message: "Required field Rule 'oneSiteName' is missing" },
+  RULE_MISSING_OTHER_SITE_NAME: { code: 7409, message: "Required field Rule 'otherSiteName' is missing" },
+  RULE_DELETE_DATA_NOT_FOUND_BY_ID: { code: 7410, message: "Rule data with the provided 'id' NOT found" }
 };
 
 /**

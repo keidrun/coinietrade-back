@@ -4,6 +4,7 @@ yarn-error.log*
 node_modules/
 .npm
 .serverless
+.seed
 config/*
 !config/keys.js
 .env*

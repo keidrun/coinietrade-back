@@ -33,7 +33,7 @@ module.exports.addPolicy = async (event, callback) => {
           apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
           event.httpMethod,
           event.path,
-          apiErrors.errors.RULE_INVALID_EXPIRED_AT,
+          apiErrors.errors.POLICY_INVALID_EXPIRED_AT,
           event
         )
       );

@@ -8,7 +8,7 @@ const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 before(() => {
   // Clear all policies items
-  return Policy.scan().exec().then((existingPolicies) => {
+  return Policy.getAll().then((existingPolicies) => {
     return existingPolicies.forEach((policy) => {
       return Policy.delete({ id: policy.id });
     });
@@ -17,7 +17,7 @@ before(() => {
 
 after(() => {
   // Clear all policies items
-  return Policy.scan().exec().then((existingPolicies) => {
+  return Policy.getAll().then((existingPolicies) => {
     return existingPolicies.forEach((policy) => {
       return Policy.delete({ id: policy.id });
     });

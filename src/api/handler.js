@@ -5,8 +5,6 @@ const { removePolicy } = require('./v1/policies/removePolicy');
 const { updatePolicy } = require('./v1/policies/updatePolicy');
 const { addSecret } = require('./v1/secrets/addSecret');
 const { removeSecret } = require('./v1/secrets/removeSecret');
-const { addWallet } = require('./v1/wallets/addWallet');
-const { removeWallet } = require('./v1/wallets/removeWallet');
 const { getRules } = require('./v1/rules/getRules');
 const { addRule } = require('./v1/rules/addRule');
 const { removeRule } = require('./v1/rules/removeRule');
@@ -21,10 +19,6 @@ module.exports.updatePolicy = (event, context, callback) => updatePolicy(event, 
 // Secrets API
 module.exports.addSecret = (event, context, callback) => addSecret(event, callback);
 module.exports.removeSecret = (event, context, callback) => removeSecret(event, callback);
-
-// Wallets API
-module.exports.addWallet = (event, context, callback) => addWallet(event, callback);
-module.exports.removeWallet = (event, context, callback) => removeWallet(event, callback);
 
 // Rules API
 module.exports.getRules = (event, context, callback) => getRules(event, callback);

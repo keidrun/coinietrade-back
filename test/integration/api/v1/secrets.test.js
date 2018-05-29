@@ -8,7 +8,7 @@ const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 before(() => {
   // Clear all secrets items
-  return Secret.scan().exec().then((existingSecrets) => {
+  return Secret.getAll().then((existingSecrets) => {
     return existingSecrets.forEach((secret) => {
       return Secret.delete({ id: secret.id });
     });
@@ -17,7 +17,7 @@ before(() => {
 
 after(() => {
   // Clear all secrets items
-  return Secret.scan().exec().then((existingSecrets) => {
+  return Secret.getAll().then((existingSecrets) => {
     return existingSecrets.forEach((secret) => {
       return Secret.delete({ id: secret.id });
     });

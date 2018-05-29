@@ -63,41 +63,36 @@ const ruleSchema = new Schema(
       default: ORDER_TYPES.LIMIT_ORDER,
       validate: (value) => Object.values(ORDER_TYPES).indexOf(value) !== -1
     },
-    orderAmount: {
+    assetRange: {
       type: Number,
       required: true,
-      validate: (value) => (value > 0 ? true : false)
+      validate: (value) => (value >= 0 ? true : false)
     },
-    orderPrice: {
+    commitmentTimeLimit: {
       type: Number,
       required: true,
-      validate: (value) => (value > 0 ? true : false)
+      validate: (value) => (value >= 0 ? true : false)
     },
-    orderPriority: { type: Number, required: true, default: 0 },
-    priceDifference: {
-      type: Number,
+    buyWeightRate: { type: Number, required: true, default: 0 },
+    sellWeightRate: { type: Number, required: true, default: 0 },
+    oneSiteName: {
+      type: String,
       required: true,
-      validate: (value) => (value > 0 ? true : false)
+      validate: (value) => Object.values(EXCHANGE_SITES).indexOf(value) !== -1
     },
-    sites: [
-      // exactly 2 exchange sites
-      {
-        name: {
-          type: String,
-          required: true,
-          validate: (value) => Object.values(EXCHANGE_SITES).indexOf(value) !== -1
-        },
-        expectedTransactionFeeRate: { type: Number, required: true },
-        expectedRemittanceFee: { type: Number, required: true }
-      }
-    ],
-    profitPrice: { type: Number, required: true, default: 0 },
+    otherSiteName: {
+      type: String,
+      required: true,
+      validate: (value) => Object.values(EXCHANGE_SITES).indexOf(value) !== -1
+    },
+    totalProfit: { type: Number, required: true, default: 0 },
     counts: {
       // Initialize all to 0 in api because the dynamoose cannot define
       // defaults in an object
       executionCount: { type: Number, required: true },
       successCount: { type: Number, required: true },
-      failureCount: { type: Number, required: true }
+      failureCount: { type: Number, required: true },
+      cancellationCount: { type: Number, required: true }
     },
     status: {
       type: String,

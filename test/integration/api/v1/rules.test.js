@@ -8,18 +8,19 @@ const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 before(() => {
   // Clear all Rules items
-  return Rule.scan().exec().then((existingRules) => {
+  return Rule.getAll().then((existingRules) => {
+    console.log(existingRules);
     return existingRules.forEach((rule) => {
-      return Rule.delete({ id: rule.id });
+      return Rule.delete({ id: rule.id, process: rule.process });
     });
   });
 });
 
 after(() => {
   // Clear all Rules items
-  return Rule.scan().exec().then((existingRules) => {
+  return Rule.getAll().then((existingRules) => {
     return existingRules.forEach((rule) => {
-      return Rule.delete({ id: rule.id });
+      return Rule.delete({ id: rule.id, process: rule.process });
     });
   });
 });
@@ -34,52 +35,28 @@ describe('rules endpoints', () => {
           userId: uuid.v4(),
           priority: 1,
           arbitrageStrategy: 'simple',
-          orderType: 'limit_order',
           coinUnit: 'btc',
           currencyUnit: 'jpy',
-          orderAmount: 0.0005,
-          orderPrice: 800000,
-          orderPriority: 0,
-          priceDifference: 10000,
-          sites: [
-            {
-              name: 'bitflyer',
-              expectedTransactionFeeRate: 0.001,
-              expectedRemittanceFee: 0.0004
-            },
-            {
-              name: 'zaif',
-              expectedTransactionFeeRate: -0.01,
-              expectedRemittanceFee: 0.0004
-            }
-          ]
+          orderType: 'limit_order',
+          assetRange: 0.1,
+          commitmentTimeLimit: 600,
+          buyWeightRate: 0.001,
+          sellWeightRate: -0.001,
+          oneSiteName: 'bitflyer',
+          otherSiteName: 'zaif'
         })
         .then((response) => {
           expect(response.data.priority).to.equal(1);
           expect(response.data.arbitrageStrategy).to.equal('simple');
-          expect(response.data.orderType).to.equal('limit_order');
           expect(response.data.coinUnit).to.equal('btc');
           expect(response.data.currencyUnit).to.equal('jpy');
-          expect(response.data.orderAmount).to.equal(0.0005);
-          expect(response.data.orderPrice).to.equal(800000);
-          expect(response.data.orderPriority).to.equal(0);
-          expect(response.data.priceDifference).to.equal(10000);
-          expect(response.data.sites.length).to.equal(2);
-          expect(response.data.sites[0]).to.deep.equal({
-            name: 'bitflyer',
-            expectedTransactionFeeRate: 0.001,
-            expectedRemittanceFee: 0.0004
-          });
-          expect(response.data.sites[1]).to.deep.equal({
-            name: 'zaif',
-            expectedTransactionFeeRate: -0.01,
-            expectedRemittanceFee: 0.0004
-          });
-          expect(response.data.counts).to.deep.equal({
-            executionCount: 0,
-            successCount: 0,
-            failureCount: 0
-          });
+          expect(response.data.orderType).to.equal('limit_order');
+          expect(response.data.assetRange).to.equal(0.1);
+          expect(response.data.commitmentTimeLimit).to.equal(600);
+          expect(response.data.buyWeightRate).to.equal(0.001);
+          expect(response.data.sellWeightRate).to.equal(-0.001);
+          expect(response.data.oneSiteName).to.equal('bitflyer');
+          expect(response.data.otherSiteName).to.equal('zaif');
           expect(response.data.status).to.equal('available');
           existingRules.push(response.data);
           done();
@@ -96,47 +73,26 @@ describe('rules endpoints', () => {
           arbitrageStrategy: 'simple',
           coinUnit: 'btc',
           currencyUnit: 'jpy',
-          orderAmount: 0.001,
-          orderPrice: 999999,
-          priceDifference: 777,
-          sites: [
-            {
-              name: 'zaif',
-              expectedTransactionFeeRate: 0.005,
-              expectedRemittanceFee: 0.0006
-            },
-            {
-              name: 'bitflyer',
-              expectedTransactionFeeRate: -0.05,
-              expectedRemittanceFee: 0.0006
-            }
-          ]
+          assetRange: 0.05,
+          commitmentTimeLimit: 1200,
+          oneSiteName: 'zaif',
+          otherSiteName: 'bitflyer'
         })
         .then((response) => {
           expect(response.data.priority).to.equal(0);
           expect(response.data.arbitrageStrategy).to.equal('simple');
-          expect(response.data.orderType).to.equal('limit_order');
           expect(response.data.coinUnit).to.equal('btc');
           expect(response.data.currencyUnit).to.equal('jpy');
-          expect(response.data.orderAmount).to.equal(0.001);
-          expect(response.data.orderPrice).to.equal(999999);
-          expect(response.data.orderPriority).to.equal(0);
-          expect(response.data.priceDifference).to.equal(777);
-          expect(response.data.sites.length).to.equal(2);
-          expect(response.data.sites[0]).to.deep.equal({
-            name: 'zaif',
-            expectedTransactionFeeRate: 0.005,
-            expectedRemittanceFee: 0.0006
-          });
-          expect(response.data.sites[1]).to.deep.equal({
-            name: 'bitflyer',
-            expectedTransactionFeeRate: -0.05,
-            expectedRemittanceFee: 0.0006
-          });
+          expect(response.data.orderType).to.equal('limit_order');
+          expect(response.data.assetRange).to.equal(0.05);
+          expect(response.data.commitmentTimeLimit).to.equal(1200);
+          expect(response.data.oneSiteName).to.equal('zaif');
+          expect(response.data.otherSiteName).to.equal('bitflyer');
           expect(response.data.counts).to.deep.equal({
             executionCount: 0,
             successCount: 0,
-            failureCount: 0
+            failureCount: 0,
+            cancellationCount: 0
           });
           existingRules.push(response.data);
           done();
@@ -162,15 +118,16 @@ describe('rules endpoints', () => {
               userId: existingRules[i].userId,
               priority: existingRules[i].priority,
               arbitrageStrategy: existingRules[i].arbitrageStrategy,
-              orderType: existingRules[i].orderType,
               coinUnit: existingRules[i].coinUnit,
               currencyUnit: existingRules[i].currencyUnit,
-              orderAmount: existingRules[i].orderAmount,
-              orderPrice: existingRules[i].orderPrice,
-              orderPriority: existingRules[i].orderPriority,
-              priceDifference: existingRules[i].priceDifference,
-              sites: existingRules[i].sites,
-              profitPrice: existingRules[i].profitPrice,
+              orderType: existingRules[i].orderType,
+              assetRange: existingRules[i].assetRange,
+              commitmentTimeLimit: existingRules[i].commitmentTimeLimit,
+              buyWeightRate: existingRules[i].buyWeightRate,
+              sellWeightRate: existingRules[i].sellWeightRate,
+              oneSiteName: existingRules[i].oneSiteName,
+              otherSiteName: existingRules[i].otherSiteName,
+              totalProfit: existingRules[i].totalProfit,
               counts: existingRules[i].counts,
               status: existingRules[i].status,
               version: existingRules[i].version,

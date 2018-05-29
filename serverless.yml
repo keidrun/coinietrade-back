@@ -28,7 +28,6 @@ provider:
     # Table names on DynamoDB
     DYNAMODB_TABLE_POLICIES: ${self:custom.service.name}_policies_${self:provider.stage}
     DYNAMODB_TABLE_SECRETS: ${self:custom.service.name}_secrets_${self:provider.stage}
-    DYNAMODB_TABLE_WALLETS: ${self:custom.service.name}_wallets_${self:provider.stage}
     DYNAMODB_TABLE_RULES: ${self:custom.service.name}_rules_${self:provider.stage}
     DYNAMODB_TABLE_TRANSACTIONS: ${self:custom.service.name}_transactions_${self:provider.stage}
     # Secret encrypt
@@ -49,6 +48,8 @@ package:
     - src/api/**
     - src/models/**
     - src/services/**
+    - src/messages/**
+    - src/utils/**
     - src/scheduler/**
 
 functions:
@@ -110,23 +111,6 @@ functions:
           path: v1/secrets/{id}
           private: true
           cors: false
-  # Wallets API
-  addWallet:
-    handler: src/api/handler.addWallet
-    events:
-      - http:
-          method: post
-          path: v1/wallets
-          private: true
-          cors: false
-  removeWallet:
-    handler: src/api/handler.removeWallet
-    events:
-      - http:
-          method: delete
-          path: v1/wallets/{id}
-          private: true
-          cors: false
   # Rules API
   getRules:
     handler: src/api/handler.getRules
@@ -152,6 +136,7 @@ functions:
           path: v1/rules/{id}
           private: true
           cors: false
+
   # Scheduler
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage
@@ -187,19 +172,6 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    walletsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_WALLETS}
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
     rulesTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -220,9 +192,13 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: process
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+          - AttributeName: process
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -241,12 +217,20 @@ custom:
       dev:
         sources:
           - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
-            sources: [./test/.seed/fake-policies.json]
+            sources: [.seed/dev/fake-policies.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
-            sources: [./test/.seed/fake-secrets.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_WALLETS}
-            sources: [./test/.seed/fake-wallets.json]
+            sources: [.seed/dev/fake-secrets.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_RULES}
-            sources: [./test/.seed/fake-rules.json]
+            sources: [.seed/dev/fake-rules.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
-            sources: [./test/.seed/fake-transactions.json]
+            sources: [.seed/dev/fake-transactions.json]
+      test:
+        sources:
+          - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
+            sources: [.seed/test/test-policies.json]
+          - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
+            sources: [.seed/test/test-secrets.json]
+          - table: ${self:provider.environment.DYNAMODB_TABLE_RULES}
+            sources: [.seed/test/test-rules.json]
+          - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
+            sources: [.seed/test/test-transactions.json]

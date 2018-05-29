@@ -33,15 +33,15 @@
     "serverless-offline-scheduler": "^0.3.3"
   },
   "scripts": {
-    "start": "sls offline start",
-    "debug": "SLS_DEBUG=* sls offline start",
+    "start": "sls offline start --seed=dev",
+    "debug": "SLS_DEBUG=* sls offline start --seed=dev",
     "lint": "eslint src/**/*.js",
     "test": "mocha test/**/*.test.js",
     "db:init": "sls dynamodb install",
     "db:rm": "sls dynamodb remove",
     "db:start": "sls dynamodb start",
     "db:migrate": "sls dynamodb migrate",
-    "db:seed": "sls dynamodb seed",
+    "db:seed": "sls dynamodb seed --seed=dev",
     "dev:start": "yarn start",
     "dev:lint": "nodemon --exec \"yarn lint\"",
     "dev:test": "sleep 10 && nodemon --exec \"yarn test\"",
