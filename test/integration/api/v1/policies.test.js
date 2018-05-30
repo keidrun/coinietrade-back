@@ -10,7 +10,7 @@ before(() => {
   // Clear all policies items
   return Policy.getAll().then((existingPolicies) => {
     return existingPolicies.forEach((policy) => {
-      return Policy.delete({ id: policy.id });
+      return Policy.delete({ userId: policy.userId });
     });
   });
 });
@@ -19,7 +19,7 @@ after(() => {
   // Clear all policies items
   return Policy.getAll().then((existingPolicies) => {
     return existingPolicies.forEach((policy) => {
-      return Policy.delete({ id: policy.id });
+      return Policy.delete({ userId: policy.userId });
     });
   });
 });
@@ -89,7 +89,6 @@ describe('policies endpoints', () => {
           expect(policies.length).equals(3);
           policies.forEach((policy, i) => {
             expect(policy).to.deep.equal({
-              id: existingPolicies[i].id,
               userId: existingPolicies[i].userId,
               effect: existingPolicies[i].effect,
               grade: existingPolicies[i].grade,
@@ -108,15 +107,14 @@ describe('policies endpoints', () => {
     });
   });
 
-  describe('GET /v1/policies/{id}', () => {
+  describe('GET /v1/policies/{userId}', () => {
     it('should return one data response', (done) => {
       axios
-        .get(`/v1/policies/${existingPolicies[0].id}`)
+        .get(`/v1/policies/${existingPolicies[0].userId}`)
         .then((response) => {
           const policy = response.data;
 
           expect(policy).to.deep.equal({
-            id: existingPolicies[0].id,
             userId: existingPolicies[0].userId,
             effect: existingPolicies[0].effect,
             grade: existingPolicies[0].grade,
@@ -134,12 +132,12 @@ describe('policies endpoints', () => {
     });
   });
 
-  describe('DELETE /v1/policies/{id}', () => {
+  describe('DELETE /v1/policies/{userId}', () => {
     it('should return 204 status', (done) => {
       const expectedToDeletePlicy = existingPolicies[existingPolicies.length - 1];
 
       axios
-        .delete(`/v1/policies/${expectedToDeletePlicy.id}`)
+        .delete(`/v1/policies/${expectedToDeletePlicy.userId}`)
         .then((response) => {
           expect(response.status).to.equal(204);
           expect(response.data).to.be.empty;
@@ -152,12 +150,16 @@ describe('policies endpoints', () => {
     });
   });
 
-  describe('PATCH /v1/policies/{id}', () => {
+  describe('PATCH /v1/policies/{userId}', () => {
     it('should return updated data response', (done) => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
-        .patch(`/v1/policies/${expectedToUpdatePolicy.id}`, { effect: 'deny', grade: 'professional', ruleLimit: 777 })
+        .patch(`/v1/policies/${expectedToUpdatePolicy.userId}`, {
+          effect: 'deny',
+          grade: 'professional',
+          ruleLimit: 777
+        })
         .then((response) => {
           const updatedPolicy = response.data;
           expectedToUpdatePolicy.effect = 'deny';
@@ -181,7 +183,7 @@ describe('policies endpoints', () => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
-        .patch(`/v1/policies/${expectedToUpdatePolicy.id}`, { grade: 'ultimate' })
+        .patch(`/v1/policies/${expectedToUpdatePolicy.userId}`, { grade: 'ultimate' })
         .then((response) => {
           const updatedPolicy = response.data;
           expectedToUpdatePolicy.grade = 'ultimate';
@@ -199,7 +201,7 @@ describe('policies endpoints', () => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
-        .patch(`/v1/policies/${expectedToUpdatePolicy.id}`, { ruleLimit: 100 })
+        .patch(`/v1/policies/${expectedToUpdatePolicy.userId}`, { ruleLimit: 100 })
         .then((response) => {
           const updatedPolicy = response.data;
           expectedToUpdatePolicy.ruleLimit = 100;

@@ -4,7 +4,7 @@ const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
 module.exports.updatePolicy = async (event, callback) => {
-  const { id } = event.pathParameters;
+  const { userId } = event.pathParameters;
   const { effect, grade, ruleLimit } = JSON.parse(event.body);
 
   let policy = {};
@@ -13,11 +13,11 @@ module.exports.updatePolicy = async (event, callback) => {
   if (ruleLimit) policy.ruleLimit = ruleLimit;
 
   try {
-    const existingPolicy = await Policy.get(id);
+    const existingPolicy = await Policy.get(userId);
     if (existingPolicy) {
       const version = existingPolicy.version;
       policy.version = version + 1;
-      const updatedPolicy = await Policy.update({ id, version }, { $PUT: policy });
+      const updatedPolicy = await Policy.update({ userId, version }, { $PUT: policy });
       callback(null, response(200, updatedPolicy));
     } else {
       responseError(

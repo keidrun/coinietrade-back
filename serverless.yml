@@ -67,7 +67,7 @@ functions:
     events:
       - http:
           method: get
-          path: v1/policies/{id}
+          path: v1/policies/{userId}
           private: true
           cors: false
   addPolicy:
@@ -83,7 +83,7 @@ functions:
     events:
       - http:
           method: delete
-          path: v1/policies/{id}
+          path: v1/policies/{userId}
           private: true
           cors: false
   updatePolicy:
@@ -91,7 +91,7 @@ functions:
     events:
       - http:
           method: patch
-          path: v1/policies/{id}
+          path: v1/policies/{userId}
           private: true
           cors: false
   # Secrets API
@@ -108,7 +108,7 @@ functions:
     events:
       - http:
           method: delete
-          path: v1/secrets/{id}
+          path: v1/secrets/{userId}/{secretId}
           private: true
           cors: false
   # Rules API
@@ -118,6 +118,14 @@ functions:
       - http:
           method: get
           path: v1/rules
+          private: true
+          cors: false
+  getRulesByUserId:
+    handler: src/api/handler.getRulesByUserId
+    events:
+      - http:
+          method: get
+          path: v1/rules/{userId}
           private: true
           cors: false
   addRule:
@@ -133,7 +141,7 @@ functions:
     events:
       - http:
           method: delete
-          path: v1/rules/{id}
+          path: v1/rules/{userId}/{ruleId}
           private: true
           cors: false
 
@@ -151,10 +159,10 @@ resources:
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: userId
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: userId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
@@ -164,11 +172,15 @@ resources:
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: secretId
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: secretId
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -177,11 +189,27 @@ resources:
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE_RULES}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: ruleId
+            AttributeType: S
+          - AttributeName: status
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: ruleId
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: statusIndex
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -224,13 +252,13 @@ custom:
             sources: [.seed/dev/fake-rules.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
             sources: [.seed/dev/fake-transactions.json]
-      test:
+      me:
         sources:
           - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
-            sources: [.seed/test/test-policies.json]
+            sources: [.seed/me/my-policies.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
-            sources: [.seed/test/test-secrets.json]
+            sources: [.seed/me/my-secrets.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_RULES}
-            sources: [.seed/test/test-rules.json]
+            sources: [.seed/me/my-rules.json]
           - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
-            sources: [.seed/test/test-transactions.json]
+            sources: [.seed/me/my-transactions.json]

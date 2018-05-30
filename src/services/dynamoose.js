@@ -1,7 +1,12 @@
 const dynamoose = require('dynamoose');
 
 let defaultOptions = {
-  create: true,
+  // both create and update must be always true or false
+  // if use global secondary index
+  // See https://github.com/automategreen/dynamoose/issues/278
+  // and https://github.com/automategreen/dynamoose/issues/302
+  create: false, // Always must re-create table on my own when modifying schema
+  update: false,
   prefix: `${process.env.SERVICE_NAME}_`,
   suffix: `_${process.env.STAGE}`
 };

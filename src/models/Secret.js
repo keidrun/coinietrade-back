@@ -2,10 +2,10 @@ const uuid = require('uuid');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 const { encrypt, decrypt } = require('../utils/crypto');
+const { EXCHANGE_SITES } = require('./Rule');
 
 const API_PROVIDERS = {
-  BITFLYER: 'bitflyer',
-  ZAIF: 'zaif'
+  ...EXCHANGE_SITES
 };
 
 const options = {
@@ -16,9 +16,8 @@ const options = {
 
 const secretSchema = new Schema(
   {
-    id: { type: String, hashKey: true, default: () => uuid.v4() },
-    userId: { type: String, required: true, trim: true },
-    kind: { type: String, trim: true },
+    userId: { type: String, hashKey: true, required: true, trim: true },
+    secretId: { type: String, rangeKey: true, default: () => uuid.v4() },
     apiProvider: {
       type: String,
       required: true,
@@ -26,6 +25,7 @@ const secretSchema = new Schema(
     },
     apiKey: { type: String, required: true, trim: true },
     apiSecret: { type: String, required: true, trim: true },
+    apiKind: { type: String },
     version: { type: Number, required: true, default: 0 }
   },
   options
@@ -59,5 +59,6 @@ secretSchema.statics.getAll = async function() {
 const Secret = dynamoose.model('secrets', secretSchema);
 
 module.exports = {
+  API_PROVIDERS,
   Secret
 };

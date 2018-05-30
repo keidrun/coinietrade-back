@@ -6,6 +6,7 @@ const { updatePolicy } = require('./v1/policies/updatePolicy');
 const { addSecret } = require('./v1/secrets/addSecret');
 const { removeSecret } = require('./v1/secrets/removeSecret');
 const { getRules } = require('./v1/rules/getRules');
+const { getRulesByUserId } = require('./v1/rules/getRulesByUserId');
 const { addRule } = require('./v1/rules/addRule');
 const { removeRule } = require('./v1/rules/removeRule');
 
@@ -22,5 +23,6 @@ module.exports.removeSecret = (event, context, callback) => removeSecret(event, 
 
 // Rules API
 module.exports.getRules = (event, context, callback) => getRules(event, callback);
+module.exports.getRulesByUserId = (event, context, callback) => getRulesByUserId(event, callback);
 module.exports.addRule = (event, context, callback) => addRule(event, callback);
 module.exports.removeRule = (event, context, callback) => removeRule(event, callback);

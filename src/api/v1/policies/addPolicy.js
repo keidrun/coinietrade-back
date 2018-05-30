@@ -48,23 +48,8 @@ module.exports.addPolicy = async (event, callback) => {
 
   const newPolicy = new Policy(policy);
   try {
-    const duplicatePolicies = await Policy.scan('userId').contains(userId).exec();
-    if (duplicatePolicies.count <= 0) {
-      const addedPolicy = await newPolicy.save({ overwrite: false });
-      callback(null, response(201, addedPolicy));
-    } else {
-      callback(
-        null,
-        responseError(
-          400,
-          apiMessages.errors.POLICY_API_MESSAGE_CREATE_FAILED,
-          event.httpMethod,
-          event.path,
-          apiErrors.errors.POLICY_DUPLICATE_USER_ID,
-          event
-        )
-      );
-    }
+    const addedPolicy = await newPolicy.save({ overwrite: false });
+    callback(null, response(201, addedPolicy));
   } catch (error) {
     callback(
       null,

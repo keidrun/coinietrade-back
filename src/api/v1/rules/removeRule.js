@@ -4,13 +4,13 @@ const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
 module.exports.removeRule = async (event, callback) => {
-  const { id } = event.pathParameters;
+  const { userId, ruleId } = event.pathParameters;
 
   try {
-    const existingRule = await Rule.get(id);
+    const existingRule = await Rule.get({ userId, ruleId });
     if (existingRule) {
       const version = existingRule.version;
-      await Rule.delete({ id, version });
+      await Rule.delete({ userId, ruleId, version });
       callback(null, response(204));
     } else {
       responseError(
@@ -18,7 +18,7 @@ module.exports.removeRule = async (event, callback) => {
         apiMessages.errors.RULE_API_MESSAGE_DELETE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.RULE_DELETE_DATA_NOT_FOUND_BY_ID,
+        apiErrors.errors.RULE_DELETE_DATA_NOT_FOUND_BY_IDS,
         event
       );
     }

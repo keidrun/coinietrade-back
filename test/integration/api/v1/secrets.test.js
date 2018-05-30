@@ -10,7 +10,7 @@ before(() => {
   // Clear all secrets items
   return Secret.getAll().then((existingSecrets) => {
     return existingSecrets.forEach((secret) => {
-      return Secret.delete({ id: secret.id });
+      return Secret.delete({ userId: secret.userId, secretId: secret.secretId });
     });
   });
 });
@@ -19,7 +19,7 @@ after(() => {
   // Clear all secrets items
   return Secret.getAll().then((existingSecrets) => {
     return existingSecrets.forEach((secret) => {
-      return Secret.delete({ id: secret.id });
+      return Secret.delete({ userId: secret.userId, secretId: secret.secretId });
     });
   });
 });
@@ -69,12 +69,11 @@ describe('secrets endpoints', () => {
     });
   });
 
-  describe('DELETE /v1/secrets/{id}', () => {
+  describe('DELETE /v1/secrets/{userId}/{secretId}', () => {
     it('should return 204 status', (done) => {
       const expectedToDeleteSecret = existingSecrets[existingSecrets.length - 1];
-
       axios
-        .delete(`/v1/secrets/${expectedToDeleteSecret.id}`)
+        .delete(`/v1/secrets/${expectedToDeleteSecret.userId}/${expectedToDeleteSecret.secretId}`)
         .then((response) => {
           expect(response.status).to.equal(204);
           expect(response.data).to.be.empty;

@@ -1,9 +1,8 @@
-const uuid = require('uuid');
 const moment = require('moment');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
-const EFFECTS = {
+const USER_EFFECTS = {
   ALLOW: 'allow',
   DENY: 'deny'
 };
@@ -22,13 +21,12 @@ const options = {
 
 const policySchema = new Schema(
   {
-    id: { type: String, hashKey: true, default: () => uuid.v4() },
-    userId: { type: String, required: true, trim: true },
+    userId: { type: String, hashKey: true, required: true, trim: true },
     effect: {
       type: String,
       required: true,
-      default: EFFECTS.ALLOW,
-      validate: (value) => Object.values(EFFECTS).indexOf(value) !== -1
+      default: USER_EFFECTS.ALLOW,
+      validate: (value) => Object.values(USER_EFFECTS).indexOf(value) !== -1
     },
     grade: {
       type: String,
@@ -58,7 +56,7 @@ policySchema.statics.getAll = async function() {
 const Policy = dynamoose.model('policies', policySchema);
 
 module.exports = {
-  EFFECTS,
+  USER_EFFECTS,
   USER_GRADES,
   Policy
 };

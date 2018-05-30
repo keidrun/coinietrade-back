@@ -4,13 +4,13 @@ const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
 module.exports.removeSecret = async (event, callback) => {
-  const { id } = event.pathParameters;
+  const { userId, secretId } = event.pathParameters;
 
   try {
-    const existingSecret = await Secret.get(id);
+    const existingSecret = await Secret.get({ userId, secretId });
     if (existingSecret) {
       const version = existingSecret.version;
-      await Secret.delete({ id, version });
+      await Secret.delete({ userId, secretId, version });
       callback(null, response(204));
     } else {
       responseError(
@@ -18,7 +18,7 @@ module.exports.removeSecret = async (event, callback) => {
         apiMessages.errors.SECRET_API_MESSAGE_DELETE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.SECRET_DELETE_DATA_NOT_FOUND_BY_ID,
+        apiErrors.errors.SECRET_DELETE_DATA_NOT_FOUND_BY_IDS,
         event
       );
     }

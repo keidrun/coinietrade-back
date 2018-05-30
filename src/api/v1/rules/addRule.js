@@ -133,7 +133,6 @@ module.exports.addRule = async (event, callback) => {
 
   const rule = {
     userId,
-    priority,
     arbitrageStrategy,
     coinUnit,
     currencyUnit,
@@ -148,29 +147,15 @@ module.exports.addRule = async (event, callback) => {
       cancellationCount: 0
     }
   };
+  if (priority) rule.priority = priority;
   if (orderType) rule.orderType = orderType;
   if (buyWeightRate) rule.buyWeightRate = buyWeightRate;
   if (sellWeightRate) rule.sellWeightRate = sellWeightRate;
   const newRule = new Rule(rule);
 
   try {
-    const duplicateRules = await Rule.scan('userId').contains(userId).exec();
-    if (duplicateRules.count <= 0) {
-      const addedRule = await newRule.save({ overwrite: false });
-      callback(null, response(201, addedRule));
-    } else {
-      callback(
-        null,
-        responseError(
-          400,
-          apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-          event.httpMethod,
-          event.path,
-          apiErrors.errors.RULE_DUPLICATE_USER_ID,
-          event
-        )
-      );
-    }
+    const addedRule = await newRule.save({ overwrite: false });
+    callback(null, response(201, addedRule));
   } catch (error) {
     callback(
       null,

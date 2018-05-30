@@ -4,13 +4,13 @@ const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
 module.exports.removePolicy = async (event, callback) => {
-  const { id } = event.pathParameters;
+  const { userId } = event.pathParameters;
 
   try {
-    const existingPolicy = await Policy.get(id);
+    const existingPolicy = await Policy.get(userId);
     if (existingPolicy) {
       const version = existingPolicy.version;
-      await Policy.delete({ id, version });
+      await Policy.delete({ userId, version });
       callback(null, response(204));
     } else {
       responseError(
@@ -18,7 +18,7 @@ module.exports.removePolicy = async (event, callback) => {
         apiMessages.errors.POLICY_API_MESSAGE_DELETE_FAILED,
         event.httpMethod,
         event.path,
-        apiErrors.errors.POLICY_DELETE_DATA_NOT_FOUND_BY_ID,
+        apiErrors.errors.POLICY_DELETE_DATA_NOT_FOUND_BY_USER_ID,
         event
       );
     }

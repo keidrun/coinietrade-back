@@ -39,8 +39,8 @@ const options = {
 
 const ruleSchema = new Schema(
   {
-    id: { type: String, hashKey: true, default: () => uuid.v4() },
-    userId: { type: String, required: true, trim: true },
+    userId: { type: String, hashKey: true, required: true, trim: true },
+    ruleId: { type: String, rangeKey: true, default: () => uuid.v4() },
     priority: { type: Number, required: true, default: 0 },
     arbitrageStrategy: {
       type: String,
@@ -96,6 +96,7 @@ const ruleSchema = new Schema(
     },
     status: {
       type: String,
+      index: { global: true, name: 'statusIndex', project: true },
       required: true,
       default: RULE_STATUS.AVAILABLE,
       validate: (value) => Object.values(RULE_STATUS).indexOf(value) !== -1
