@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 
-const DEFAULT_TRANSACTION_FEE_RATE = -0.01;
+const DEFAULT_TRANSACTION_FEE_RATE = -0.0001;
 const DEFAULT_TRANSACTION_MIN_AMOUNT = 0.0001;
 
 // Public
