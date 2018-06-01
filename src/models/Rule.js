@@ -66,15 +66,25 @@ const ruleSchema = new Schema(
     assetRange: {
       type: Number,
       required: true,
-      validate: (value) => (value >= 0 ? true : false)
+      validate: (value) => (value >= 0 && value <= 1 ? true : false)
     },
     commitmentTimeLimit: {
       type: Number,
       required: true,
       validate: (value) => (value >= 0 ? true : false)
     },
-    buyWeightRate: { type: Number, required: true, default: 0 },
-    sellWeightRate: { type: Number, required: true, default: 0 },
+    buyWeightRate: {
+      type: Number,
+      required: true,
+      default: 0,
+      validate: (value) => (value > -1 && value < 1 ? true : false)
+    },
+    sellWeightRate: {
+      type: Number,
+      required: true,
+      default: 0,
+      validate: (value) => (value > -1 && value < 1 ? true : false)
+    },
     oneSiteName: {
       type: String,
       required: true,

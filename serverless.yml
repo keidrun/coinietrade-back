@@ -218,15 +218,29 @@ resources:
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: userId
             AttributeType: S
-          - AttributeName: process
+          - AttributeName: transactionId
+            AttributeType: S
+          - AttributeName: state
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: userId
             KeyType: HASH
-          - AttributeName: process
+          - AttributeName: transactionId
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: userIdIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: state
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

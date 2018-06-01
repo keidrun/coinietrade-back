@@ -3,7 +3,6 @@ const { encrypt, decrypt } = require('../../../src/utils/crypto');
 require('../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
 
 const encryptKey = process.env.ENCRYPT_KEY;
-console.log(encryptKey);
 
 describe('crypto', () => {
   describe('encrypt', () => {

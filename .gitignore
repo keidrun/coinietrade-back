@@ -1,14 +1,9 @@
-npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 node_modules/
-.npm
 .serverless
 .seed
 config/*
 !config/keys.js
 .env*
 .vscode
-
-# for test
-src/scheduler/launch.js
