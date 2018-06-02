@@ -1,0 +1,24 @@
+dev:
+  node_env: development
+  profile: {any}
+  region: localhost
+  aws_access_key_id: MOCK_ACCESS_KEY_ID
+  aws_secret_access_key: MOCK_SECRET_ACCESS_KEY
+  encrypt_key: {any}
+  scheduler_interval: {any}
+staging:
+  node_env: staging
+  profile: {any}
+  region: {any}
+  aws_access_key_id: {any}
+  aws_secret_access_key: {any}
+  encrypt_key: {any}
+  scheduler_interval: {any}
+prod:
+  node_env: production
+  profile: {any}
+  region: {any}
+  aws_access_key_id: {any}
+  aws_secret_access_key: {any}
+  encrypt_key: {any}
+  scheduler_interval: {any}

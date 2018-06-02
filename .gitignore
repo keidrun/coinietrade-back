@@ -4,8 +4,7 @@ node_modules/
 .serverless
 .seed
 config/*
-!config/keys.js
+!config/template.config.yml
 .env*
 .vscode
-
-localScripts/
+.localScripts/
