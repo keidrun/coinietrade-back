@@ -1,9 +1,11 @@
+const uuid = require('uuid');
 const moment = require('moment');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 const { ARBITRAGE_STRATEGIES, EXCHANGE_SITES, ORDER_TYPES, COIN_UNITS, CURRENCY_UNITS } = require('./Rule');
+const { ERROR_CODES } = require('../scheduler/exchanges/errors.js');
 
-const TRANSACTION_PROCESSES = {
+const ORDER_PROCESSES = {
   BUY: 'buy',
   SELL: 'sell'
 };
@@ -16,19 +18,6 @@ const TRANSACTION_STATES = {
   FAILED: 'failed'
 };
 
-const ERROR_REASONS = {
-  // canceled
-  ASSET_SHORTAGE: 'Asset shortage',
-  TRANSACTION_TIMEOUT: 'Transaction timeout',
-  // failed
-  API_CONNECTION_FAILED: 'API connection failed',
-  API_ORDER_REQUEST_FAILED: 'Order request failed',
-  API_CANCEL_REQUEST_FAILED: 'Cancel request failed',
-  UNMATCHED_TRANSACTION_FAILED: 'Unmatched transaction failed',
-  // Both
-  UNKNOWN_REASON: 'Unkown reason'
-};
-
 const options = {
   timestamps: true,
   useNativeBooleans: true,
@@ -37,15 +26,28 @@ const options = {
 
 const transactionSchema = new Schema(
   {
-    id: { type: String, hashKey: true, trim: true },
-    process: {
+    userId: {
+      type: String,
+      hashKey: true,
+      required: true,
+      trim: true
+    },
+    transactionId: {
       type: String,
       rangeKey: true,
-      required: true,
-      validate: (value) => Object.values(TRANSACTION_PROCESSES).indexOf(value) !== -1
+      default: () => uuid.v4()
     },
-    userId: { type: String, required: true, trim: true },
-    ruleId: { type: String, required: true, trim: true },
+    ruleId: {
+      type: String,
+      index: {
+        global: true,
+        rangeKey: 'state',
+        name: 'ruleIdIndex',
+        project: true
+      },
+      required: true,
+      trim: true
+    },
     arbitrageStrategy: {
       type: String,
       required: true,
@@ -66,34 +68,37 @@ const transactionSchema = new Schema(
       required: true,
       validate: (value) => Object.values(CURRENCY_UNITS).indexOf(value) !== -1
     },
+    orderProcess: {
+      type: String,
+      required: true,
+      validate: (value) => Object.values(ORDER_PROCESSES).indexOf(value) !== -1
+    },
     orderType: {
       type: String,
       required: true,
       default: ORDER_TYPES.LIMIT_ORDER,
       validate: (value) => Object.values(ORDER_TYPES).indexOf(value) !== -1
     },
+    orderPrice: { type: Number, validate: (value) => (value >= 0 ? true : false) },
     orderAmount: {
       type: Number,
       required: true,
       validate: (value) => (value >= 0 ? true : false)
     },
-    orderPrice: {
-      type: Number,
-      validate: (value) => (value >= 0 ? true : false)
-    },
-    expectedTransactionFee: { type: Number, required: true },
-    expectedProfitPrice: { type: Number, required: true },
+    transactionFeeRate: { type: Number, required: true },
     state: {
       type: String,
       required: true,
       default: TRANSACTION_STATES.INITIAL,
       validate: (value) => Object.values(TRANSACTION_STATES).indexOf(value) !== -1
     },
-    reason: {
-      type: String,
-      validate: (value) => Object.values(ERROR_REASONS).indexOf(value) !== -1
-    },
     modifiedAt: { type: Date, required: true, default: () => moment().toISOString() },
+    executionTime: { type: Number },
+    errorCode: {
+      type: String,
+      validate: (value) => Object.values(ERROR_CODES).indexOf(value) !== -1
+    },
+    errorDetail: { type: String },
     version: { type: Number, required: true, default: 0 }
   },
   options
@@ -110,8 +115,7 @@ transactionSchema.statics.getAll = async function() {
 const Transaction = dynamoose.model('transactions', transactionSchema);
 
 module.exports = {
-  TRANSACTION_PROCESSES,
+  ORDER_PROCESSES,
   TRANSACTION_STATES,
-  ERROR_REASONS,
   Transaction
 };

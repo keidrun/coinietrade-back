@@ -69,6 +69,7 @@ const ruleSchema = new Schema(
       validate: (value) => (value >= 0 && value <= 1 ? true : false)
     },
     commitmentTimeLimit: {
+      // Seconnds
       type: Number,
       required: true,
       validate: (value) => (value >= 0 ? true : false)

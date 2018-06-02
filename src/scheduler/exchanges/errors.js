@@ -1,19 +1,34 @@
 const ERROR_CODES = {
-  REQUEST_FAILURE: 'request_failure',
-  REQUEST_TEMPORARILY_UNAVAILABLE: 'request_temporarily_unavailable'
+  // FAILED
+  UNKNOWN_ERROR: 'unknown_error',
+  NETWORK_ERROR: 'network_error',
+  API_FAILURE: 'api_failure',
+  API_TEMPORARILY_UNAVAILABLE: 'api_temporarily_unavailable',
+  // CANCELED
+  ORDERS_FAILURE: 'orders_failure',
+  BOTH_ORDERS_TIMEOUT: 'both_orders_timeout',
+  BUY_ORDER_TIMEOUT: 'buy_order_timeout',
+  SELL_ORDER_TIMEOUT: 'sell_order_timeout'
 };
 
 const errors = {
-  requestFailure: (status, message) => {
+  networkError: (message) => {
     return {
-      code: ERROR_CODES.REQUEST_FAILURE,
+      code: ERROR_CODES.NETWORK_ERROR,
+      status: null,
+      message
+    };
+  },
+  apiFailure: (status, message) => {
+    return {
+      code: ERROR_CODES.API_FAILURE,
       status,
       message
     };
   },
-  requestTemporarilyUnavailable: (status, message) => {
+  apiTemporarilyUnavailable: (status, message) => {
     return {
-      code: ERROR_CODES.REQUEST_TEMPORARILY_UNAVAILABLE,
+      code: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
       status,
       message
     };

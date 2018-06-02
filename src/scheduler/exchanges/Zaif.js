@@ -87,14 +87,14 @@ class Zaif {
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
           Promise.reject(
-            errors.requestTemporarilyUnavailable(
+            errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
           );
         } else {
           Promise.reject(
-            errors.requestFailure(
+            errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
@@ -110,7 +110,11 @@ class Zaif {
         presentCurrencyAmount
       };
     } catch (error) {
-      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      if (!error.response) {
+        Promise.reject(errors.networkError(error));
+      } else {
+        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+      }
     }
   }
 
@@ -147,14 +151,14 @@ class Zaif {
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
           Promise.reject(
-            errors.requestTemporarilyUnavailable(
+            errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
           Promise.reject(
-            errors.requestFailure(
+            errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
@@ -166,7 +170,11 @@ class Zaif {
 
       return orderId;
     } catch (error) {
-      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      if (!error.response) {
+        Promise.reject(errors.networkError(error));
+      } else {
+        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+      }
     }
   }
 
@@ -185,14 +193,14 @@ class Zaif {
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
           Promise.reject(
-            errors.requestTemporarilyUnavailable(
+            errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
           Promise.reject(
-            errors.requestFailure(
+            errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
@@ -204,7 +212,11 @@ class Zaif {
 
       return isCompleted;
     } catch (error) {
-      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      if (!error.response) {
+        Promise.reject(errors.networkError(error));
+      } else {
+        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+      }
     }
   }
 
@@ -224,14 +236,14 @@ class Zaif {
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
           Promise.reject(
-            errors.requestTemporarilyUnavailable(
+            errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
           Promise.reject(
-            errors.requestFailure(
+            errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
@@ -241,7 +253,11 @@ class Zaif {
 
       return orderId;
     } catch (error) {
-      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      if (!error.response) {
+        Promise.reject(errors.networkError(error));
+      } else {
+        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+      }
     }
   }
 
@@ -281,7 +297,11 @@ class Zaif {
         asks: formattedAsks
       };
     } catch (error) {
-      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      if (!error.response) {
+        Promise.reject(errors.networkError(error));
+      } else {
+        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+      }
     }
   }
 }

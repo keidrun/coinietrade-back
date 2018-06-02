@@ -32,6 +32,8 @@ provider:
     DYNAMODB_TABLE_TRANSACTIONS: ${self:custom.service.name}_transactions_${self:provider.stage}
     # Secret encrypt
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
+    # Scheduler interval minute
+    SCHEDULER_INTERVAL: ${file(./config/config.yml):${self:provider.stage}.scheduler_interval}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -149,7 +151,7 @@ functions:
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage
     events:
-      - schedule: rate(1 minute)
+      - schedule: rate(${self:provider.environment.SCHEDULER_INTERVAL} minute)
 
 # Dynamodb settings
 resources:
@@ -222,6 +224,8 @@ resources:
             AttributeType: S
           - AttributeName: transactionId
             AttributeType: S
+          - AttributeName: ruleId
+            AttributeType: S
           - AttributeName: state
             AttributeType: S
         KeySchema:
@@ -230,9 +234,9 @@ resources:
           - AttributeName: transactionId
             KeyType: RANGE
         GlobalSecondaryIndexes:
-          - IndexName: userIdIndex
+          - IndexName: ruleIdIndex
             KeySchema:
-              - AttributeName: userId
+              - AttributeName: ruleId
                 KeyType: HASH
               - AttributeName: state
                 KeyType: RANGE
