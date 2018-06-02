@@ -2,6 +2,7 @@ const axios = require('axios');
 const crypto = require('crypto');
 const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
+const { errors } = require('./errors');
 
 const DEFAULT_TRANSACTION_MIN_AMOUNT = 0.001;
 
@@ -88,18 +89,27 @@ class Bitflyer {
     const URL = `${BASE_URL}${PATH}`;
     const method = 'GET';
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH);
-    const response = await axios.get(`${URL}`, { headers });
+    try {
+      const response = await axios.get(`${URL}`, { headers });
 
-    const presentCoinAmount = response.data.filter((data) => data.currency_code === getAssetCoinCode(this.coinUnit))[0]
-      .available;
-    const presentCurrencyAmount = response.data.filter(
-      (data) => data.currency_code === getAssetCurrencyCode(this.currencyUnit)
-    )[0].available;
+      const presentCoinAmount = response.data.filter(
+        (data) => data.currency_code === getAssetCoinCode(this.coinUnit)
+      )[0].available;
+      const presentCurrencyAmount = response.data.filter(
+        (data) => data.currency_code === getAssetCurrencyCode(this.currencyUnit)
+      )[0].available;
 
-    return {
-      presentCoinAmount,
-      presentCurrencyAmount
-    };
+      return {
+        presentCoinAmount,
+        presentCurrencyAmount
+      };
+    } catch (error) {
+      if (error.response.status === -208) {
+        Promise.reject(errors.requestTemporarilyUnavailable(error.response.status, error.response.data));
+      } else {
+        Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      }
+    }
   }
 
   async order(process, type, price, amount) {
@@ -128,10 +138,18 @@ class Bitflyer {
       time_in_force: 'GTC' // Good 'Til Canceled (default)
     };
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH, body);
-    const response = await axios.post(`${URL}`, body, { headers });
-    const orderId = response.data.child_order_acceptance_id;
+    try {
+      const response = await axios.post(`${URL}`, body, { headers });
+      const orderId = response.data.child_order_acceptance_id;
 
-    return orderId;
+      return orderId;
+    } catch (error) {
+      if (error.response.status === -208) {
+        Promise.reject(errors.requestTemporarilyUnavailable(error.response.status, error.response.data));
+      } else {
+        Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      }
+    }
   }
 
   async isCompletedOrder(orderId) {
@@ -140,13 +158,18 @@ class Bitflyer {
     const URL = `${BASE_URL}${PATH}`;
     const method = 'GET';
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH);
-    const response = await axios.get(`${URL}`, { headers });
-    const completedOrders = response.data;
 
-    if (completedOrders.length > 0) {
-      return true;
-    } else {
-      return false;
+    try {
+      const response = await axios.get(`${URL}`, { headers });
+      const isCompleted = response.data.length > 0 ? true : false;
+
+      return isCompleted;
+    } catch (error) {
+      if (error.response.status === -208) {
+        Promise.reject(errors.requestTemporarilyUnavailable(error.response.status, error.response.data));
+      } else {
+        Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      }
     }
   }
 
@@ -159,7 +182,15 @@ class Bitflyer {
       child_order_acceptance_id: orderId
     };
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH, body);
-    await axios.post(`${URL}`, body, { headers });
+    try {
+      await axios.post(`${URL}`, body, { headers });
+    } catch (error) {
+      if (error.response.status === -208) {
+        Promise.reject(errors.requestTemporarilyUnavailable(error.response.status, error.response.data));
+      } else {
+        Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      }
+    }
 
     return orderId;
   }
@@ -167,35 +198,44 @@ class Bitflyer {
   async getSortedBoard() {
     const PATH = `${BOARD_PATH}?product_code=${this.pairCode}`;
     const URL = `${BASE_URL}${PATH}`;
-    const response = await axios.get(`${URL}`);
-    const bids = response.data.bids;
-    bids.sort((a, b) => {
-      if (a.price > b.price) return -1;
-      if (a.price < b.price) return 1;
-      return 0;
-    });
-    const asks = response.data.asks;
-    asks.sort((a, b) => {
-      if (a.price < b.price) return -1;
-      if (a.price > b.price) return 1;
-      return 0;
-    });
-    const formattedBids = bids.map((bid) => {
+
+    try {
+      const response = await axios.get(`${URL}`);
+      const bids = response.data.bids;
+      bids.sort((a, b) => {
+        if (a.price > b.price) return -1;
+        if (a.price < b.price) return 1;
+        return 0;
+      });
+      const asks = response.data.asks;
+      asks.sort((a, b) => {
+        if (a.price < b.price) return -1;
+        if (a.price > b.price) return 1;
+        return 0;
+      });
+      const formattedBids = bids.map((bid) => {
+        return {
+          price: bid.price,
+          amount: bid.size
+        };
+      });
+      const formattedAsks = asks.map((ask) => {
+        return {
+          price: ask.price,
+          amount: ask.size
+        };
+      });
       return {
-        price: bid.price,
-        amount: bid.size
+        bids: formattedBids,
+        asks: formattedAsks
       };
-    });
-    const formattedAsks = asks.map((ask) => {
-      return {
-        price: ask.price,
-        amount: ask.size
-      };
-    });
-    return {
-      bids: formattedBids,
-      asks: formattedAsks
-    };
+    } catch (error) {
+      if (error.response.status === -208) {
+        Promise.reject(errors.requestTemporarilyUnavailable(error.response.status, error.response.data));
+      } else {
+        Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+      }
+    }
   }
 }
 

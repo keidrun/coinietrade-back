@@ -3,8 +3,12 @@ const qs = require('qs');
 const crypto = require('crypto');
 const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
+const { errors } = require('./errors');
+const messages = {
+  TRADE_TEMPORARILY_UNAVAILABLE: 'trade temporarily unavailable.'
+};
 
-const DEFAULT_TRANSACTION_FEE_RATE = -0.0001;
+const DEFAULT_TRANSACTION_FEE_RATE = 0;
 const DEFAULT_TRANSACTION_MIN_AMOUNT = 0.0001;
 
 // Public
@@ -77,19 +81,37 @@ class Zaif {
     };
     const encodedParams = qs.stringify(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
-    const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+    try {
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
 
-    if (response.data.success !== 1) {
-      throw new Error(`Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`);
+      if (response.data.success !== 1) {
+        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          Promise.reject(
+            errors.requestTemporarilyUnavailable(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
+            )
+          );
+        } else {
+          Promise.reject(
+            errors.requestFailure(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
+            )
+          );
+        }
+      }
+
+      const presentCoinAmount = response.data.return.funds[getAssetCoinCode(this.coinUnit)];
+      const presentCurrencyAmount = response.data.return.funds[getAssetCurrencyCode(this.currencyUnit)];
+
+      return {
+        presentCoinAmount,
+        presentCurrencyAmount
+      };
+    } catch (error) {
+      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
     }
-
-    const presentCoinAmount = response.data.return.funds[getAssetCoinCode(this.coinUnit)];
-    const presentCurrencyAmount = response.data.return.funds[getAssetCurrencyCode(this.currencyUnit)];
-
-    return {
-      presentCoinAmount,
-      presentCurrencyAmount
-    };
   }
 
   async order(process, type, price, amount) {
@@ -119,14 +141,33 @@ class Zaif {
     }
     const encodedParams = qs.stringify(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
-    const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
-    if (response.data.success !== 1) {
-      throw new Error(`Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`);
+
+    try {
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      if (response.data.success !== 1) {
+        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          Promise.reject(
+            errors.requestTemporarilyUnavailable(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        } else {
+          Promise.reject(
+            errors.requestFailure(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        }
+      }
+
+      const orderId = response.data.return.order_id;
+
+      return orderId;
+    } catch (error) {
+      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
     }
-
-    const orderId = response.data.return.order_id;
-
-    return orderId;
   }
 
   async isCompletedOrder(orderId) {
@@ -138,12 +179,33 @@ class Zaif {
     };
     const encodedParams = qs.stringify(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
-    const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
-    if (response.data.success !== 1) {
-      throw new Error(`Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}: ${response.data.error}'`);
-    }
 
-    return response.data.return.hasOwnProperty(orderId) ? false : true;
+    try {
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      if (response.data.success !== 1) {
+        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          Promise.reject(
+            errors.requestTemporarilyUnavailable(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        } else {
+          Promise.reject(
+            errors.requestFailure(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        }
+      }
+
+      const isCompleted = response.data.return.hasOwnProperty(orderId) ? false : true;
+
+      return isCompleted;
+    } catch (error) {
+      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+    }
   }
 
   async cancelOrder(orderId) {
@@ -156,47 +218,71 @@ class Zaif {
     };
     const encodedParams = qs.stringify(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
-    const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
-    if (response.data.success !== 1) {
-      throw new Error(`Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`);
-    }
 
-    return orderId;
+    try {
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      if (response.data.success !== 1) {
+        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          Promise.reject(
+            errors.requestTemporarilyUnavailable(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        } else {
+          Promise.reject(
+            errors.requestFailure(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        }
+      }
+
+      return orderId;
+    } catch (error) {
+      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+    }
   }
 
   async getSortedBoard() {
     const PATH = `${BOARD_PATH}/${this.pairCode}`;
     const URL = `${BASE_URL}${PATH}`;
-    const response = await axios.get(`${URL}`);
 
-    const bids = response.data.bids;
-    bids.sort((a, b) => {
-      if (a > b) return -1;
-      if (a < b) return 1;
-      return 0;
-    });
-    const asks = response.data.asks;
-    asks.sort((a, b) => {
-      if (a < b) return -1;
-      if (a > b) return 1;
-      return 0;
-    });
-    const formattedBids = bids.map((bid) => {
+    try {
+      const response = await axios.get(`${URL}`);
+
+      const bids = response.data.bids;
+      bids.sort((a, b) => {
+        if (a > b) return -1;
+        if (a < b) return 1;
+        return 0;
+      });
+      const asks = response.data.asks;
+      asks.sort((a, b) => {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+      });
+      const formattedBids = bids.map((bid) => {
+        return {
+          price: bid[0],
+          amount: bid[1]
+        };
+      });
+      const formattedAsks = asks.map((ask) => {
+        return {
+          price: ask[0],
+          amount: ask[1]
+        };
+      });
       return {
-        price: bid[0],
-        amount: bid[1]
+        bids: formattedBids,
+        asks: formattedAsks
       };
-    });
-    const formattedAsks = asks.map((ask) => {
-      return {
-        price: ask[0],
-        amount: ask[1]
-      };
-    });
-    return {
-      bids: formattedBids,
-      asks: formattedAsks
-    };
+    } catch (error) {
+      Promise.reject(errors.requestFailure(error.response.status, error.response.data));
+    }
   }
 }
 
