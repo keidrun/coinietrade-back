@@ -45,22 +45,23 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           apiSecrets[otherSiteName] = otherSecret;
 
           console.info(util.format('INFO : %s', 'Applying a rule...'));
+          let updatedRule;
           switch (arbitrageStrategy) {
             case ARBITRAGE_STRATEGIES.SIMPLE:
-              await runSimpleArbitrage(rule, apiSecrets);
+              updatedRule = await runSimpleArbitrage(rule, apiSecrets);
               break;
             default:
-              await runSimpleArbitrage(rule, apiSecrets);
+              updatedRule = await runSimpleArbitrage(rule, apiSecrets);
               break;
           }
           console.info(util.format('INFO : %s', 'Applied  a rule'));
+          console.log(updatedRule);
         }
       } catch (error) {
         // Rule table update error etc.
         console.error(util.format('ERROR : %s', error));
       }
     });
-    console.log('###');
   } catch (error) {
     // database connection error
     console.error(util.format('ERROR : %s', error));

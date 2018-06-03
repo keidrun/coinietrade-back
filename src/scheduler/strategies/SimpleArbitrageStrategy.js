@@ -11,7 +11,7 @@ const { ERROR_CODES } = require('../exchanges/errors');
 
 const result = {
   noTransaction: () => {
-    return {
+    return Promise.resolve({
       additionalProfit: 0,
       additionalCounts: {
         executionCount: 1,
@@ -19,10 +19,10 @@ const result = {
         failureCount: 0,
         cancellationCount: 0
       }
-    };
+    });
   },
   success: (profit) => {
-    return {
+    return Promise.resolve({
       additionalProfit: profit,
       additionalCounts: {
         executionCount: 1,
@@ -30,10 +30,10 @@ const result = {
         failureCount: 0,
         cancellationCount: 0
       }
-    };
+    });
   },
   failure: () => {
-    return {
+    return Promise.resolve({
       additionalProfit: 0,
       additionalCounts: {
         executionCount: 1,
@@ -41,10 +41,10 @@ const result = {
         failureCount: 1,
         cancellationCount: 0
       }
-    };
+    });
   },
   cancellation: () => {
-    return {
+    return Promise.resolve({
       additionalProfit: 0,
       additionalCounts: {
         executionCount: 1,
@@ -52,13 +52,9 @@ const result = {
         failureCount: 0,
         cancellationCount: 1
       }
-    };
+    });
   }
 };
-
-function calcExecutionTime(startTime) {
-  return Date.now() - startTime;
-}
 
 class SimpleArbitrageStrategy {
   constructor(argsObj) {
@@ -89,7 +85,6 @@ class SimpleArbitrageStrategy {
   }
 
   async doArbitrage() {
-    const startTime = Date.now();
     const buyTransactionId = uuid.v4();
     const sellTransactionId = uuid.v4();
 
@@ -101,6 +96,9 @@ class SimpleArbitrageStrategy {
         .eq(TRANSACTION_STATES.IN_PROGRESS)
         .exec();
       if (workingTransactions.length > 0) {
+        // TODO: Release rule
+        // compare with modifiedAt
+
         console.log('Skipping...');
         return result.noTransaction();
       }
@@ -169,7 +167,8 @@ class SimpleArbitrageStrategy {
       console.log('BTC limit', possibleCoinAmountLimitB);
       console.log('JPY limit', possiblePriceLimitB);
       console.log('########################');
-      console.log('DIFF', Math.abs(bestBidPriceA - bestAskPriceB));
+      console.log('DIFF BidA-AskB', bestBidPriceA - bestAskPriceB);
+      console.log('DIFF BidB-AskA', bestBidPriceB - bestAskPriceA);
       console.log('########################');
 
       // Condition
@@ -203,6 +202,20 @@ class SimpleArbitrageStrategy {
           buyAmount = sellAmount = possibleCoinAmountLimitA;
         }
 
+        console.log('@@@@@@@@@@@@@@@@@@');
+        console.log('transactionDigit', transactionDigit);
+        console.log('buyAmount', buyAmount);
+        console.log(
+          'buyAmount',
+          Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit)
+        );
+        console.log('sellAmount', sellAmount);
+        console.log(
+          'sellAmount',
+          Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit)
+        );
+        console.log('@@@@@@@@@@@@@@@@@@');
+
         target = {
           buy: {
             api: this.ExchangeB,
@@ -233,6 +246,20 @@ class SimpleArbitrageStrategy {
           buyAmount = sellAmount = possibleCoinAmountLimitB;
         }
 
+        console.log('@@@@@@@@@@@@@@@@@@');
+        console.log('transactionDigit', transactionDigit);
+        console.log('buyAmount', buyAmount);
+        console.log(
+          'buyAmount',
+          Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit)
+        );
+        console.log('sellAmount', sellAmount);
+        console.log(
+          'sellAmount',
+          Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit)
+        );
+        console.log('@@@@@@@@@@@@@@@@@@');
+
         target = {
           buy: {
             api: this.ExchangeA,
@@ -252,6 +279,8 @@ class SimpleArbitrageStrategy {
         return result.noTransaction();
       }
 
+      console.log('transactionMinAmount', transactionMinAmount);
+      console.log('target.buy.orderAmount', target.buy.orderAmount);
       if (target.buy.orderAmount < transactionMinAmount) {
         console.log('NOOOOOOO Trade!!! TOOO MIN');
         return result.noTransaction();
@@ -276,7 +305,6 @@ class SimpleArbitrageStrategy {
       console.log('########################');
 
       // Begin transactions
-      const executionTime = calcExecutionTime(startTime);
       const buyTransactionObj = {
         userId: this.userId,
         transactionId: buyTransactionId,
@@ -289,8 +317,7 @@ class SimpleArbitrageStrategy {
         orderType: this.orderType,
         orderPrice: target.buy.orderPrice,
         orderAmount: target.buy.orderAmount,
-        transactionFeeRate: target.buy.transactionFeeRate,
-        executionTime
+        transactionFeeRate: target.buy.transactionFeeRate
       };
       const sellTransactionObj = {
         userId: this.userId,
@@ -304,8 +331,7 @@ class SimpleArbitrageStrategy {
         orderType: this.orderType,
         orderPrice: target.sell.orderPrice,
         orderAmount: target.sell.orderAmount,
-        transactionFeeRate: target.sell.transactionFeeRate,
-        executionTime
+        transactionFeeRate: target.sell.transactionFeeRate
       };
       const newBuyTransaction = new Transaction(buyTransactionObj);
       const newSellTransaction = new Transaction(sellTransactionObj);
@@ -337,12 +363,13 @@ class SimpleArbitrageStrategy {
         );
         console.log('orderId', buyOrderId);
       } catch (error) {
+        console.log(error);
+
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
           console.log('BUY CANCELED', buyOrderId);
         }
         // =>  CANCELED
-        const executionTime = calcExecutionTime(startTime);
         const modifiedAt = moment().toISOString();
         const canceledBuyTransaction = await Transaction.update(
           { userId: this.userId, transactionId: buyTransactionId },
@@ -350,13 +377,12 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.CANCELED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.ORDERS_FAILURE
+              errorCode: ERROR_CODES.ORDERS_FAILURE,
+              errorDetail: error.toString()
             }
           }
         );
         console.log('-------------------------');
-        console.log('Exec Time: ', executionTime);
         console.log('modifiedAt: ', modifiedAt);
         console.log(canceledBuyTransaction);
         console.log('-------------------------');
@@ -382,6 +408,7 @@ class SimpleArbitrageStrategy {
         );
         console.log('orderId', sellOrderId);
       } catch (error) {
+        console.log(error);
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
           console.log('BUY CANCELED', buyOrderId);
@@ -391,7 +418,6 @@ class SimpleArbitrageStrategy {
           console.log('SELL CANCELED', sellOrderId);
         }
         // =>  CANCELED
-        const executionTime = calcExecutionTime(startTime);
         const modifiedAt = moment().toISOString();
         const canceledBuyTransaction = await Transaction.update(
           { userId: this.userId, transactionId: buyTransactionId },
@@ -399,8 +425,8 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.CANCELED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.ORDERS_FAILURE
+              errorCode: ERROR_CODES.ORDERS_FAILURE,
+              errorDetail: error.toString()
             }
           }
         );
@@ -410,13 +436,12 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.CANCELED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.ORDERS_FAILURE
+              errorCode: ERROR_CODES.ORDERS_FAILURE,
+              errorDetail: error.toString()
             }
           }
         );
         console.log('-------------------------');
-        console.log('Exec Time: ', executionTime);
         console.log('modifiedAt: ', modifiedAt);
         console.log(canceledBuyTransaction);
         console.log(canceledSellTransaction);
@@ -426,131 +451,124 @@ class SimpleArbitrageStrategy {
 
       // Exit criteria to finish transactions
       const commitmentTimeLimitMSec = this.commitmentTimeLimit * 1000;
-      await setTimeoutPromise(commitmentTimeLimitMSec, async () => {
-        const isCompletedBuyOrder = await target.buy.api.isCompletedOrder(buyOrderId);
-        const isCompletedSellOrder = await target.sell.api.isCompletedOrder(sellOrderId);
+      await setTimeoutPromise(commitmentTimeLimitMSec);
 
-        if (isCompletedBuyOrder === false && isCompletedSellOrder === true) {
-          // TODO: How to recover?
-          await target.buy.api.cancelOrder(buyOrderId);
-          console.log('BUY CANCELED TO STOP', buyOrderId);
-          // => CANCELED but only buy order
-          const executionTime = calcExecutionTime(startTime);
-          const modifiedAt = moment().toISOString();
-          const canceledBuyTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: buyTransactionId },
-            {
-              $PUT: {
-                state: TRANSACTION_STATES.CANCELED,
-                modifiedAt,
-                executionTime,
-                errorCode: ERROR_CODES.BUY_ORDER_TIMEOUT
-              }
+      const isCompletedBuyOrder = await target.buy.api.isCompletedOrder(buyOrderId);
+      const isCompletedSellOrder = await target.sell.api.isCompletedOrder(sellOrderId);
+
+      console.log('_+_+_+_+_++_+_+_+_+');
+      console.log('isCompletedBuyOrder', isCompletedBuyOrder);
+      console.log('isCompletedSellOrder', isCompletedSellOrder);
+      console.log('_+_+_+_+_++_+_+_+_+');
+
+      if (isCompletedBuyOrder === false && isCompletedSellOrder === true) {
+        // TODO: How to recover?
+        await target.buy.api.cancelOrder(buyOrderId);
+        console.log('BUY CANCELED TO STOP', buyOrderId);
+        // => CANCELED but only buy order
+        const modifiedAt = moment().toISOString();
+        const canceledBuyTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: buyTransactionId },
+          {
+            $PUT: {
+              state: TRANSACTION_STATES.CANCELED,
+              modifiedAt,
+              errorCode: ERROR_CODES.BUY_ORDER_TIMEOUT
             }
-          );
-          const succeededSellTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: sellTransactionId },
-            { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt, executionTime } }
-          );
-          console.log('-------------------------');
-          console.log('Exec Time: ', executionTime);
-          console.log('modifiedAt: ', modifiedAt);
-          console.log(canceledBuyTransaction);
-          console.log(succeededSellTransaction);
-          console.log('-------------------------');
-          return result.failure();
-        } else if (isCompletedBuyOrder === true && isCompletedSellOrder === false) {
-          // TODO: How to recover?
-          await target.sell.api.cancelOrder(sellOrderId);
-          console.log('SELL CANCELED TO STOP', sellOrderId);
-          // => CANCELED but only sell order
-          const executionTime = calcExecutionTime(startTime);
-          const modifiedAt = moment().toISOString();
-          const succeededBuyTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: buyTransactionId },
-            { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt, executionTime } }
-          );
-          const canceledSellTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: sellTransactionId },
-            {
-              $PUT: {
-                state: TRANSACTION_STATES.CANCELED,
-                modifiedAt,
-                executionTime,
-                errorCode: ERROR_CODES.BUY_ORDER_TIMEOUT
-              }
+          }
+        );
+        const succeededSellTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: sellTransactionId },
+          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
+        );
+        console.log('-------------------------');
+        console.log('modifiedAt: ', modifiedAt);
+        console.log(canceledBuyTransaction);
+        console.log(succeededSellTransaction);
+        console.log('-------------------------');
+        return result.failure();
+      } else if (isCompletedBuyOrder === true && isCompletedSellOrder === false) {
+        // TODO: How to recover?
+        await target.sell.api.cancelOrder(sellOrderId);
+        console.log('SELL CANCELED TO STOP', sellOrderId);
+        // => CANCELED but only sell order
+        const modifiedAt = moment().toISOString();
+        const succeededBuyTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: buyTransactionId },
+          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
+        );
+        const canceledSellTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: sellTransactionId },
+          {
+            $PUT: {
+              state: TRANSACTION_STATES.CANCELED,
+              modifiedAt,
+              errorCode: ERROR_CODES.SELL_ORDER_TIMEOUT
             }
-          );
-          console.log('-------------------------');
-          console.log('Exec Time: ', executionTime);
-          console.log('modifiedAt: ', modifiedAt);
-          console.log(succeededBuyTransaction);
-          console.log(canceledSellTransaction);
-          console.log('-------------------------');
-          return result.failure();
-        } else if (isCompletedBuyOrder === false && isCompletedSellOrder === false) {
-          await target.buy.api.cancelOrder(buyOrderId);
-          await target.sell.api.cancelOrder(sellOrderId);
-          console.log('BUY CANCELED', buyOrderId);
-          console.log('SELL CANCELED', sellOrderId);
-          // =>  CANCELED but both
-          const executionTime = calcExecutionTime(startTime);
-          const modifiedAt = moment().toISOString();
-          const canceledBuyTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: buyTransactionId },
-            {
-              $PUT: {
-                state: TRANSACTION_STATES.CANCELED,
-                modifiedAt,
-                executionTime,
-                errorCode: ERROR_CODES.BOTH_ORDERS_TIMEOUT
-              }
+          }
+        );
+        console.log('-------------------------');
+        console.log('modifiedAt: ', modifiedAt);
+        console.log(succeededBuyTransaction);
+        console.log(canceledSellTransaction);
+        console.log('-------------------------');
+        return result.failure();
+      } else if (isCompletedBuyOrder === false && isCompletedSellOrder === false) {
+        await target.buy.api.cancelOrder(buyOrderId);
+        await target.sell.api.cancelOrder(sellOrderId);
+        console.log('BUY CANCELED', buyOrderId);
+        console.log('SELL CANCELED', sellOrderId);
+        // =>  CANCELED but both
+        const modifiedAt = moment().toISOString();
+        const canceledBuyTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: buyTransactionId },
+          {
+            $PUT: {
+              state: TRANSACTION_STATES.CANCELED,
+              modifiedAt,
+              errorCode: ERROR_CODES.BOTH_ORDERS_TIMEOUT
             }
-          );
-          const canceledSellTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: sellTransactionId },
-            {
-              $PUT: {
-                state: TRANSACTION_STATES.CANCELED,
-                modifiedAt,
-                executionTime,
-                errorCode: ERROR_CODES.BOTH_ORDERS_TIMEOUT
-              }
+          }
+        );
+        const canceledSellTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: sellTransactionId },
+          {
+            $PUT: {
+              state: TRANSACTION_STATES.CANCELED,
+              modifiedAt,
+              errorCode: ERROR_CODES.BOTH_ORDERS_TIMEOUT
             }
-          );
-          console.log('-------------------------');
-          console.log('Exec Time: ', executionTime);
-          console.log('modifiedAt: ', modifiedAt);
-          console.log(canceledBuyTransaction);
-          console.log(canceledSellTransaction);
-          console.log('-------------------------');
-          return result.cancellation();
-        } else {
-          // => DONE
-          const executionTime = calcExecutionTime(startTime);
-          const modifiedAt = moment().toISOString();
-          const succeededBuyTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: buyTransactionId },
-            { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt, executionTime } }
-          );
-          const succeededSellTransaction = await Transaction.update(
-            { userId: this.userId, transactionId: sellTransactionId },
-            { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt, executionTime } }
-          );
-          console.log('-------------------------');
-          console.log('Exec Time: ', executionTime);
-          console.log('modifiedAt: ', modifiedAt);
-          console.log(succeededBuyTransaction);
-          console.log(succeededSellTransaction);
-          console.log('-------------------------');
-          return result.success(anticipatedProfit);
-        }
-      });
+          }
+        );
+        console.log('-------------------------');
+        console.log('modifiedAt: ', modifiedAt);
+        console.log(canceledBuyTransaction);
+        console.log(canceledSellTransaction);
+        console.log('-------------------------');
+        return result.cancellation();
+      } else {
+        // => DONE
+        const modifiedAt = moment().toISOString();
+        const succeededBuyTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: buyTransactionId },
+          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
+        );
+        const succeededSellTransaction = await Transaction.update(
+          { userId: this.userId, transactionId: sellTransactionId },
+          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
+        );
+        console.log('-------------------------');
+        console.log('modifiedAt: ', modifiedAt);
+        console.log(succeededBuyTransaction);
+        console.log(succeededSellTransaction);
+        console.log('++++++++++anticipatedProfit final+++++++++++', anticipatedProfit);
+        console.log('-------------------------');
+        return result.success(anticipatedProfit);
+      }
     } catch (error) {
       if (!error.code) {
         // FATAL: database error or bugs
-        // => FAILED
-        const executionTime = calcExecutionTime(startTime);
+        // => FAILEDf
         const modifiedAt = moment().toISOString();
         const failedBuyTransaction = await Transaction.update(
           { userId: this.userId, transactionId: buyTransactionId },
@@ -558,8 +576,8 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.UNKNOWN_ERROR
+              errorCode: ERROR_CODES.UNKNOWN_ERROR,
+              errorDetail: error.toString()
             }
           }
         );
@@ -569,21 +587,20 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.UNKNOWN_ERROR
+              errorCode: ERROR_CODES.UNKNOWN_ERROR,
+              errorDetail: error.toString()
             }
           }
         );
         console.log('-------------------------');
-        console.log('Exec Time: ', executionTime);
         console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
+        console.log(error);
         console.log('-------------------------');
         return result.failure();
       } else if (error.code === ERROR_CODES.NETWORK_ERROR) {
         // => FAILED
-        const executionTime = calcExecutionTime(startTime);
         const modifiedAt = moment().toISOString();
         const failedBuyTransaction = await Transaction.update(
           { userId: this.userId, transactionId: buyTransactionId },
@@ -591,8 +608,8 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.NETWORK_ERROR
+              errorCode: ERROR_CODES.NETWORK_ERROR,
+              errorDetail: error.toString()
             }
           }
         );
@@ -602,21 +619,20 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.NETWORK_ERROR
+              errorCode: ERROR_CODES.NETWORK_ERROR,
+              errorDetail: error.toString()
             }
           }
         );
         console.log('-------------------------');
-        console.log('Exec Time: ', executionTime);
         console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
+        console.log(error);
         console.log('-------------------------');
         return result.failure();
       } else if (error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE) {
         // => FAILED
-        const executionTime = calcExecutionTime(startTime);
         const modifiedAt = moment().toISOString();
         const failedBuyTransaction = await Transaction.update(
           { userId: this.userId, transactionId: buyTransactionId },
@@ -624,8 +640,8 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE
+              errorCode: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
+              errorDetail: error.toString()
             }
           }
         );
@@ -635,22 +651,21 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE
+              errorCode: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
+              errorDetail: error.toString()
             }
           }
         );
         console.log('-------------------------');
-        console.log('Exec Time: ', executionTime);
         console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
+        console.log(error);
         console.log('-------------------------');
         return result.failure();
       } else {
         // API_FAILURE
         // => FAILED
-        const executionTime = calcExecutionTime(startTime);
         const modifiedAt = moment().toISOString();
         const failedBuyTransaction = await Transaction.update(
           { userId: this.userId, transactionId: buyTransactionId },
@@ -658,8 +673,8 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.API_FAILURE
+              errorCode: ERROR_CODES.API_FAILURE,
+              errorDetail: error.toString()
             }
           }
         );
@@ -669,16 +684,16 @@ class SimpleArbitrageStrategy {
             $PUT: {
               state: TRANSACTION_STATES.FAILED,
               modifiedAt,
-              executionTime,
-              errorCode: ERROR_CODES.API_FAILURE
+              errorCode: ERROR_CODES.API_FAILURE,
+              errorDetail: error.toString()
             }
           }
         );
         console.log('-------------------------');
-        console.log('Exec Time: ', executionTime);
         console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
+        console.log(error);
         console.log('-------------------------');
         return result.failure();
       }

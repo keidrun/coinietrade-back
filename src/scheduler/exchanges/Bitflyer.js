@@ -105,7 +105,7 @@ class Bitflyer {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else if (error.response.status === -208) {
         throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
       } else {
@@ -147,7 +147,7 @@ class Bitflyer {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else if (error.response.status === -208) {
         throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
       } else {
@@ -170,7 +170,7 @@ class Bitflyer {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else if (error.response.status === -208) {
         throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
       } else {
@@ -192,7 +192,7 @@ class Bitflyer {
       await axios.post(`${URL}`, body, { headers });
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else if (error.response.status === -208) {
         throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
       } else {
@@ -239,7 +239,7 @@ class Bitflyer {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else if (error.response.status === -208) {
         throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
       } else {

@@ -93,7 +93,6 @@ const transactionSchema = new Schema(
       validate: (value) => Object.values(TRANSACTION_STATES).indexOf(value) !== -1
     },
     modifiedAt: { type: Date, required: true, default: () => moment().toISOString() },
-    executionTime: { type: Number },
     errorCode: {
       type: String,
       validate: (value) => Object.values(ERROR_CODES).indexOf(value) !== -1

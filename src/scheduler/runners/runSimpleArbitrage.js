@@ -34,6 +34,11 @@ const runSimpleArbitrage = async (rule, apiSecrets) => {
     const strategy = new SimpleArbitrageStrategy(argsObj);
     const { additionalProfit, additionalCounts } = await strategy.doArbitrage();
 
+    console.log('+++++++++++++++++++');
+    console.log('additionalProfit', additionalProfit);
+    console.log('additionalCounts', additionalCounts);
+    console.log('+++++++++++++++++++');
+
     const existingRule = await Rule.get({ userId, ruleId });
     if (existingRule) {
       const version = existingRule.version + 1;
@@ -49,7 +54,7 @@ const runSimpleArbitrage = async (rule, apiSecrets) => {
       };
       const updatedRule = await Rule.update({ userId, ruleId, version }, { $PUT: patchRule });
 
-      console.log(updatedRule);
+      return updatedRule;
     } else {
       throw new Error('Rule Not found');
     }

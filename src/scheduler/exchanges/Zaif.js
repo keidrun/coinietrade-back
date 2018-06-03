@@ -111,7 +111,7 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else {
         throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
@@ -171,7 +171,7 @@ class Zaif {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else {
         throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
@@ -213,7 +213,7 @@ class Zaif {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else {
         throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
@@ -251,10 +251,10 @@ class Zaif {
         }
       }
 
-      return orderId;
+      return Promise.resolve(orderId);
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else {
         throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
@@ -298,7 +298,7 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error));
+        throw new Error(errors.networkError(error.toString()));
       } else {
         throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
