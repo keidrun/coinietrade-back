@@ -18,45 +18,51 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
       return 0;
     });
     availableRules.forEach(async (rule) => {
-      const userId = rule.userId;
-      const arbitrageStrategy = rule.arbitrageStrategy;
-      const oneSiteName = rule.oneSiteName;
-      const otherSiteName = rule.otherSiteName;
+      try {
+        const userId = rule.userId;
+        const arbitrageStrategy = rule.arbitrageStrategy;
+        const oneSiteName = rule.oneSiteName;
+        const otherSiteName = rule.otherSiteName;
 
-      const policy = await Policy.get(userId);
-      if (!policy) {
-        console.info(util.format('WARN : %s', 'Policy NOT Found, SKIPPING process...'));
-        return;
-      }
-      const effect = policy.effect;
-      const mExpiredAt = moment(policy.expiredAt).utc();
-      const mNow = moment().utc();
-      if (effect === USER_EFFECTS.ALLOW && mNow.isBefore(mExpiredAt)) {
-        const secrets = await Secret.query('userId').eq(userId).exec();
-        if (secrets.length < 2) {
-          console.info(util.format('WARN : %s', 'Secrets MUST have over 2 items, SKIPPING process...'));
+        const policy = await Policy.get(userId);
+        if (!policy) {
+          console.info(util.format('WARN : %s', 'Policy NOT Found, SKIPPING process...'));
           return;
         }
-        const oneSecret = secrets.filter((secret) => secret.apiProvider === oneSiteName)[0];
-        const otherSecret = secrets.filter((secret) => secret.apiProvider === otherSiteName)[0];
-        const apiSecrets = {};
-        apiSecrets[oneSiteName] = oneSecret;
-        apiSecrets[otherSiteName] = otherSecret;
+        const effect = policy.effect;
+        const mExpiredAt = moment(policy.expiredAt).utc();
+        const mNow = moment().utc();
+        if (effect === USER_EFFECTS.ALLOW && mNow.isBefore(mExpiredAt)) {
+          const secrets = await Secret.query('userId').eq(userId).exec();
+          if (secrets.length < 2) {
+            console.info(util.format('WARN : %s', 'Secrets MUST have over 2 items, SKIPPING process...'));
+            return;
+          }
+          const oneSecret = secrets.filter((secret) => secret.apiProvider === oneSiteName)[0];
+          const otherSecret = secrets.filter((secret) => secret.apiProvider === otherSiteName)[0];
+          const apiSecrets = {};
+          apiSecrets[oneSiteName] = oneSecret;
+          apiSecrets[otherSiteName] = otherSecret;
 
-        console.info(util.format('INFO : %s', 'Applying a rule...'));
-        switch (arbitrageStrategy) {
-          case ARBITRAGE_STRATEGIES.SIMPLE:
-            await runSimpleArbitrage(rule, apiSecrets);
-            break;
-          default:
-            await runSimpleArbitrage(rule, apiSecrets);
-            break;
+          console.info(util.format('INFO : %s', 'Applying a rule...'));
+          switch (arbitrageStrategy) {
+            case ARBITRAGE_STRATEGIES.SIMPLE:
+              await runSimpleArbitrage(rule, apiSecrets);
+              break;
+            default:
+              await runSimpleArbitrage(rule, apiSecrets);
+              break;
+          }
+          console.info(util.format('INFO : %s', 'Applied  a rule'));
         }
-        console.info(util.format('INFO : %s', 'Applied  a rule Successfully!'));
+      } catch (error) {
+        // Rule table update error etc.
+        console.error(util.format('ERROR : %s', error));
       }
     });
+    console.log('###');
   } catch (error) {
-    // Rule table update error OR database connection error
+    // database connection error
     console.error(util.format('ERROR : %s', error));
   }
 };

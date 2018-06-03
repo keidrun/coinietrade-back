@@ -86,14 +86,14 @@ class Zaif {
 
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          Promise.reject(
+          throw new Error(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          Promise.reject(
+          throw new Error(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
@@ -111,9 +111,9 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        Promise.reject(errors.networkError(error));
+        throw new Error(errors.networkError(error));
       } else {
-        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+        throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
     }
   }
@@ -150,14 +150,14 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          Promise.reject(
+          throw new Error(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          Promise.reject(
+          throw new Error(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
@@ -171,9 +171,9 @@ class Zaif {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        Promise.reject(errors.networkError(error));
+        throw new Error(errors.networkError(error));
       } else {
-        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+        throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
     }
   }
@@ -192,14 +192,14 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          Promise.reject(
+          throw new Error(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          Promise.reject(
+          throw new Error(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
@@ -213,9 +213,9 @@ class Zaif {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        Promise.reject(errors.networkError(error));
+        throw new Error(errors.networkError(error));
       } else {
-        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+        throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
     }
   }
@@ -235,14 +235,14 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          Promise.reject(
+          throw new Error(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          Promise.reject(
+          throw new Error(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
@@ -254,9 +254,9 @@ class Zaif {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        Promise.reject(errors.networkError(error));
+        throw new Error(errors.networkError(error));
       } else {
-        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+        throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
     }
   }
@@ -298,9 +298,9 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        Promise.reject(errors.networkError(error));
+        throw new Error(errors.networkError(error));
       } else {
-        Promise.reject(errors.apiFailure(error.response.status, error.response.data));
+        throw new Error(errors.apiFailure(error.response.status, error.response.data));
       }
     }
   }

@@ -15,6 +15,7 @@ provider:
   region: ${file(./config/config.yml):${self:provider.stage}.region, 'us-east-1'}
   memorySize: 1024
   timeout: 6
+  reservedConcurrency: 5
   logRetentionInDays: 14
   apiKeys:
     - ${opt:stage, self:provider.stage}-privateApiKey
@@ -32,7 +33,7 @@ provider:
     DYNAMODB_TABLE_TRANSACTIONS: ${self:custom.service.name}_transactions_${self:provider.stage}
     # Secret encrypt
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
-    # Scheduler interval minute
+    # Scheduler interval minutes
     SCHEDULER_INTERVAL: ${file(./config/config.yml):${self:provider.stage}.scheduler_interval}
   iamRoleStatements:
     - Effect: "Allow"

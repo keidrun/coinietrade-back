@@ -7,11 +7,7 @@ const Exchanges = {
   bitflyer: require('../exchanges/Bitflyer'),
   zaif: require('../exchanges/Zaif')
 };
-const { decrypt } = require('../../utils/crypto');
 const { ERROR_CODES } = require('../exchanges/errors');
-
-const encryptKey = process.env.ENCRYPT_KEY;
-const schedulerInterval = process.env.SCHEDULER_INTERVAL;
 
 const result = {
   noTransaction: () => {
@@ -78,15 +74,15 @@ class SimpleArbitrageStrategy {
     this.sellWeightRate = argsObj.sellWeightRate;
     this.ExchangeA = new Exchanges[argsObj.a.siteName](
       argsObj.a.siteName,
-      decrypt(argsObj.a.apiKey, encryptKey),
-      decrypt(argsObj.a.apiSecret, encryptKey),
+      argsObj.a.apiKey,
+      argsObj.a.apiSecret,
       argsObj.coinUnit,
       argsObj.currencyUnit
     );
     this.ExchangeB = new Exchanges[argsObj.b.siteName](
       argsObj.b.siteName,
-      decrypt(argsObj.b.apiKey, encryptKey),
-      decrypt(argsObj.b.apiSecret, encryptKey),
+      argsObj.b.apiKey,
+      argsObj.b.apiSecret,
       argsObj.coinUnit,
       argsObj.currencyUnit
     );
@@ -429,11 +425,8 @@ class SimpleArbitrageStrategy {
       }
 
       // Exit criteria to finish transactions
-      const schedulerIntervalMSec = schedulerInterval * 60 * 1000;
       const commitmentTimeLimitMSec = this.commitmentTimeLimit * 1000;
-      const intervalMSec =
-        commitmentTimeLimitMSec < schedulerIntervalMSec ? commitmentTimeLimitMSec : schedulerIntervalMSec - 60 * 1000;
-      await setTimeoutPromise(intervalMSec, async () => {
+      await setTimeoutPromise(commitmentTimeLimitMSec, async () => {
         const isCompletedBuyOrder = await target.buy.api.isCompletedOrder(buyOrderId);
         const isCompletedSellOrder = await target.sell.api.isCompletedOrder(sellOrderId);
 
