@@ -5,6 +5,8 @@ const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule')
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 const messages = {
+  NO_DATA_FOUND_FOR_THE_KEY: 'no data found for the key',
+  SIGNATURE_MISMATCH: 'signature mismatch',
   TRADE_TEMPORARILY_UNAVAILABLE: 'trade temporarily unavailable.'
 };
 
@@ -85,15 +87,25 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
 
       if (response.data.success !== 1) {
-        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          throw new Error(
+        if (
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+        ) {
+          return Promise.reject(
+            errors.apiUnauthorized(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
+            )
+          );
+        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          throw new Error(
+          return Promise.reject(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
@@ -111,16 +123,16 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(error.toString()));
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
 
   async order(process, type, price, amount) {
     if (type !== ORDER_TYPES.LIMIT_ORDER) {
-      throw new Error(`Cannot apply the order type: ${type}`);
+      return Promise.reject(`Cannot apply the order type: ${type}`);
     }
     const nonce = Date.now().toString() / 1000;
     let params;
@@ -149,15 +161,25 @@ class Zaif {
     try {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
-        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          throw new Error(
+        if (
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+        ) {
+          return Promise.reject(
+            errors.apiUnauthorized(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          throw new Error(
+          return Promise.reject(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
@@ -171,9 +193,9 @@ class Zaif {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(error.toString()));
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
@@ -191,15 +213,25 @@ class Zaif {
     try {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
-        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          throw new Error(
+        if (
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+        ) {
+          return Promise.reject(
+            errors.apiUnauthorized(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          throw new Error(
+          return Promise.reject(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
@@ -213,9 +245,9 @@ class Zaif {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(error.toString()));
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
@@ -234,15 +266,25 @@ class Zaif {
     try {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
-        if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
-          throw new Error(
+        if (
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+        ) {
+          return Promise.reject(
+            errors.apiUnauthorized(
+              response.status,
+              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
+            )
+          );
+        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+          return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else {
-          throw new Error(
+          return Promise.reject(
             errors.apiFailure(
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
@@ -254,9 +296,9 @@ class Zaif {
       return Promise.resolve(orderId);
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(error.toString()));
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
@@ -298,9 +340,9 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(error.toString()));
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }

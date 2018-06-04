@@ -1,8 +1,10 @@
 const ERROR_CODES = {
   // FAILED
   UNKNOWN_ERROR: 'unknown_error',
+  RELEASED_LOCKED_TRANSACTIONS: 'released_locked_transactions',
   NETWORK_ERROR: 'network_error',
   API_FAILURE: 'api_failure',
+  API_UNAUTHORIZED: 'api_unauthorized',
   API_TEMPORARILY_UNAVAILABLE: 'api_temporarily_unavailable',
   // CANCELED
   ORDERS_FAILURE: 'orders_failure',
@@ -22,6 +24,13 @@ const errors = {
   apiFailure: (status, message) => {
     return {
       code: ERROR_CODES.API_FAILURE,
+      status,
+      message
+    };
+  },
+  apiUnauthorized: (status, message) => {
+    return {
+      code: ERROR_CODES.API_UNAUTHORIZED,
       status,
       message
     };

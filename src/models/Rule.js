@@ -28,8 +28,7 @@ const EXCHANGE_SITES = {
 
 const RULE_STATUS = {
   AVAILABLE: 'available',
-  UNAVAILABLE: 'unavailable',
-  DELETED: 'deleted'
+  UNAVAILABLE: 'unavailable'
 };
 
 const options = {

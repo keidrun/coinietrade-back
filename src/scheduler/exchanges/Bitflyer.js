@@ -77,11 +77,23 @@ class Bitflyer {
     const URL = `${BASE_URL}${PATH}`;
     const method = 'GET';
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH);
-    const response = await axios.get(`${URL}`, { headers });
-
-    const transactionFee = response.data.commission_rate;
-
-    return transactionFee;
+    try {
+      const response = await axios.get(`${URL}`, { headers });
+      const transactionFee = response.data.commission_rate;
+      return transactionFee;
+    } catch (error) {
+      if (!error.response) {
+        return Promise.reject(errors.networkError(error.toString()));
+      } else if (error.response.status === 401) {
+        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+      } else if (error.response.data.status === -208) {
+        return Promise.reject(
+          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+        );
+      } else {
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+      }
+    }
   }
 
   async getAssets() {
@@ -105,11 +117,15 @@ class Bitflyer {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
-      } else if (error.response.status === -208) {
-        throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
+        return Promise.reject(errors.networkError(error.toString()));
+      } else if (error.response.status === 401) {
+        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+      } else if (error.response.data.status === -208) {
+        return Promise.reject(
+          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+        );
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
@@ -147,11 +163,15 @@ class Bitflyer {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
-      } else if (error.response.status === -208) {
-        throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
+        return Promise.reject(errors.networkError(error.toString()));
+      } else if (error.response.status === 401) {
+        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+      } else if (error.response.data.status === -208) {
+        return Promise.reject(
+          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+        );
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
@@ -170,11 +190,15 @@ class Bitflyer {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
-      } else if (error.response.status === -208) {
-        throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
+        return Promise.reject(errors.networkError(error.toString()));
+      } else if (error.response.status === 401) {
+        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+      } else if (error.response.data.status === -208) {
+        return Promise.reject(
+          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+        );
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }
@@ -192,11 +216,15 @@ class Bitflyer {
       await axios.post(`${URL}`, body, { headers });
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
-      } else if (error.response.status === -208) {
-        throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
+        return Promise.reject(errors.networkError(error.toString()));
+      } else if (error.response.status === 401) {
+        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+      } else if (error.response.data.status === -208) {
+        return Promise.reject(
+          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+        );
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
 
@@ -239,11 +267,15 @@ class Bitflyer {
       };
     } catch (error) {
       if (!error.response) {
-        throw new Error(errors.networkError(error.toString()));
-      } else if (error.response.status === -208) {
-        throw new Error(errors.apiTemporarilyUnavailable(error.response.status, error.response.data));
+        return Promise.reject(errors.networkError(error.toString()));
+      } else if (error.response.status === 401) {
+        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+      } else if (error.response.data.status === -208) {
+        return Promise.reject(
+          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+        );
       } else {
-        throw new Error(errors.apiFailure(error.response.status, error.response.data));
+        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
       }
     }
   }

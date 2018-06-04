@@ -2,59 +2,15 @@ const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
 const uuid = require('uuid');
 const moment = require('moment');
-const { Transaction, ORDER_PROCESSES, TRANSACTION_STATES } = require('../../models/Transaction');
+const { ORDER_PROCESSES } = require('../../models/Transaction');
 const Exchanges = {
   bitflyer: require('../exchanges/Bitflyer'),
   zaif: require('../exchanges/Zaif')
 };
 const { ERROR_CODES } = require('../exchanges/errors');
+const { result, transaction } = require('./utils');
 
-const result = {
-  noTransaction: () => {
-    return Promise.resolve({
-      additionalProfit: 0,
-      additionalCounts: {
-        executionCount: 1,
-        successCount: 1,
-        failureCount: 0,
-        cancellationCount: 0
-      }
-    });
-  },
-  success: (profit) => {
-    return Promise.resolve({
-      additionalProfit: profit,
-      additionalCounts: {
-        executionCount: 1,
-        successCount: 1,
-        failureCount: 0,
-        cancellationCount: 0
-      }
-    });
-  },
-  failure: () => {
-    return Promise.resolve({
-      additionalProfit: 0,
-      additionalCounts: {
-        executionCount: 1,
-        successCount: 0,
-        failureCount: 1,
-        cancellationCount: 0
-      }
-    });
-  },
-  cancellation: () => {
-    return Promise.resolve({
-      additionalProfit: 0,
-      additionalCounts: {
-        executionCount: 1,
-        successCount: 0,
-        failureCount: 0,
-        cancellationCount: 1
-      }
-    });
-  }
-};
+const RELEASE_LOCKED_TRANSACTIONS_TIME_SEC = 10 * 60;
 
 class SimpleArbitrageStrategy {
   constructor(argsObj) {
@@ -90,14 +46,27 @@ class SimpleArbitrageStrategy {
 
     try {
       // Check working transactions
-      const workingTransactions = await Transaction.query('ruleId')
-        .eq(this.ruleId)
-        .where('state')
-        .eq(TRANSACTION_STATES.IN_PROGRESS)
-        .exec();
+      const workingTransactions = await transaction.getWorking(this.ruleId);
       if (workingTransactions.length > 0) {
-        // TODO: Release rule
-        // compare with modifiedAt
+        // Release locked transactions
+        workingTransactions.forEach(async (lockedTransaction) => {
+          const mNow = moment();
+          const mModifiedAt = moment(lockedTransaction.modifiedAt);
+          const diffSec = mModifiedAt.diff(mNow, 'seconds');
+
+          if (diffSec > RELEASE_LOCKED_TRANSACTIONS_TIME_SEC) {
+            // => FAILED
+            const releasedTransaction = await transaction.failed(
+              lockedTransaction.userId,
+              lockedTransaction.transactionId,
+              ERROR_CODES.RELEASED_LOCKED_TRANSACTIONS
+            );
+            console.log('-------------------------');
+            console.log('Release transactions');
+            console.log(releasedTransaction);
+            console.log('-------------------------');
+          }
+        });
 
         console.log('Skipping...');
         return result.noTransaction();
@@ -333,11 +302,10 @@ class SimpleArbitrageStrategy {
         orderAmount: target.sell.orderAmount,
         transactionFeeRate: target.sell.transactionFeeRate
       };
-      const newBuyTransaction = new Transaction(buyTransactionObj);
-      const newSellTransaction = new Transaction(sellTransactionObj);
+
       // =>  INITIAL
-      const buyTransaction = await newBuyTransaction.save({ overwrite: false });
-      const sellTransaction = await newSellTransaction.save({ overwrite: false });
+      const buyTransaction = await transaction.initial(buyTransactionObj);
+      const sellTransaction = await transaction.initial(sellTransactionObj);
       console.log('-------------------------');
       console.log(buyTransaction);
       console.log(sellTransaction);
@@ -345,11 +313,8 @@ class SimpleArbitrageStrategy {
 
       // Begin buy transaction
       let buyOrderId;
-      // =>  IN_PROGRESS
-      const workingBuyTransaction = await Transaction.update(
-        { userId: this.userId, transactionId: buyTransactionId },
-        { $PUT: { state: TRANSACTION_STATES.IN_PROGRESS } }
-      );
+      // => IN_PROGRESS
+      const workingBuyTransaction = await transaction.in_progress(this.userId, buyTransactionId);
       console.log('-------------------------');
       console.log(workingBuyTransaction);
       console.log('-------------------------');
@@ -363,27 +328,18 @@ class SimpleArbitrageStrategy {
         );
         console.log('orderId', buyOrderId);
       } catch (error) {
-        console.log(error);
-
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
           console.log('BUY CANCELED', buyOrderId);
         }
-        // =>  CANCELED
-        const modifiedAt = moment().toISOString();
-        const canceledBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.ORDERS_FAILURE,
-              errorDetail: error.toString()
-            }
-          }
+        // => CANCELED
+        const canceledBuyTransaction = await transaction.canceled(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.ORDERS_FAILURE,
+          error.toString()
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(canceledBuyTransaction);
         console.log('-------------------------');
         return result.cancellation();
@@ -391,10 +347,8 @@ class SimpleArbitrageStrategy {
 
       // Begin sell transaction
       let sellOrderId;
-      const workingSellTransaction = await Transaction.update(
-        { userId: this.userId, transactionId: sellTransactionId },
-        { $PUT: { state: TRANSACTION_STATES.IN_PROGRESS } }
-      );
+      // => IN_PROGRESS
+      const workingSellTransaction = await transaction.in_progress(this.userId, sellTransactionId);
       console.log('-------------------------');
       console.log(workingSellTransaction);
       console.log('-------------------------');
@@ -408,7 +362,6 @@ class SimpleArbitrageStrategy {
         );
         console.log('orderId', sellOrderId);
       } catch (error) {
-        console.log(error);
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
           console.log('BUY CANCELED', buyOrderId);
@@ -417,32 +370,20 @@ class SimpleArbitrageStrategy {
           await target.sell.api.cancelOrder(sellOrderId);
           console.log('SELL CANCELED', sellOrderId);
         }
-        // =>  CANCELED
-        const modifiedAt = moment().toISOString();
-        const canceledBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.ORDERS_FAILURE,
-              errorDetail: error.toString()
-            }
-          }
+        // => CANCELED
+        const canceledBuyTransaction = await transaction.canceled(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.ORDERS_FAILURE,
+          error.toString()
         );
-        const canceledSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.ORDERS_FAILURE,
-              errorDetail: error.toString()
-            }
-          }
+        const canceledSellTransaction = await transaction.canceled(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.ORDERS_FAILURE,
+          error.toString()
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(canceledBuyTransaction);
         console.log(canceledSellTransaction);
         console.log('-------------------------');
@@ -466,23 +407,14 @@ class SimpleArbitrageStrategy {
         await target.buy.api.cancelOrder(buyOrderId);
         console.log('BUY CANCELED TO STOP', buyOrderId);
         // => CANCELED but only buy order
-        const modifiedAt = moment().toISOString();
-        const canceledBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.BUY_ORDER_TIMEOUT
-            }
-          }
+        const canceledBuyTransaction = await transaction.canceled(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.BUY_ORDER_TIMEOUT
         );
-        const succeededSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
-        );
+        // => SUCCEEDED but only sell order
+        const succeededSellTransaction = await transaction.succeeded(this.userId, sellTransactionId);
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(canceledBuyTransaction);
         console.log(succeededSellTransaction);
         console.log('-------------------------');
@@ -491,24 +423,15 @@ class SimpleArbitrageStrategy {
         // TODO: How to recover?
         await target.sell.api.cancelOrder(sellOrderId);
         console.log('SELL CANCELED TO STOP', sellOrderId);
+        // => SUCCEEDED but only buy order
+        const succeededBuyTransaction = await transaction.succeeded(this.userId, buyTransactionId);
         // => CANCELED but only sell order
-        const modifiedAt = moment().toISOString();
-        const succeededBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
-        );
-        const canceledSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.SELL_ORDER_TIMEOUT
-            }
-          }
+        const canceledSellTransaction = await transaction.canceled(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.SELL_ORDER_TIMEOUT
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(succeededBuyTransaction);
         console.log(canceledSellTransaction);
         console.log('-------------------------');
@@ -518,47 +441,27 @@ class SimpleArbitrageStrategy {
         await target.sell.api.cancelOrder(sellOrderId);
         console.log('BUY CANCELED', buyOrderId);
         console.log('SELL CANCELED', sellOrderId);
-        // =>  CANCELED but both
-        const modifiedAt = moment().toISOString();
-        const canceledBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.BOTH_ORDERS_TIMEOUT
-            }
-          }
+        // => CANCELED but both
+        const canceledBuyTransaction = await transaction.canceled(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.BOTH_ORDERS_TIMEOUT
         );
-        const canceledSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.CANCELED,
-              modifiedAt,
-              errorCode: ERROR_CODES.BOTH_ORDERS_TIMEOUT
-            }
-          }
+        const canceledSellTransaction = await transaction.canceled(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.BOTH_ORDERS_TIMEOUT
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(canceledBuyTransaction);
         console.log(canceledSellTransaction);
         console.log('-------------------------');
         return result.cancellation();
       } else {
-        // => DONE
-        const modifiedAt = moment().toISOString();
-        const succeededBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
-        );
-        const succeededSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
-        );
+        // => SUCCEEDED
+        const succeededBuyTransaction = await transaction.succeeded(this.userId, buyTransactionId);
+        const succeededSellTransaction = await transaction.succeeded(this.userId, sellTransactionId);
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(succeededBuyTransaction);
         console.log(succeededSellTransaction);
         console.log('++++++++++anticipatedProfit final+++++++++++', anticipatedProfit);
@@ -568,132 +471,99 @@ class SimpleArbitrageStrategy {
     } catch (error) {
       if (!error.code) {
         // FATAL: database error or bugs
-        // => FAILEDf
-        const modifiedAt = moment().toISOString();
-        const failedBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.UNKNOWN_ERROR,
-              errorDetail: error.toString()
-            }
-          }
+        // => FAILED
+        const failedBuyTransaction = await transaction.failed(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.UNKNOWN_ERROR,
+          error.toString()
         );
-        const failedSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.UNKNOWN_ERROR,
-              errorDetail: error.toString()
-            }
-          }
+        const failedSellTransaction = await transaction.failed(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.UNKNOWN_ERROR,
+          error.toString()
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
-        console.log(error);
         console.log('-------------------------');
         return result.failure();
       } else if (error.code === ERROR_CODES.NETWORK_ERROR) {
         // => FAILED
-        const modifiedAt = moment().toISOString();
-        const failedBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.NETWORK_ERROR,
-              errorDetail: error.toString()
-            }
-          }
+        const failedBuyTransaction = await transaction.failed(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.NETWORK_ERROR,
+          error.message
         );
-        const failedSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.NETWORK_ERROR,
-              errorDetail: error.toString()
-            }
-          }
+        const failedSellTransaction = await transaction.failed(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.NETWORK_ERROR,
+          error.message
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
-        console.log(error);
+        console.log('-------------------------');
+        return result.failure();
+      } else if (error.code === ERROR_CODES.API_UNAUTHORIZED) {
+        // => FAILED
+        const failedBuyTransaction = await transaction.failed(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.API_UNAUTHORIZED,
+          error.message
+        );
+        const failedSellTransaction = await transaction.failed(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.API_UNAUTHORIZED,
+          error.message
+        );
+        console.log('-------------------------');
+        console.log(failedBuyTransaction);
+        console.log(failedSellTransaction);
         console.log('-------------------------');
         return result.failure();
       } else if (error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE) {
         // => FAILED
-        const modifiedAt = moment().toISOString();
-        const failedBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
-              errorDetail: error.toString()
-            }
-          }
+        const failedBuyTransaction = await transaction.failed(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
+          error.message
         );
-        const failedSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
-              errorDetail: error.toString()
-            }
-          }
+        const failedSellTransaction = await transaction.failed(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
+          error.message
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
-        console.log(error);
         console.log('-------------------------');
         return result.failure();
       } else {
         // API_FAILURE
         // => FAILED
-        const modifiedAt = moment().toISOString();
-        const failedBuyTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: buyTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.API_FAILURE,
-              errorDetail: error.toString()
-            }
-          }
+        const failedBuyTransaction = await transaction.failed(
+          this.userId,
+          buyTransactionId,
+          ERROR_CODES.API_FAILURE,
+          error.message
         );
-        const failedSellTransaction = await Transaction.update(
-          { userId: this.userId, transactionId: sellTransactionId },
-          {
-            $PUT: {
-              state: TRANSACTION_STATES.FAILED,
-              modifiedAt,
-              errorCode: ERROR_CODES.API_FAILURE,
-              errorDetail: error.toString()
-            }
-          }
+        const failedSellTransaction = await transaction.failed(
+          this.userId,
+          sellTransactionId,
+          ERROR_CODES.API_FAILURE,
+          error.message
         );
         console.log('-------------------------');
-        console.log('modifiedAt: ', modifiedAt);
         console.log(failedBuyTransaction);
         console.log(failedSellTransaction);
-        console.log(error);
         console.log('-------------------------');
         return result.failure();
       }

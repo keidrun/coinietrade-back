@@ -34,12 +34,14 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
         const mNow = moment().utc();
         if (effect === USER_EFFECTS.ALLOW && mNow.isBefore(mExpiredAt)) {
           const secrets = await Secret.query('userId').eq(userId).exec();
-          if (secrets.length < 2) {
-            console.info(util.format('WARN : %s', 'Secrets MUST have over 2 items, SKIPPING process...'));
-            return;
-          }
           const oneSecret = secrets.filter((secret) => secret.apiProvider === oneSiteName)[0];
           const otherSecret = secrets.filter((secret) => secret.apiProvider === otherSiteName)[0];
+
+          if (!oneSecret || !otherSecret) {
+            console.info(util.format('WARN : %s', 'Secrets MUST have over 2  effective items, SKIPPING process...'));
+            return;
+          }
+
           const apiSecrets = {};
           apiSecrets[oneSiteName] = oneSecret;
           apiSecrets[otherSiteName] = otherSecret;
