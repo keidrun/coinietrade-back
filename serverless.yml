@@ -147,7 +147,15 @@ functions:
           path: v1/rules/{userId}/{ruleId}
           private: true
           cors: false
-
+  # Properties API
+  getExchanges:
+    handler: src/api/handler.getExchanges
+    events:
+      - http:
+          method: get
+          path: v1/exchanges
+          private: true
+          cors: false
   # Scheduler
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage

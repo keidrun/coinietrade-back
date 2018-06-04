@@ -9,6 +9,7 @@ const { getRules } = require('./v1/rules/getRules');
 const { getRulesByUserId } = require('./v1/rules/getRulesByUserId');
 const { addRule } = require('./v1/rules/addRule');
 const { removeRule } = require('./v1/rules/removeRule');
+const { getExchanges } = require('./v1/properties/getExchanges');
 
 // Policies API
 module.exports.getPolicies = (event, context, callback) => getPolicies(event, callback);
@@ -26,3 +27,6 @@ module.exports.getRules = (event, context, callback) => getRules(event, callback
 module.exports.getRulesByUserId = (event, context, callback) => getRulesByUserId(event, callback);
 module.exports.addRule = (event, context, callback) => addRule(event, callback);
 module.exports.removeRule = (event, context, callback) => removeRule(event, callback);
+
+// Properties API
+module.exports.getExchanges = (event, context, callback) => getExchanges(event, callback);

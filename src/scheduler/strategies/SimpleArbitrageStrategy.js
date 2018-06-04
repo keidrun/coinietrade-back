@@ -12,6 +12,28 @@ const { result, transaction } = require('./utils');
 
 const RELEASE_LOCKED_TRANSACTIONS_TIME_SEC = 10 * 60;
 
+const parseError = (error) => {
+  let errorCode, errorDetail;
+  if (!error.code) {
+    // FATAL: database error or bugs
+    errorCode = ERROR_CODES.UNKNOWN_ERROR;
+    errorDetail = error.toString();
+  } else if (error.code === ERROR_CODES.NETWORK_ERROR) {
+    errorCode = ERROR_CODES.NETWORK_ERROR;
+    errorDetail = error.message;
+  } else if (error.code === ERROR_CODES.API_UNAUTHORIZED) {
+    errorCode = ERROR_CODES.API_UNAUTHORIZED;
+    errorDetail = error.message;
+  } else if (error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE) {
+    errorCode = ERROR_CODES.API_TEMPORARILY_UNAVAILABLE;
+    errorDetail = error.message;
+  } else {
+    errorCode = ERROR_CODES.API_FAILURE;
+    errorDetail = error.message;
+  }
+  return { errorCode, errorDetail };
+};
+
 class SimpleArbitrageStrategy {
   constructor(argsObj) {
     this.userId = argsObj.userId;
@@ -328,19 +350,23 @@ class SimpleArbitrageStrategy {
         );
         console.log('orderId', buyOrderId);
       } catch (error) {
+        const { errorCode, errorDetail } = parseError(error);
+
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
           console.log('BUY CANCELED', buyOrderId);
         }
+
         // => CANCELED
         const canceledBuyTransaction = await transaction.canceled(
           this.userId,
           buyTransactionId,
-          ERROR_CODES.ORDERS_FAILURE,
-          error.toString()
+          errorCode,
+          errorDetail
         );
         console.log('-------------------------');
         console.log(canceledBuyTransaction);
+        console.log(error);
         console.log('-------------------------');
         return result.cancellation();
       }
@@ -362,6 +388,8 @@ class SimpleArbitrageStrategy {
         );
         console.log('orderId', sellOrderId);
       } catch (error) {
+        const { errorCode, errorDetail } = parseError(error);
+
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
           console.log('BUY CANCELED', buyOrderId);
@@ -370,22 +398,24 @@ class SimpleArbitrageStrategy {
           await target.sell.api.cancelOrder(sellOrderId);
           console.log('SELL CANCELED', sellOrderId);
         }
+
         // => CANCELED
         const canceledBuyTransaction = await transaction.canceled(
           this.userId,
           buyTransactionId,
-          ERROR_CODES.ORDERS_FAILURE,
-          error.toString()
+          errorCode,
+          errorDetail
         );
         const canceledSellTransaction = await transaction.canceled(
           this.userId,
           sellTransactionId,
-          ERROR_CODES.ORDERS_FAILURE,
-          error.toString()
+          errorCode,
+          errorDetail
         );
         console.log('-------------------------');
         console.log(canceledBuyTransaction);
         console.log(canceledSellTransaction);
+        console.log(error);
         console.log('-------------------------');
         return result.cancellation();
       }
@@ -469,104 +499,17 @@ class SimpleArbitrageStrategy {
         return result.success(anticipatedProfit);
       }
     } catch (error) {
-      if (!error.code) {
-        // FATAL: database error or bugs
-        // => FAILED
-        const failedBuyTransaction = await transaction.failed(
-          this.userId,
-          buyTransactionId,
-          ERROR_CODES.UNKNOWN_ERROR,
-          error.toString()
-        );
-        const failedSellTransaction = await transaction.failed(
-          this.userId,
-          sellTransactionId,
-          ERROR_CODES.UNKNOWN_ERROR,
-          error.toString()
-        );
-        console.log('-------------------------');
-        console.log(failedBuyTransaction);
-        console.log(failedSellTransaction);
-        console.log('-------------------------');
-        return result.failure();
-      } else if (error.code === ERROR_CODES.NETWORK_ERROR) {
-        // => FAILED
-        const failedBuyTransaction = await transaction.failed(
-          this.userId,
-          buyTransactionId,
-          ERROR_CODES.NETWORK_ERROR,
-          error.message
-        );
-        const failedSellTransaction = await transaction.failed(
-          this.userId,
-          sellTransactionId,
-          ERROR_CODES.NETWORK_ERROR,
-          error.message
-        );
-        console.log('-------------------------');
-        console.log(failedBuyTransaction);
-        console.log(failedSellTransaction);
-        console.log('-------------------------');
-        return result.failure();
-      } else if (error.code === ERROR_CODES.API_UNAUTHORIZED) {
-        // => FAILED
-        const failedBuyTransaction = await transaction.failed(
-          this.userId,
-          buyTransactionId,
-          ERROR_CODES.API_UNAUTHORIZED,
-          error.message
-        );
-        const failedSellTransaction = await transaction.failed(
-          this.userId,
-          sellTransactionId,
-          ERROR_CODES.API_UNAUTHORIZED,
-          error.message
-        );
-        console.log('-------------------------');
-        console.log(failedBuyTransaction);
-        console.log(failedSellTransaction);
-        console.log('-------------------------');
-        return result.failure();
-      } else if (error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE) {
-        // => FAILED
-        const failedBuyTransaction = await transaction.failed(
-          this.userId,
-          buyTransactionId,
-          ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
-          error.message
-        );
-        const failedSellTransaction = await transaction.failed(
-          this.userId,
-          sellTransactionId,
-          ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
-          error.message
-        );
-        console.log('-------------------------');
-        console.log(failedBuyTransaction);
-        console.log(failedSellTransaction);
-        console.log('-------------------------');
-        return result.failure();
-      } else {
-        // API_FAILURE
-        // => FAILED
-        const failedBuyTransaction = await transaction.failed(
-          this.userId,
-          buyTransactionId,
-          ERROR_CODES.API_FAILURE,
-          error.message
-        );
-        const failedSellTransaction = await transaction.failed(
-          this.userId,
-          sellTransactionId,
-          ERROR_CODES.API_FAILURE,
-          error.message
-        );
-        console.log('-------------------------');
-        console.log(failedBuyTransaction);
-        console.log(failedSellTransaction);
-        console.log('-------------------------');
-        return result.failure();
-      }
+      const { errorCode, errorDetail } = parseError(error);
+
+      // => FAILED
+      const failedBuyTransaction = await transaction.failed(this.userId, buyTransactionId, errorCode, errorDetail);
+      const failedSellTransaction = await transaction.failed(this.userId, sellTransactionId, errorCode, errorDetail);
+      console.log('-------------------------');
+      console.log(failedBuyTransaction);
+      console.log(failedSellTransaction);
+      console.log(error);
+      console.log('-------------------------');
+      return result.failure();
     }
   }
 }

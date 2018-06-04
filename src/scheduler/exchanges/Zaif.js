@@ -1,3 +1,4 @@
+const moment = require('moment');
 const axios = require('axios');
 const qs = require('qs');
 const crypto = require('crypto');
@@ -35,6 +36,13 @@ function getPairCode(coinUnit, currencyUnit) {
 function generateAccessHeaders(key, secret, encodedParams) {
   const sign = crypto.createHmac('sha512', secret).update(encodedParams).digest('hex');
   return { key, sign };
+}
+
+function generateEncodedParams(params) {
+  const nonce = moment.utc().format('x') / 1000;
+  params.nonce = nonce;
+  const encodedParams = qs.stringify(params);
+  return encodedParams;
 }
 
 function getAssetCoinCode(coinUnit) {
@@ -76,12 +84,10 @@ class Zaif {
   }
 
   async getAssets() {
-    const nonce = Date.now().toString() / 1000;
     const params = {
-      nonce,
       method: ASSETS_METHOD
     };
-    const encodedParams = qs.stringify(params);
+    const encodedParams = generateEncodedParams(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
     try {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
@@ -134,11 +140,9 @@ class Zaif {
     if (type !== ORDER_TYPES.LIMIT_ORDER) {
       return Promise.reject(`Cannot apply the order type: ${type}`);
     }
-    const nonce = Date.now().toString() / 1000;
     let params;
     if (process === ORDER_PROCESSES.BUY) {
       params = {
-        nonce,
         method: ORDER_METHOD,
         currency_pair: this.pairCode,
         action: 'bid',
@@ -147,7 +151,6 @@ class Zaif {
       };
     } else {
       params = {
-        nonce,
         method: ORDER_METHOD,
         currency_pair: this.pairCode,
         action: 'ask',
@@ -155,7 +158,7 @@ class Zaif {
         amount
       };
     }
-    const encodedParams = qs.stringify(params);
+    const encodedParams = generateEncodedParams(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
 
     try {
@@ -201,13 +204,11 @@ class Zaif {
   }
 
   async isCompletedOrder(orderId) {
-    const nonce = Date.now().toString() / 1000;
     const params = {
-      nonce,
       method: ACTIVE_ORDER_METHOD,
       currency_pair: this.pairCode
     };
-    const encodedParams = qs.stringify(params);
+    const encodedParams = generateEncodedParams(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
 
     try {
@@ -253,14 +254,12 @@ class Zaif {
   }
 
   async cancelOrder(orderId) {
-    const nonce = Date.now().toString() / 1000;
     const params = {
-      nonce,
       method: CANCEL_ORDER_METHOD,
       order_id: orderId,
       currency_pair: this.pairCode
     };
-    const encodedParams = qs.stringify(params);
+    const encodedParams = generateEncodedParams(params);
     const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
 
     try {

@@ -1,5 +1,5 @@
 const moment = require('moment');
-const { Transaction, ORDER_PROCESSES, TRANSACTION_STATES } = require('../../models/Transaction');
+const { Transaction, TRANSACTION_STATES } = require('../../models/Transaction');
 
 const result = {
   noTransaction: () => {

@@ -1,3 +1,4 @@
+const moment = require('moment');
 const axios = require('axios');
 const crypto = require('crypto');
 const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule');
@@ -26,7 +27,7 @@ function getPairCode(coinUnit, currencyUnit) {
 }
 
 function generateAccessHeaders(key, secret, method, path, body) {
-  const timestamp = Date.now().toString();
+  const timestamp = moment.utc().format('x');
   const bodyStr = body ? JSON.stringify(body) : '';
   const text = timestamp + method + path + bodyStr;
   const sign = crypto.createHmac('sha256', secret).update(text).digest('hex');
