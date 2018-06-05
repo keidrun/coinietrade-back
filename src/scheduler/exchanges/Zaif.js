@@ -8,6 +8,7 @@ const { errors } = require('./errors');
 const messages = {
   NO_DATA_FOUND_FOR_THE_KEY: 'no data found for the key',
   SIGNATURE_MISMATCH: 'signature mismatch',
+  TIME_WAIT_RESTRICTION: 'trade temporarily unavailable.',
   TRADE_TEMPORARILY_UNAVAILABLE: 'trade temporarily unavailable.'
 };
 
@@ -94,7 +95,7 @@ class Zaif {
 
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
           response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
         ) {
           return Promise.reject(
@@ -103,7 +104,10 @@ class Zaif {
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
           );
-        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+        } else if (
+          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
+          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+        ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
@@ -165,7 +169,7 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
           response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
         ) {
           return Promise.reject(
@@ -174,7 +178,10 @@ class Zaif {
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
           );
-        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+        } else if (
+          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
+          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+        ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
@@ -215,7 +222,7 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
           response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
         ) {
           return Promise.reject(
@@ -224,7 +231,10 @@ class Zaif {
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
           );
-        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+        } else if (
+          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
+          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+        ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
@@ -266,7 +276,7 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 &&
+          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
           response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
         ) {
           return Promise.reject(
@@ -275,7 +285,10 @@ class Zaif {
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
           );
-        } else if (response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1) {
+        } else if (
+          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
+          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+        ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
               response.status,
