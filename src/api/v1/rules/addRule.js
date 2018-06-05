@@ -12,6 +12,7 @@ module.exports.addRule = async (event, callback) => {
     currencyUnit,
     orderType,
     assetRange,
+    assetMinLimit,
     commitmentTimeLimit,
     buyWeightRate,
     sellWeightRate,
@@ -75,34 +76,6 @@ module.exports.addRule = async (event, callback) => {
     );
   }
 
-  if (!assetRange) {
-    return callback(
-      null,
-      responseError(
-        400,
-        apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.RULE_MISSING_ASSET_RANGE,
-        event
-      )
-    );
-  }
-
-  if (!commitmentTimeLimit) {
-    return callback(
-      null,
-      responseError(
-        400,
-        apiMessages.errors.RULE_API_MESSAGE_CREATE_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.RULE_MISSING_COMMITMENT_TIME_LIMIT,
-        event
-      )
-    );
-  }
-
   if (!oneSiteName) {
     return callback(
       null,
@@ -136,8 +109,6 @@ module.exports.addRule = async (event, callback) => {
     arbitrageStrategy,
     coinUnit,
     currencyUnit,
-    assetRange,
-    commitmentTimeLimit,
     oneSiteName,
     otherSiteName,
     counts: {
@@ -149,6 +120,9 @@ module.exports.addRule = async (event, callback) => {
   };
   if (priority) rule.priority = priority;
   if (orderType) rule.orderType = orderType;
+  if (assetRange) rule.assetRange = assetRange;
+  if (assetMinLimit) rule.assetMinLimit = assetMinLimit;
+  if (commitmentTimeLimit) rule.commitmentTimeLimit = commitmentTimeLimit;
   if (buyWeightRate) rule.buyWeightRate = buyWeightRate;
   if (sellWeightRate) rule.sellWeightRate = sellWeightRate;
   const newRule = new Rule(rule);

@@ -39,6 +39,7 @@ describe('rules endpoints', () => {
           currencyUnit: 'jpy',
           orderType: 'limit_order',
           assetRange: 0.1,
+          assetMinLimit: 2000,
           commitmentTimeLimit: 600,
           buyWeightRate: 0.001,
           sellWeightRate: -0.001,
@@ -52,6 +53,7 @@ describe('rules endpoints', () => {
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderType).to.equal('limit_order');
           expect(response.data.assetRange).to.equal(0.1);
+          expect(response.data.assetMinLimit).to.equal(2000);
           expect(response.data.commitmentTimeLimit).to.equal(600);
           expect(response.data.buyWeightRate).to.equal(0.001);
           expect(response.data.sellWeightRate).to.equal(-0.001);
@@ -76,6 +78,7 @@ describe('rules endpoints', () => {
           currencyUnit: 'jpy',
           orderType: 'market_order',
           assetRange: 1.0,
+          assetMinLimit: 3500,
           commitmentTimeLimit: 888,
           buyWeightRate: -0.001,
           sellWeightRate: 0.001,
@@ -89,6 +92,7 @@ describe('rules endpoints', () => {
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderType).to.equal('market_order');
           expect(response.data.assetRange).to.equal(1.0);
+          expect(response.data.assetMinLimit).to.equal(3500);
           expect(response.data.commitmentTimeLimit).to.equal(888);
           expect(response.data.buyWeightRate).to.equal(-0.001);
           expect(response.data.sellWeightRate).to.equal(0.001);
@@ -111,6 +115,7 @@ describe('rules endpoints', () => {
           coinUnit: 'btc',
           currencyUnit: 'jpy',
           assetRange: 0.05,
+          assetMinLimit: 1500,
           commitmentTimeLimit: 1200,
           oneSiteName: 'zaif',
           otherSiteName: 'bitflyer'
@@ -122,6 +127,7 @@ describe('rules endpoints', () => {
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderType).to.equal('limit_order');
           expect(response.data.assetRange).to.equal(0.05);
+          expect(response.data.assetMinLimit).to.equal(1500);
           expect(response.data.commitmentTimeLimit).to.equal(1200);
           expect(response.data.oneSiteName).to.equal('zaif');
           expect(response.data.otherSiteName).to.equal('bitflyer');
@@ -159,6 +165,7 @@ describe('rules endpoints', () => {
               currencyUnit: existingRules[i].currencyUnit,
               orderType: existingRules[i].orderType,
               assetRange: existingRules[i].assetRange,
+              assetMinLimit: existingRules[i].assetMinLimit,
               commitmentTimeLimit: existingRules[i].commitmentTimeLimit,
               buyWeightRate: existingRules[i].buyWeightRate,
               sellWeightRate: existingRules[i].sellWeightRate,
@@ -199,6 +206,7 @@ describe('rules endpoints', () => {
               currencyUnit: existingRules[i].currencyUnit,
               orderType: existingRules[i].orderType,
               assetRange: existingRules[i].assetRange,
+              assetMinLimit: existingRules[i].assetMinLimit,
               commitmentTimeLimit: existingRules[i].commitmentTimeLimit,
               buyWeightRate: existingRules[i].buyWeightRate,
               sellWeightRate: existingRules[i].sellWeightRate,

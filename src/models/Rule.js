@@ -2,6 +2,8 @@ const uuid = require('uuid');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
+const DEFAULT_COMMITMENT_TIME_LIMIT_SEC = 120;
+
 const ARBITRAGE_STRATEGIES = {
   SIMPLE: 'simple'
 };
@@ -66,12 +68,20 @@ const ruleSchema = new Schema(
     assetRange: {
       type: Number,
       required: true,
+      default: 100,
       validate: (value) => (value >= 0 && value <= 1 ? true : false)
+    },
+    assetMinLimit: {
+      type: Number,
+      required: true,
+      default: 0,
+      validate: (value) => (value >= 0 ? true : false)
     },
     commitmentTimeLimit: {
       // Seconnds
       type: Number,
       required: true,
+      default: DEFAULT_COMMITMENT_TIME_LIMIT_SEC,
       validate: (value) => (value >= 0 ? true : false)
     },
     buyWeightRate: {

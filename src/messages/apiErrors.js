@@ -50,19 +50,14 @@ exports.errors = {
   },
   RULE_MISSING_COIN_UNIT: { code: 7303, message: "Required field Rule 'coinUnit' is missing" },
   RULE_MISSING_CURRENCY_UNIT: { code: 7304, message: "Required field Rule 'currencyUnit' is missing" },
-  RULE_MISSING_ASSET_RANGE: { code: 7305, message: "Required field Rule 'assetRange' is missing" },
-  RULE_MISSING_COMMITMENT_TIME_LIMIT: {
-    code: 7306,
-    message: "Required field Rule 'commitmentTimeLimit' is missing"
-  },
-  RULE_MISSING_ONE_SITE_NAME: { code: 7307, message: "Required field Rule 'oneSiteName' is missing" },
-  RULE_MISSING_OTHER_SITE_NAME: { code: 7308, message: "Required field Rule 'otherSiteName' is missing" },
+  RULE_MISSING_ONE_SITE_NAME: { code: 7305, message: "Required field Rule 'oneSiteName' is missing" },
+  RULE_MISSING_OTHER_SITE_NAME: { code: 7306, message: "Required field Rule 'otherSiteName' is missing" },
   RULE_DELETE_DATA_NOT_FOUND_BY_IDS: {
-    code: 7309,
+    code: 7307,
     message: "Rule data with the provided 'userId' and 'ruleId' NOT found"
   },
   RULE_READ_DATA_NOT_FOUND_BY_USER_ID: {
-    code: 7310,
+    code: 7308,
     message: "Rule data with the provided 'userId' NOT found"
   }
 };

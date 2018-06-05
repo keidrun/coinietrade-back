@@ -16,6 +16,7 @@ const runSimpleArbitrage = async (rule, apiSecrets) => {
       currencyUnit: rule.currencyUnit,
       orderType: rule.orderType,
       assetRange: rule.assetRange,
+      assetMinLimit: rule.assetMinLimit,
       commitmentTimeLimit: rule.commitmentTimeLimit,
       buyWeightRate: rule.buyWeightRate,
       sellWeightRate: rule.sellWeightRate,

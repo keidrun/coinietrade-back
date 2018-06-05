@@ -8,7 +8,7 @@ const Exchanges = {
   zaif: require('../exchanges/Zaif')
 };
 const { ERROR_CODES } = require('../exchanges/errors');
-const { result, transaction } = require('./utils');
+const { result, transaction } = require('./transactions');
 
 const lockedTransactionsReleaseTimeSec = process.env.LOCKED_TRANSACTIONS_RELEASE_TIME_SEC;
 
@@ -43,6 +43,7 @@ class SimpleArbitrageStrategy {
     this.currencyUnit = argsObj.currencyUnit;
     this.orderType = argsObj.orderType;
     this.assetRange = argsObj.assetRange;
+    this.assetMinLimit = argsObj.assetMinLimit;
     this.commitmentTimeLimit = argsObj.commitmentTimeLimit;
     this.buyWeightRate = argsObj.buyWeightRate;
     this.sellWeightRate = argsObj.sellWeightRate;
@@ -104,6 +105,7 @@ class SimpleArbitrageStrategy {
       console.log('currencyUnit', this.currencyUnit);
       console.log('orderType', this.orderType);
       console.log('assetRange', this.assetRange);
+      console.log('assetMinLimit', this.assetMinLimit);
       console.log('commitmentTimeLimit', this.commitmentTimeLimit);
       console.log('buyWeightRate', this.buyWeightRate);
       console.log('sellWeightRate', this.sellWeightRate);
@@ -199,23 +201,33 @@ class SimpleArbitrageStrategy {
           buyAmount = sellAmount = possibleCoinAmountLimitA;
         }
 
+        const fixedBuyAmount = Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit);
+        const fixedSellAmount =
+          Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit);
+
         console.log('-------------------------');
         console.log('buyAmount', buyAmount);
+        console.log('fixedBuyAmount', fixedBuyAmount);
         console.log('sellAmount', sellAmount);
+        console.log('fixedSellAmount', fixedSellAmount);
         console.log('-------------------------');
 
         target = {
           buy: {
             api: this.ExchangeB,
             orderPrice: buyPrice,
-            orderAmount: Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit),
-            transactionFeeRate: transactionFeeRateB
+            orderAmount: fixedBuyAmount,
+            transactionFeeRate: transactionFeeRateB,
+            laterAssetPrice:
+              assetsAmountsB.presentCurrencyAmount - buyPrice * fixedBuyAmount * (1 + transactionFeeRateB)
           },
           sell: {
             api: this.ExchangeA,
             orderPrice: sellPrice,
-            orderAmount: Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit),
-            transactionFeeRate: transactionFeeRateA
+            orderAmount: fixedSellAmount,
+            transactionFeeRate: transactionFeeRateA,
+            laterAssetPrice:
+              assetsAmountsA.presentCurrencyAmount + sellPrice * fixedSellAmount * (1 + transactionFeeRateA)
           }
         };
       } else if (isConditionedToBuyAskAAndSellBidB) {
@@ -234,9 +246,15 @@ class SimpleArbitrageStrategy {
           buyAmount = sellAmount = possibleCoinAmountLimitB;
         }
 
+        const fixedBuyAmount = Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit);
+        const fixedSellAmount =
+          Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit);
+
         console.log('-------------------------');
         console.log('buyAmount', buyAmount);
+        console.log('fixedBuyAmount', fixedBuyAmount);
         console.log('sellAmount', sellAmount);
+        console.log('fixedSellAmount', fixedSellAmount);
         console.log('-------------------------');
 
         target = {
@@ -244,13 +262,17 @@ class SimpleArbitrageStrategy {
             api: this.ExchangeA,
             orderPrice: buyPrice,
             orderAmount: Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit),
-            transactionFeeRate: transactionFeeRateA
+            transactionFeeRate: transactionFeeRateA,
+            laterAssetPrice:
+              assetsAmountsA.presentCurrencyAmount - buyPrice * fixedBuyAmount * (1 + transactionFeeRateA)
           },
           sell: {
             api: this.ExchangeB,
             orderPrice: sellPrice,
             orderAmount: Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit),
-            transactionFeeRate: transactionFeeRateB
+            transactionFeeRate: transactionFeeRateB,
+            laterAssetPrice:
+              assetsAmountsB.presentCurrencyAmount + sellPrice * fixedSellAmount * (1 + transactionFeeRateB)
           }
         };
       } else {
@@ -260,11 +282,23 @@ class SimpleArbitrageStrategy {
         return result.noTransaction();
       }
 
+      console.log('-------------------------');
       console.log('transactionMinAmount', transactionMinAmount);
       console.log('target.buy.orderAmount', target.buy.orderAmount);
+      console.log('assetMinLimit', this.assetMinLimit);
+      console.log('target.buy.laterAssetPrice', target.buy.laterAssetPrice);
+      console.log('-------------------------');
+
+      if (target.buy.laterAssetPrice < this.assetMinLimit) {
+        console.log('-------------------------');
+        console.log('NOOOOOOO Trade!!! OVER ASSET MIN LIMIT');
+        console.log('-------------------------');
+        return result.noTransaction();
+      }
+
       if (target.buy.orderAmount < transactionMinAmount) {
         console.log('-------------------------');
-        console.log('NOOOOOOO Trade!!! TOOO MIN');
+        console.log('NOOOOOOO Trade!!! TOO MIN');
         console.log('-------------------------');
         return result.noTransaction();
       }
