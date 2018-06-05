@@ -48,6 +48,27 @@ secretSchema.statics.getAndDecrypt = async function(id, encryptKey) {
   }
 };
 
+secretSchema.statics.deleteWithVersion = async function(key, options) {
+  const existingSecret = await this.get({
+    userId: key.userId,
+    secretId: key.secretId
+  });
+  if (existingSecret) {
+    const version = existingSecret.version + 1;
+    const deletedSecret = await this.delete(
+      {
+        userId: key.userId,
+        secretId: key.secretId,
+        version
+      },
+      options
+    );
+    return deletedSecret;
+  } else {
+    throw new Error('The Secret delete failed. It was NOT found.');
+  }
+};
+
 secretSchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {

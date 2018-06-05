@@ -103,6 +103,44 @@ const transactionSchema = new Schema(
   options
 );
 
+transactionSchema.statics.updateWithVersionOrCreate = async function(key, update, options) {
+  const modifiedAt = moment().toISOString();
+  update.modifiedAt = modifiedAt;
+
+  const existingTransaction = await this.get({
+    userId: key.userId,
+    transactionId: key.transactionId
+  });
+  if (existingTransaction) {
+    const version = existingTransaction.version + 1;
+    update.version = version;
+    const updatedTransaction = await this.update(
+      {
+        userId: key.userId,
+        transactionId: key.transactionId,
+        version
+      },
+      {
+        $PUT: update
+      },
+      options
+    );
+    return updatedTransaction;
+  } else {
+    const createdTransaction = await this.update(
+      {
+        userId: key.userId,
+        transactionId: key.transactionId
+      },
+      {
+        $PUT: update
+      },
+      options
+    );
+    return createdTransaction;
+  }
+};
+
 transactionSchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {

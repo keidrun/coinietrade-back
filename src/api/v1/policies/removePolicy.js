@@ -9,8 +9,7 @@ module.exports.removePolicy = async (event, callback) => {
   try {
     const existingPolicy = await Policy.get(userId);
     if (existingPolicy) {
-      const version = existingPolicy.version;
-      await Policy.delete({ userId, version });
+      await Policy.deleteWithVersion({ userId });
       callback(null, response(204));
     } else {
       responseError(

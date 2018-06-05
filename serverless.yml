@@ -35,6 +35,8 @@ provider:
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
     # Scheduler interval minutes
     SCHEDULER_INTERVAL: ${file(./config/config.yml):${self:provider.stage}.scheduler_interval}
+    # Scheduler locked transaction release time seconds
+    LOCKED_TRANSACTIONS_RELEASE_TIME_SEC: ${file(./config/config.yml):${self:provider.stage}.scheduler_locked_transactions_release_time_sec}
   iamRoleStatements:
     - Effect: "Allow"
       Action:

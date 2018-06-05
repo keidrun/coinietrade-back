@@ -60,12 +60,12 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           console.log(updatedRule);
         }
       } catch (error) {
-        // Rule table update error etc.
+        // Rule table update error
         console.error(util.format('ERROR : %s', error));
       }
     });
   } catch (error) {
-    // database connection error
+    // database connection error OR bugs
     console.error(util.format('ERROR : %s', error));
   }
 };

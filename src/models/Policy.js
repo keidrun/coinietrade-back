@@ -45,6 +45,48 @@ const policySchema = new Schema(
   options
 );
 
+policySchema.statics.updateWithVersion = async function(key, update, options) {
+  const existingPolicy = await this.get({
+    userId: key.userId
+  });
+  if (existingPolicy) {
+    const version = existingPolicy.version + 1;
+    update.version = version;
+    const updatedPolicy = await this.update(
+      {
+        userId: key.userId,
+        version
+      },
+      {
+        $PUT: update
+      },
+      options
+    );
+    return updatedPolicy;
+  } else {
+    throw new Error('The Policy update failed. It was NOT found.');
+  }
+};
+
+policySchema.statics.deleteWithVersion = async function(key, options) {
+  const existingPolicy = await this.get({
+    userId: key.userId
+  });
+  if (existingPolicy) {
+    const version = existingPolicy.version + 1;
+    const deletedPolicy = await this.delete(
+      {
+        userId: key.userId,
+        version
+      },
+      options
+    );
+    return deletedPolicy;
+  } else {
+    throw new Error('The Policy delete failed. It was NOT found.');
+  }
+};
+
 policySchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {

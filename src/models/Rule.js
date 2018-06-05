@@ -117,6 +117,52 @@ const ruleSchema = new Schema(
   options
 );
 
+ruleSchema.statics.updateWithVersion = async function(key, update, options) {
+  const existingRule = await this.get({
+    userId: key.userId,
+    ruleId: key.ruleId
+  });
+  if (existingRule) {
+    const version = existingRule.version + 1;
+    update.version = version;
+    const updatedRule = await this.update(
+      {
+        userId: key.userId,
+        ruleId: key.ruleId,
+        version
+      },
+      {
+        $PUT: update
+      },
+      options
+    );
+    return updatedRule;
+  } else {
+    throw new Error('The Rule update failed. It was NOT found.');
+  }
+};
+
+ruleSchema.statics.deleteWithVersion = async function(key, options) {
+  const existingRule = await this.get({
+    userId: key.userId,
+    ruleId: key.ruleId
+  });
+  if (existingRule) {
+    const version = existingRule.version + 1;
+    const deletedRule = await this.delete(
+      {
+        userId: key.userId,
+        ruleId: key.ruleId,
+        version
+      },
+      options
+    );
+    return deletedRule;
+  } else {
+    throw new Error('The Rule delete failed. It was NOT found.');
+  }
+};
+
 ruleSchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {

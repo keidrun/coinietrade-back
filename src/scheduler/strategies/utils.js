@@ -1,4 +1,3 @@
-const moment = require('moment');
 const { Transaction, TRANSACTION_STATES } = require('../../models/Transaction');
 
 const result = {
@@ -55,49 +54,44 @@ const transaction = {
     return transaction;
   },
   in_progress: async (userId, transactionId) => {
-    const workingTransaction = await Transaction.update(
+    const workingTransaction = await Transaction.updateWithVersionOrCreate(
       { userId, transactionId },
-      { $PUT: { state: TRANSACTION_STATES.IN_PROGRESS } }
+      {
+        state: TRANSACTION_STATES.IN_PROGRESS
+      }
     );
     return workingTransaction;
   },
   succeeded: async (userId, transactionId) => {
-    const modifiedAt = moment().toISOString();
-    const succeededTransaction = await Transaction.update(
+    const succeededTransaction = await Transaction.updateWithVersionOrCreate(
       { userId, transactionId },
-      { $PUT: { state: TRANSACTION_STATES.SUCCEEDED, modifiedAt } }
+      {
+        state: TRANSACTION_STATES.SUCCEEDED
+      }
     );
     return succeededTransaction;
   },
   canceled: async (userId, transactionId, errorCode, errorDetail) => {
-    const modifiedAt = moment().toISOString();
-    const canceledTransaction = await Transaction.update(
+    const canceledTransaction = await Transaction.updateWithVersionOrCreate(
       { userId, transactionId },
       {
-        $PUT: {
-          state: TRANSACTION_STATES.CANCELED,
-          modifiedAt,
-          errorCode,
-          errorDetail
-        }
+        state: TRANSACTION_STATES.CANCELED,
+        errorCode,
+        errorDetail
       }
     );
     return canceledTransaction;
   },
   failed: async (userId, transactionId, errorCode, errorDetail) => {
-    const modifiedAt = moment().toISOString();
-    const releasedTransaction = await Transaction.update(
+    const failedTransaction = await Transaction.updateWithVersionOrCreate(
       { userId, transactionId },
       {
-        $PUT: {
-          state: TRANSACTION_STATES.FAILED,
-          modifiedAt,
-          errorCode,
-          errorDetail
-        }
+        state: TRANSACTION_STATES.FAILED,
+        errorCode,
+        errorDetail
       }
     );
-    return releasedTransaction;
+    return failedTransaction;
   },
   getWorking: async (ruleId) => {
     const workingTransactions = await Transaction.query('ruleId')
