@@ -6,6 +6,7 @@ dev:
   aws_secret_access_key: MOCK_SECRET_ACCESS_KEY
   encrypt_key: {any}
   scheduler_interval: {any}
+  scheduler_locked_transactions_release_time_sec: {any}
 staging:
   node_env: staging
   profile: {any}
@@ -14,6 +15,7 @@ staging:
   aws_secret_access_key: {any}
   encrypt_key: {any}
   scheduler_interval: {any}
+  scheduler_locked_transactions_release_time_sec: {any}
 prod:
   node_env: production
   profile: {any}
@@ -22,3 +24,4 @@ prod:
   aws_secret_access_key: {any}
   encrypt_key: {any}
   scheduler_interval: {any}
+  scheduler_locked_transactions_release_time_sec: {any}

@@ -26,7 +26,7 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
 
         const policy = await Policy.get(userId);
         if (!policy) {
-          console.info(util.format('WARN : %s', 'Policy NOT Found, SKIPPING process...'));
+          console.warn(util.format('WARN : %s', 'Policy NOT Found, SKIPPING process...'));
           return;
         }
         const effect = policy.effect;
@@ -37,8 +37,24 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           const oneSecret = secrets.filter((secret) => secret.apiProvider === oneSiteName)[0];
           const otherSecret = secrets.filter((secret) => secret.apiProvider === otherSiteName)[0];
 
+          // If exist key and secret of both exchange sites
           if (!oneSecret || !otherSecret) {
-            console.info(util.format('WARN : %s', 'Secrets MUST have over 2  effective items, SKIPPING process...'));
+            console.warn(util.format('WARN : %s', 'Secrets MUST have over 2  effective items, SKIPPING process...'));
+            return;
+          }
+
+          // If change the rule's status to unavailable
+          if (rule.counts.failureCount >= rule.maxFailedLimit) {
+            await Rule.updateWithVersion(
+              { userId: rule.userId, ruleId: rule.ruleId },
+              { status: RULE_STATUS.UNAVAILABLE }
+            );
+            console.warn(
+              util.format(
+                'WARN : %s',
+                "Over failure count, then the rule's status was changed to unavailable, SKIPPING process..."
+              )
+            );
             return;
           }
 

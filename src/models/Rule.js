@@ -3,6 +3,7 @@ const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
 const DEFAULT_COMMITMENT_TIME_LIMIT_SEC = 120;
+const DEFAULT_MAX_FAILED_LIMIT_COUNT = 100;
 
 const ARBITRAGE_STRATEGIES = {
   SIMPLE: 'simple'
@@ -69,7 +70,7 @@ const ruleSchema = new Schema(
     assetRange: {
       type: Number,
       required: true,
-      default: 100,
+      default: 1,
       validate: (value) => (value >= 0 && value <= 1 ? true : false)
     },
     assetMinLimit: {
@@ -96,6 +97,12 @@ const ruleSchema = new Schema(
       required: true,
       default: 0,
       validate: (value) => (value > -1 && value < 1 ? true : false)
+    },
+    maxFailedLimit: {
+      type: Number,
+      required: true,
+      default: DEFAULT_MAX_FAILED_LIMIT_COUNT,
+      validate: (value) => (value >= 0 ? true : false)
     },
     oneSiteName: {
       type: String,

@@ -16,6 +16,7 @@ module.exports.addRule = async (event, callback) => {
     commitmentTimeLimit,
     buyWeightRate,
     sellWeightRate,
+    maxFailedLimit,
     oneSiteName,
     otherSiteName
   } = JSON.parse(event.body);
@@ -125,6 +126,7 @@ module.exports.addRule = async (event, callback) => {
   if (commitmentTimeLimit) rule.commitmentTimeLimit = commitmentTimeLimit;
   if (buyWeightRate) rule.buyWeightRate = buyWeightRate;
   if (sellWeightRate) rule.sellWeightRate = sellWeightRate;
+  if (maxFailedLimit) rule.maxFailedLimit = maxFailedLimit;
   const newRule = new Rule(rule);
 
   try {

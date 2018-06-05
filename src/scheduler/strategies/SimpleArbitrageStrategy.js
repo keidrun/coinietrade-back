@@ -218,16 +218,16 @@ class SimpleArbitrageStrategy {
             orderPrice: buyPrice,
             orderAmount: fixedBuyAmount,
             transactionFeeRate: transactionFeeRateB,
-            laterAssetPrice:
-              assetsAmountsB.presentCurrencyAmount - buyPrice * fixedBuyAmount * (1 + transactionFeeRateB)
+            laterAssetCoin: assetsAmountsB.presentCoinAmount + fixedBuyAmount * (1 - transactionFeeRateB),
+            laterAssetPrice: assetsAmountsB.presentCurrencyAmount - buyPrice * fixedBuyAmount
           },
           sell: {
             api: this.ExchangeA,
             orderPrice: sellPrice,
             orderAmount: fixedSellAmount,
             transactionFeeRate: transactionFeeRateA,
-            laterAssetPrice:
-              assetsAmountsA.presentCurrencyAmount + sellPrice * fixedSellAmount * (1 + transactionFeeRateA)
+            laterAssetCoin: assetsAmountsA.presentCoinAmount - fixedSellAmount * (1 + transactionFeeRateA),
+            laterAssetPrice: assetsAmountsA.presentCurrencyAmount + sellPrice * fixedSellAmount
           }
         };
       } else if (isConditionedToBuyAskAAndSellBidB) {
@@ -263,16 +263,16 @@ class SimpleArbitrageStrategy {
             orderPrice: buyPrice,
             orderAmount: Math.floor(buyAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit),
             transactionFeeRate: transactionFeeRateA,
-            laterAssetPrice:
-              assetsAmountsA.presentCurrencyAmount - buyPrice * fixedBuyAmount * (1 + transactionFeeRateA)
+            laterAssetCoin: assetsAmountsA.presentCoinAmount + fixedBuyAmount * (1 - transactionFeeRateA),
+            laterAssetPrice: assetsAmountsA.presentCurrencyAmount - buyPrice * fixedBuyAmount
           },
           sell: {
             api: this.ExchangeB,
             orderPrice: sellPrice,
             orderAmount: Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit),
             transactionFeeRate: transactionFeeRateB,
-            laterAssetPrice:
-              assetsAmountsB.presentCurrencyAmount + sellPrice * fixedSellAmount * (1 + transactionFeeRateB)
+            laterAssetCoin: assetsAmountsB.presentCoinAmount - fixedSellAmount * (1 + transactionFeeRateB),
+            laterAssetPrice: assetsAmountsB.presentCurrencyAmount + sellPrice * fixedSellAmount
           }
         };
       } else {
