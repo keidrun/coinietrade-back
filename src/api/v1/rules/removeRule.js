@@ -1,4 +1,4 @@
-const { Rule } = require('../../../models/Rule');
+const { Rule, RULE_STATUS } = require('../../../models/Rule');
 const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
@@ -9,7 +9,12 @@ module.exports.removeRule = async (event, callback) => {
   try {
     const existingRule = await Rule.get({ userId, ruleId });
     if (existingRule) {
-      await Rule.deleteWithVersion({ userId, ruleId });
+      await Rule.updateWithVersion(
+        { userId, ruleId },
+        {
+          status: RULE_STATUS.DELETED
+        }
+      );
       callback(null, response(204));
     } else {
       responseError(

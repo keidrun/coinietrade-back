@@ -3,7 +3,7 @@ const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../helpers/keys').get(process.env.NODE_ENV);
 require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
-const { Rule } = require('../../../../src/models/Rule');
+const { Rule, RULE_STATUS } = require('../../../../src/models/Rule');
 const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 before(() => {
@@ -236,8 +236,19 @@ describe('rules endpoints', () => {
         .then((response) => {
           expect(response.status).to.equal(204);
           expect(response.data).to.be.empty;
-          existingRules.pop();
-          done();
+
+          Rule.get({
+            userId: expectedToDeleteRule.userId,
+            ruleId: expectedToDeleteRule.ruleId
+          }).then((deletedRule) => {
+            expect(deletedRule.userId).to.equal(expectedToDeleteRule.userId);
+            expect(deletedRule.ruleId).to.equal(expectedToDeleteRule.ruleId);
+            expect(deletedRule.status).to.equal(RULE_STATUS.DELETED);
+
+            existingRules.pop();
+            existingRules.push(deletedRule);
+            done();
+          });
         })
         .catch((error) => {
           done(error);
