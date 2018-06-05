@@ -2,13 +2,13 @@ const moment = require('moment');
 const axios = require('axios');
 const qs = require('qs');
 const crypto = require('crypto');
-const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule');
+const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES, EXCHANGE_SITES } = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 const messages = {
   NO_DATA_FOUND_FOR_THE_KEY: 'no data found for the key',
   SIGNATURE_MISMATCH: 'signature mismatch',
-  TIME_WAIT_RESTRICTION: 'trade temporarily unavailable.',
+  TIME_WAIT_RESTRICTION: 'time wait restriction, please try later.',
   TRADE_TEMPORARILY_UNAVAILABLE: 'trade temporarily unavailable.'
 };
 
@@ -95,21 +95,23 @@ class Zaif {
 
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
-          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+          response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
+          response.data.error.includes(messages.SIGNATURE_MISMATCH)
         ) {
           return Promise.reject(
             errors.apiUnauthorized(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
           );
         } else if (
-          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
-          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+          response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
+          response.data.error.includes(messages.TRADE_TEMPORARILY_UNAVAILABLE)
         ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
@@ -117,6 +119,7 @@ class Zaif {
         } else {
           return Promise.reject(
             errors.apiFailure(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
             )
@@ -133,9 +136,11 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -169,21 +174,23 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
-          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+          response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
+          response.data.error.includes(messages.SIGNATURE_MISMATCH)
         ) {
           return Promise.reject(
             errors.apiUnauthorized(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else if (
-          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
-          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+          response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
+          response.data.error.includes(messages.TRADE_TEMPORARILY_UNAVAILABLE)
         ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
@@ -191,6 +198,7 @@ class Zaif {
         } else {
           return Promise.reject(
             errors.apiFailure(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
             )
@@ -203,9 +211,11 @@ class Zaif {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -222,21 +232,23 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
-          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+          response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
+          response.data.error.includes(messages.SIGNATURE_MISMATCH)
         ) {
           return Promise.reject(
             errors.apiUnauthorized(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else if (
-          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
-          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+          response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
+          response.data.error.includes(messages.TRADE_TEMPORARILY_UNAVAILABLE)
         ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
@@ -244,6 +256,7 @@ class Zaif {
         } else {
           return Promise.reject(
             errors.apiFailure(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
             )
@@ -256,9 +269,11 @@ class Zaif {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -276,21 +291,23 @@ class Zaif {
       const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
       if (response.data.success !== 1) {
         if (
-          response.data.error.indexOf(messages.NO_DATA_FOUND_FOR_THE_KEY) != -1 ||
-          response.data.error.indexOf(messages.SIGNATURE_MISMATCH) != -1
+          response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
+          response.data.error.includes(messages.SIGNATURE_MISMATCH)
         ) {
           return Promise.reject(
             errors.apiUnauthorized(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
           );
         } else if (
-          response.data.error.indexOf(messages.TIME_WAIT_RESTRICTION) != -1 ||
-          response.data.error.indexOf(messages.TRADE_TEMPORARILY_UNAVAILABLE) != -1
+          response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
+          response.data.error.includes(messages.TRADE_TEMPORARILY_UNAVAILABLE)
         ) {
           return Promise.reject(
             errors.apiTemporarilyUnavailable(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
@@ -298,6 +315,7 @@ class Zaif {
         } else {
           return Promise.reject(
             errors.apiFailure(
+              EXCHANGE_SITES.ZAIF,
               response.status,
               `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
             )
@@ -308,9 +326,11 @@ class Zaif {
       return Promise.resolve(orderId);
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -352,9 +372,11 @@ class Zaif {
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }

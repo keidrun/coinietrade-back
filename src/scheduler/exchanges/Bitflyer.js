@@ -1,7 +1,7 @@
 const moment = require('moment');
 const axios = require('axios');
 const crypto = require('crypto');
-const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES } = require('../../models/Rule');
+const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES, EXCHANGE_SITES } = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 
@@ -84,15 +84,23 @@ class Bitflyer {
       return transactionFee;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
       } else if (error.response.status === 401) {
-        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
-          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+          errors.apiTemporarilyUnavailable(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data)
+          )
         );
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -118,15 +126,23 @@ class Bitflyer {
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
       } else if (error.response.status === 401) {
-        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
-          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+          errors.apiTemporarilyUnavailable(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data)
+          )
         );
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -164,15 +180,23 @@ class Bitflyer {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
       } else if (error.response.status === 401) {
-        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
-          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+          errors.apiTemporarilyUnavailable(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data)
+          )
         );
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -191,15 +215,23 @@ class Bitflyer {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
       } else if (error.response.status === 401) {
-        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
-          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+          errors.apiTemporarilyUnavailable(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data)
+          )
         );
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }
@@ -217,15 +249,23 @@ class Bitflyer {
       await axios.post(`${URL}`, body, { headers });
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
       } else if (error.response.status === 401) {
-        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
-          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+          errors.apiTemporarilyUnavailable(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data)
+          )
         );
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
 
@@ -268,15 +308,23 @@ class Bitflyer {
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(error.toString()));
+        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
       } else if (error.response.status === 401) {
-        return Promise.reject(errors.apiUnauthorized(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
-          errors.apiTemporarilyUnavailable(error.response.status, JSON.stringify(error.response.data))
+          errors.apiTemporarilyUnavailable(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data)
+          )
         );
       } else {
-        return Promise.reject(errors.apiFailure(error.response.status, JSON.stringify(error.response.data)));
+        return Promise.reject(
+          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+        );
       }
     }
   }

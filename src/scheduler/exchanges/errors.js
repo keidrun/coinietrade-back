@@ -14,30 +14,34 @@ const ERROR_CODES = {
 };
 
 const errors = {
-  networkError: (message) => {
+  networkError: (provider, message) => {
     return {
       code: ERROR_CODES.NETWORK_ERROR,
+      provider,
       status: null,
       message
     };
   },
-  apiFailure: (status, message) => {
+  apiFailure: (provider, status, message) => {
     return {
       code: ERROR_CODES.API_FAILURE,
+      provider,
       status,
       message
     };
   },
-  apiUnauthorized: (status, message) => {
+  apiUnauthorized: (provider, status, message) => {
     return {
       code: ERROR_CODES.API_UNAUTHORIZED,
+      provider,
       status,
       message
     };
   },
-  apiTemporarilyUnavailable: (status, message) => {
+  apiTemporarilyUnavailable: (provider, status, message) => {
     return {
       code: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
+      provider,
       status,
       message
     };
