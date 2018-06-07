@@ -112,15 +112,41 @@ class SimpleArbitrageStrategy {
       console.log('sellWeightRate', this.sellWeightRate);
       console.log('####################');
 
-      // Compute best bid and best ask
+      // Transaction minimum price unit
+      const transactionMinPriceUnitA = await this.ExchangeA.getTransactionMinPriceUnit();
+      const transactionMinPriceUnitB = await this.ExchangeB.getTransactionMinPriceUnit();
+      console.log('-------------------------');
+      console.log('transactionMinPriceUnitA', transactionMinPriceUnitA);
+      console.log('transactionMinPriceUnitB', transactionMinPriceUnitB);
+      console.log('-------------------------');
+
+      // Compute best bid and best ask, then Weighting and Align the price unit
       const boardA = await this.ExchangeA.getSortedBoard();
-      const bestBidPriceA = boardA.bids[0].price;
-      const bestAskPriceA = boardA.asks[0].price;
+      const bestBidPriceA =
+        Math.floor(boardA.bids[0].price * this.sellWeightRate) % transactionMinPriceUnitA === 0
+          ? Math.floor(boardA.bids[0].price * this.sellWeightRate)
+          : Math.floor(boardA.bids[0].price * this.sellWeightRate) -
+            Math.floor(boardA.bids[0].price * this.sellWeightRate) % transactionMinPriceUnitA;
+      const bestAskPriceA =
+        Math.floor(boardA.asks[0].price * this.buyWeightRate) % transactionMinPriceUnitA === 0
+          ? Math.floor(boardA.asks[0].price * this.buyWeightRate)
+          : Math.floor(boardA.asks[0].price * this.buyWeightRate) -
+            Math.floor(boardA.asks[0].price * this.buyWeightRate) % transactionMinPriceUnitA;
       const bestAskAmountA = boardA.asks[0].amount;
+
       const boardB = await this.ExchangeB.getSortedBoard();
-      const bestBidPriceB = boardB.bids[0].price;
-      const bestAskPriceB = boardB.asks[0].price;
+      const bestBidPriceB =
+        Math.floor(boardB.bids[0].price * this.sellWeightRate) % transactionMinPriceUnitB === 0
+          ? Math.floor(boardB.bids[0].price * this.sellWeightRate)
+          : Math.floor(boardB.bids[0].price * this.sellWeightRate) -
+            Math.floor(boardB.bids[0].price * this.sellWeightRate) % transactionMinPriceUnitB;
+      const bestAskPriceB =
+        Math.floor(boardB.asks[0].price * this.buyWeightRate) % transactionMinPriceUnitB === 0
+          ? Math.floor(boardB.asks[0].price * this.buyWeightRate)
+          : Math.floor(boardB.asks[0].price * this.buyWeightRate) -
+            Math.floor(boardB.asks[0].price * this.buyWeightRate) % transactionMinPriceUnitB;
       const bestAskAmountB = boardB.asks[0].amount;
+
       console.log('-------------------------');
       console.log('BEST Bid A', bestBidPriceA);
       console.log('BEST Ask A', bestAskPriceA);
@@ -187,8 +213,8 @@ class SimpleArbitrageStrategy {
       // Compute target to buy and sell
       let target;
       if (isConditionedToBuyAskBAndSellBidA) {
-        const buyPrice = bestAskPriceB * (1 + this.buyWeightRate);
-        const sellPrice = bestBidPriceA * (1 + this.sellWeightRate);
+        const buyPrice = bestAskPriceA;
+        const sellPrice = bestBidPriceB;
 
         let buyAmount = 0;
         if (buyPrice * bestAskAmountB > possiblePriceLimitB) {
@@ -232,8 +258,8 @@ class SimpleArbitrageStrategy {
           }
         };
       } else if (isConditionedToBuyAskAAndSellBidB) {
-        const buyPrice = bestAskPriceA * (1 + this.buyWeightRate);
-        const sellPrice = bestBidPriceB * (1 + this.sellWeightRate);
+        const buyPrice = bestAskPriceA;
+        const sellPrice = bestBidPriceB;
 
         let buyAmount = 0;
         if (buyPrice * bestAskAmountA > possiblePriceLimitA) {

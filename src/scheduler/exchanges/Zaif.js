@@ -14,6 +14,7 @@ const messages = {
 
 const DEFAULT_TRANSACTION_FEE_RATE = 0;
 const DEFAULT_TRANSACTION_MIN_AMOUNT = 0.0001;
+const DEFAULT_TRANSACTION_MIN_PRICE_UNIT = 5;
 
 // Public
 const BASE_URL = 'https://api.zaif.jp/api';
@@ -78,6 +79,10 @@ class Zaif {
 
   getTransactionMinAmount() {
     return DEFAULT_TRANSACTION_MIN_AMOUNT;
+  }
+
+  getTransactionMinPriceUnit() {
+    return DEFAULT_TRANSACTION_MIN_PRICE_UNIT;
   }
 
   async getTransactionFeeRate() {

@@ -3,7 +3,6 @@ const moment = require('moment');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
-const DEFAULT_COMMITMENT_TIME_LIMIT_SEC = 120;
 const DEFAULT_MAX_FAILED_LIMIT_COUNT = 100;
 
 const ARBITRAGE_STRATEGIES = {
@@ -81,24 +80,17 @@ const ruleSchema = new Schema(
       default: 0,
       validate: (value) => (value >= 0 ? true : false)
     },
-    commitmentTimeLimit: {
-      // Seconnds
-      type: Number,
-      required: true,
-      default: DEFAULT_COMMITMENT_TIME_LIMIT_SEC,
-      validate: (value) => (value >= 0 ? true : false)
-    },
     buyWeightRate: {
       type: Number,
       required: true,
-      default: 0,
-      validate: (value) => (value > -1 && value < 1 ? true : false)
+      default: 1,
+      validate: (value) => (value > 0 ? true : false)
     },
     sellWeightRate: {
       type: Number,
       required: true,
-      default: 0,
-      validate: (value) => (value > -1 && value < 1 ? true : false)
+      default: 1,
+      validate: (value) => (value > 0 ? true : false)
     },
     maxFailedLimit: {
       type: Number,

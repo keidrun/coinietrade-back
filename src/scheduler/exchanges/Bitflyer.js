@@ -6,6 +6,7 @@ const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 
 const DEFAULT_TRANSACTION_MIN_AMOUNT = 0.001;
+const DEFAULT_TRANSACTION_MIN_PRICE_UNIT = 1;
 
 const BASE_URL = 'https://api.bitflyer.jp';
 // Public
@@ -71,6 +72,10 @@ class Bitflyer {
 
   getTransactionMinAmount() {
     return DEFAULT_TRANSACTION_MIN_AMOUNT;
+  }
+
+  getTransactionMinPriceUnit() {
+    return DEFAULT_TRANSACTION_MIN_PRICE_UNIT;
   }
 
   async getTransactionFeeRate() {

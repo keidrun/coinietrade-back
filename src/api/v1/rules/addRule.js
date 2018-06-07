@@ -13,7 +13,6 @@ module.exports.addRule = async (event, callback) => {
     orderType,
     assetRange,
     assetMinLimit,
-    commitmentTimeLimit,
     buyWeightRate,
     sellWeightRate,
     maxFailedLimit,
@@ -123,7 +122,6 @@ module.exports.addRule = async (event, callback) => {
   if (orderType) rule.orderType = orderType;
   if (assetRange) rule.assetRange = assetRange;
   if (assetMinLimit) rule.assetMinLimit = assetMinLimit;
-  if (commitmentTimeLimit) rule.commitmentTimeLimit = commitmentTimeLimit;
   if (buyWeightRate) rule.buyWeightRate = buyWeightRate;
   if (sellWeightRate) rule.sellWeightRate = sellWeightRate;
   if (maxFailedLimit) rule.maxFailedLimit = maxFailedLimit;
