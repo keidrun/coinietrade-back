@@ -47,7 +47,9 @@ provider:
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
     # Scheduler Settings
     SCHEDULER_INTERVAL_MINUTES: ${file(./config/config.yml):${self:provider.stage}.scheduler_interval_minutes}
-    SCHEDULER_COMMITMENT_TIME_LIMIT_SECONDS: ${file(./config/config.yml):${self:provider.stage}.commitment_time_Limit_seconds}
+    SCHEDULER_COMMITMENT_TIME_LIMIT_SECONDS: ${file(./config/config.yml):${self:provider.stage}.scheduler_commitment_time_Limit_seconds}
+    SCHEDULER_ORDER_RETRY_INTERVAL_SECONDS: ${file(./config/config.yml):${self:provider.stage}.scheduler_order_retry_interval_seconds}
+    SCHEDULER_ORDER_RETRY_TIMES: ${file(./config/config.yml):${self:provider.stage}.scheduler_order_retry_times}
     SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS: ${file(./config/config.yml):${self:provider.stage}.scheduler_locked_transactions_release_time_seconds}
     SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT: ${file(./config/config.yml):${self:provider.stage}.scheduler_rules_concurrent_execution_limit}
   iamRoleStatements:

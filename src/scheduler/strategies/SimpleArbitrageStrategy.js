@@ -12,6 +12,8 @@ const { result, transaction } = require('./transactions');
 
 const lockedTransactionsReleaseTimeSec = process.env.SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS;
 const commitmentTimeLimitSec = process.env.SCHEDULER_COMMITMENT_TIME_LIMIT_SECONDS;
+const orderRetryIntervalMSec = process.env.SCHEDULER_ORDER_RETRY_INTERVAL_SECONDS * 1000;
+const orderRetryTimes = process.env.SCHEDULER_ORDER_RETRY_TIMES;
 
 const parseError = (error) => {
   let errorCode, errorDetail;
@@ -34,6 +36,23 @@ const parseError = (error) => {
   }
   return { errorCode, errorDetail };
 };
+
+async function retryPromise(promise, args, retryIntervalMSec, retryTimes, instance = null) {
+  try {
+    const result = await promise.apply(instance, args);
+    return result;
+  } catch (error) {
+    if (error.code && error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE && retryTimes > 0) {
+      console.log('Retrying....');
+      console.log('retryIntervalMSec', retryIntervalMSec);
+      console.log('retryTimes', retryTimes);
+      await setTimeoutPromise(retryIntervalMSec);
+      return retryPromise(promise, args, retryIntervalMSec, retryTimes - 1, instance);
+    } else {
+      return Promise.reject(error);
+    }
+  }
+}
 
 class SimpleArbitrageStrategy {
   constructor(argsObj) {
@@ -336,16 +355,18 @@ class SimpleArbitrageStrategy {
       );
 
       console.log('########################');
-      console.log(target);
       console.log('BUY', 'name', target.buy.api.getName());
-      console.log('BUY', 'price', target.buy.orderPrice);
-      console.log('BUY', 'amount', target.buy.orderAmount);
-      console.log('BUY', 'feeRate', target.buy.transactionFeeRate);
+      console.log('BUY', 'orderPrice', target.buy.orderPrice);
+      console.log('BUY', 'orderAmount', target.buy.orderAmount);
+      console.log('BUY', 'transactionFeeRate', target.buy.transactionFeeRate);
+      console.log('BUY', 'laterAssetCoin', target.buy.laterAssetCoin);
+      console.log('BUY', 'laterAssetPrice', target.buy.laterAssetPrice);
       console.log('SELL', 'name', target.sell.api.getName());
-      console.log('SELL', 'price', target.sell.orderPrice);
-      console.log('SELL', 'amount', target.sell.orderAmount);
-      console.log('SELL', 'feeRate', target.sell.transactionFeeRate);
-      console.log('anticipatedProfit', anticipatedProfit);
+      console.log('SELL', 'orderPrice', target.sell.orderPrice);
+      console.log('SELL', 'orderAmount', target.sell.orderAmount);
+      console.log('SELL', 'transactionFeeRate', target.sell.transactionFeeRate);
+      console.log('SELL', 'laterAssetCoin', target.sell.laterAssetCoin);
+      console.log('SELL', 'laterAssetPrice', target.sell.laterAssetPrice);
       console.log('########################');
 
       // Begin transactions
@@ -395,11 +416,12 @@ class SimpleArbitrageStrategy {
       console.log(workingBuyTransaction);
       console.log('-------------------------');
       try {
-        buyOrderId = await target.buy.api.order(
-          ORDER_PROCESSES.BUY,
-          this.orderType,
-          target.buy.orderPrice,
-          target.buy.orderAmount
+        buyOrderId = await retryPromise(
+          target.buy.api.order,
+          [ ORDER_PROCESSES.BUY, this.orderType, target.buy.orderPrice, target.buy.orderAmount ],
+          orderRetryIntervalMSec,
+          orderRetryTimes,
+          target.buy.api
         );
       } catch (error) {
         const { errorCode, errorDetail } = parseError(error);
@@ -431,11 +453,12 @@ class SimpleArbitrageStrategy {
       console.log(workingSellTransaction);
       console.log('-------------------------');
       try {
-        sellOrderId = await target.sell.api.order(
-          ORDER_PROCESSES.SELL,
-          this.orderType,
-          target.sell.orderPrice,
-          target.sell.orderAmount
+        sellOrderId = await retryPromise(
+          target.sell.api.order,
+          [ ORDER_PROCESSES.SELL, this.orderType, target.sell.orderPrice, target.sell.orderAmount ],
+          orderRetryIntervalMSec,
+          orderRetryTimes,
+          target.sell.api
         );
       } catch (error) {
         const { errorCode, errorDetail } = parseError(error);
