@@ -11,6 +11,7 @@ const { ERROR_CODES } = require('../exchanges/errors');
 const { result, transaction } = require('./transactions');
 
 const lockedTransactionsReleaseTimeSec = process.env.SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS;
+const commitmentTimeLimitSec = process.env.SCHEDULER_COMMITMENT_TIME_LIMIT_SECONDS;
 
 const parseError = (error) => {
   let errorCode, errorDetail;
@@ -44,7 +45,6 @@ class SimpleArbitrageStrategy {
     this.orderType = argsObj.orderType;
     this.assetRange = argsObj.assetRange;
     this.assetMinLimit = argsObj.assetMinLimit;
-    this.commitmentTimeLimit = argsObj.commitmentTimeLimit;
     this.buyWeightRate = argsObj.buyWeightRate;
     this.sellWeightRate = argsObj.sellWeightRate;
     this.ExchangeA = new Exchanges[argsObj.a.siteName](
@@ -443,7 +443,7 @@ class SimpleArbitrageStrategy {
       }
 
       // Exit criteria to finish transactions
-      const commitmentTimeLimitMSec = this.commitmentTimeLimit * 1000;
+      const commitmentTimeLimitMSec = commitmentTimeLimitSec * 1000;
       await setTimeoutPromise(commitmentTimeLimitMSec);
 
       const isCompletedBuyOrder = await target.buy.api.isCompletedOrder(buyOrderId);

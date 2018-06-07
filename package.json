@@ -2,7 +2,9 @@
   "name": "coinietrade-back",
   "version": "0.0.1",
   "description": "CoinieTrade back end.",
-  "main": "index.js",
+  "engines": {
+    "node": "8.10.0"
+  },
   "repository": "https://github.com/keidrun/coinietrade-back.git",
   "author": "keidrun",
   "license": "No license",

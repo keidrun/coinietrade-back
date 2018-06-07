@@ -6,6 +6,7 @@ dev:
   aws_secret_access_key: MOCK_SECRET_ACCESS_KEY
   encrypt_key: {any}
   scheduler_interval_minutes: {any}
+  commitment_time_Limit_seconds: {any}
   scheduler_locked_transactions_release_time_seconds: {any}
   scheduler_rules_concurrent_execution_limit: {any}
   dynamodb_policies_rcu: {any}
@@ -28,6 +29,7 @@ staging:
   aws_secret_access_key: {any}
   encrypt_key: {any}
   scheduler_interval_minutes: {any}
+  commitment_time_Limit_seconds: {any}
   scheduler_locked_transactions_release_time_seconds: {any}
   scheduler_rules_concurrent_execution_limit: {any}
   dynamodb_policies_rcu: {any}
@@ -50,6 +52,7 @@ prod:
   aws_secret_access_key: {any}
   encrypt_key: {any}
   scheduler_interval_minutes: {any}
+  commitment_time_Limit_seconds: {any}
   scheduler_locked_transactions_release_time_seconds: {any}
   scheduler_rules_concurrent_execution_limit: {any}
   dynamodb_policies_rcu: {any}
