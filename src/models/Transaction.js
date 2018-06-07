@@ -79,7 +79,11 @@ const transactionSchema = new Schema(
       default: ORDER_TYPES.LIMIT_ORDER,
       validate: (value) => Object.values(ORDER_TYPES).indexOf(value) !== -1
     },
-    orderPrice: { type: Number, validate: (value) => (value >= 0 ? true : false) },
+    orderPrice: {
+      type: Number,
+      required: true,
+      validate: (value) => (value >= 0 ? true : false)
+    },
     orderAmount: {
       type: Number,
       required: true,

@@ -10,33 +10,28 @@ const Exchanges = {
 const { ERROR_CODES } = require('../exchanges/errors');
 const { result, transaction } = require('./transactions');
 
-const lockedTransactionsReleaseTimeSec = process.env.LOCKED_TRANSACTIONS_RELEASE_TIME_SEC;
+const lockedTransactionsReleaseTimeSec = process.env.SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS;
 
 const parseError = (error) => {
-  let provider, errorCode, errorDetail;
+  let errorCode, errorDetail;
   if (!error.code) {
     // FATAL: database error or bugs
-    provider = null;
     errorCode = ERROR_CODES.UNKNOWN_ERROR;
     errorDetail = error.toString();
   } else if (error.code === ERROR_CODES.NETWORK_ERROR) {
-    provider = error.provider;
     errorCode = ERROR_CODES.NETWORK_ERROR;
-    errorDetail = `[${error.status}] ${error.message}`;
+    errorDetail = `[${error.provider}] [${error.statusCode}] ${error.message}`;
   } else if (error.code === ERROR_CODES.API_UNAUTHORIZED) {
-    provider = error.provider;
     errorCode = ERROR_CODES.API_UNAUTHORIZED;
-    errorDetail = `[${error.status}] ${error.message}`;
+    errorDetail = `[${error.provider}] [${error.statusCode}] ${error.message}`;
   } else if (error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE) {
-    provider = error.provider;
     errorCode = ERROR_CODES.API_TEMPORARILY_UNAVAILABLE;
-    errorDetail = `[${error.status}] ${error.message}`;
+    errorDetail = `[${error.provider}] [${error.statusCode}] ${error.message}`;
   } else {
-    provider = error.provider;
     errorCode = ERROR_CODES.API_FAILURE;
-    errorDetail = `[${error.status}] ${error.message}`;
+    errorDetail = `[${error.provider}] [${error.statusCode}] ${error.message}`;
   }
-  return { provider, errorCode, errorDetail };
+  return { errorCode, errorDetail };
 };
 
 class SimpleArbitrageStrategy {
@@ -77,7 +72,7 @@ class SimpleArbitrageStrategy {
       const workingTransactions = await transaction.getWorking(this.ruleId);
       if (workingTransactions.length > 0) {
         // Release locked transactions
-        workingTransactions.forEach(async (lockedTransaction) => {
+        const releaseTransactionPromises = workingTransactions.map(async (lockedTransaction) => {
           const mNow = moment();
           const mModifiedAt = moment(lockedTransaction.modifiedAt);
           const diffSec = mModifiedAt.diff(mNow, 'seconds');
@@ -89,13 +84,14 @@ class SimpleArbitrageStrategy {
               lockedTransaction.transactionId,
               ERROR_CODES.RELEASED_LOCKED_TRANSACTIONS
             );
-            console.log('-------------------------');
-            console.log('Release transactions');
-            console.log(releasedTransaction);
-            console.log('-------------------------');
+            return releasedTransaction;
           }
         });
+        const releasedTransactions = await Promise.all(releaseTransactionPromises);
 
+        console.log('-------------------------');
+        console.log('Release transactions');
+        console.log(releasedTransactions);
         console.log('-------------------------');
         console.log('Skipping...');
         console.log('-------------------------');
@@ -380,7 +376,7 @@ class SimpleArbitrageStrategy {
           target.buy.orderAmount
         );
       } catch (error) {
-        const { provider, errorCode, errorDetail } = parseError(error);
+        const { errorCode, errorDetail } = parseError(error);
 
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
@@ -390,7 +386,6 @@ class SimpleArbitrageStrategy {
         const canceledBuyTransaction = await transaction.canceled(
           this.userId,
           buyTransactionId,
-          provider,
           errorCode,
           errorDetail
         );
@@ -417,7 +412,7 @@ class SimpleArbitrageStrategy {
           target.sell.orderAmount
         );
       } catch (error) {
-        const { provider, errorCode, errorDetail } = parseError(error);
+        const { errorCode, errorDetail } = parseError(error);
 
         if (buyOrderId) {
           await target.buy.api.cancelOrder(buyOrderId);
@@ -430,14 +425,12 @@ class SimpleArbitrageStrategy {
         const canceledBuyTransaction = await transaction.canceled(
           this.userId,
           buyTransactionId,
-          provider,
           errorCode,
           errorDetail
         );
         const canceledSellTransaction = await transaction.canceled(
           this.userId,
           sellTransactionId,
-          provider,
           errorCode,
           errorDetail
         );
@@ -518,17 +511,11 @@ class SimpleArbitrageStrategy {
         return result.success(anticipatedProfit);
       }
     } catch (error) {
-      const { provider, errorCode, errorDetail } = parseError(error);
+      const { errorCode, errorDetail } = parseError(error);
 
       // => FAILED
       const failedBuyTransaction = await transaction.failed(this.userId, buyTransactionId, errorCode, errorDetail);
-      const failedSellTransaction = await transaction.failed(
-        this.userId,
-        sellTransactionId,
-        provider,
-        errorCode,
-        errorDetail
-      );
+      const failedSellTransaction = await transaction.failed(this.userId, sellTransactionId, errorCode, errorDetail);
       console.log('-------------------------');
       console.log(failedBuyTransaction);
       console.log(failedSellTransaction);

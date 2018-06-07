@@ -71,28 +71,24 @@ const transaction = {
     );
     return succeededTransaction;
   },
-  canceled: async (userId, transactionId, siteName, errorCode, errorDetail) => {
-    const canceledTransaction = await Transaction.updateWithVersionOrCreate(
-      { userId, transactionId },
-      {
-        state: TRANSACTION_STATES.CANCELED,
-        siteName,
-        errorCode,
-        errorDetail
-      }
-    );
+  canceled: async (userId, transactionId, errorCode, errorDetail) => {
+    let update = {
+      state: TRANSACTION_STATES.CANCELED,
+      errorCode
+    };
+    if (errorDetail) update.errorDetail = errorDetail;
+
+    const canceledTransaction = await Transaction.updateWithVersionOrCreate({ userId, transactionId }, update);
     return canceledTransaction;
   },
-  failed: async (userId, transactionId, siteName, errorCode, errorDetail) => {
-    const failedTransaction = await Transaction.updateWithVersionOrCreate(
-      { userId, transactionId },
-      {
-        state: TRANSACTION_STATES.FAILED,
-        siteName,
-        errorCode,
-        errorDetail
-      }
-    );
+  failed: async (userId, transactionId, errorCode, errorDetail) => {
+    let update = {
+      state: TRANSACTION_STATES.FAILED,
+      errorCode
+    };
+    if (errorDetail) update.errorDetail = errorDetail;
+
+    const failedTransaction = await Transaction.updateWithVersionOrCreate({ userId, transactionId }, update);
     return failedTransaction;
   },
   getWorking: async (ruleId) => {

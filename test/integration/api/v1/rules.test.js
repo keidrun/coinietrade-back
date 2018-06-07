@@ -173,6 +173,7 @@ describe('rules endpoints', () => {
               totalProfit: existingRules[i].totalProfit,
               counts: existingRules[i].counts,
               status: existingRules[i].status,
+              modifiedAt: existingRules[i].modifiedAt,
               version: existingRules[i].version,
               createdAt: existingRules[i].createdAt,
               updatedAt: existingRules[i].updatedAt
@@ -215,6 +216,7 @@ describe('rules endpoints', () => {
               totalProfit: existingRules[i].totalProfit,
               counts: existingRules[i].counts,
               status: existingRules[i].status,
+              modifiedAt: existingRules[i].modifiedAt,
               version: existingRules[i].version,
               createdAt: existingRules[i].createdAt,
               updatedAt: existingRules[i].updatedAt

@@ -18,31 +18,31 @@ const errors = {
     return {
       code: ERROR_CODES.NETWORK_ERROR,
       provider,
-      status: null,
+      statusCode: null,
       message
     };
   },
-  apiFailure: (provider, status, message) => {
+  apiFailure: (provider, statusCode, message) => {
     return {
       code: ERROR_CODES.API_FAILURE,
       provider,
-      status,
+      statusCode,
       message
     };
   },
-  apiUnauthorized: (provider, status, message) => {
+  apiUnauthorized: (provider, statusCode, message) => {
     return {
       code: ERROR_CODES.API_UNAUTHORIZED,
       provider,
-      status,
+      statusCode,
       message
     };
   },
-  apiTemporarilyUnavailable: (provider, status, message) => {
+  apiTemporarilyUnavailable: (provider, statusCode, message) => {
     return {
       code: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
       provider,
-      status,
+      statusCode,
       message
     };
   }

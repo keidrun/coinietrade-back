@@ -5,8 +5,21 @@ dev:
   aws_access_key_id: MOCK_ACCESS_KEY_ID
   aws_secret_access_key: MOCK_SECRET_ACCESS_KEY
   encrypt_key: {any}
-  scheduler_interval: {any}
-  scheduler_locked_transactions_release_time_sec: {any}
+  scheduler_interval_minutes: {any}
+  scheduler_locked_transactions_release_time_seconds: {any}
+  scheduler_rules_concurrent_execution_limit: {any}
+  dynamodb_policies_rcu: {any}
+  dynamodb_policies_wcu: {any}
+  dynamodb_secrets_rcu: {any}
+  dynamodb_secrets_wcu: {any}
+  dynamodb_rules_rcu: {any}
+  dynamodb_rules_wcu: {any}
+  dynamodb_rules_gsi_rcu: {any}
+  dynamodb_rules_gsi_wcu: {any}
+  dynamodb_transactions_rcu: {any}
+  dynamodb_transactions_wcu: {any}
+  dynamodb_transactions_gsi_rcu: {any}
+  dynamodb_transactions_gsi_wcu: {any}
 staging:
   node_env: staging
   profile: {any}
@@ -14,8 +27,21 @@ staging:
   aws_access_key_id: {any}
   aws_secret_access_key: {any}
   encrypt_key: {any}
-  scheduler_interval: {any}
-  scheduler_locked_transactions_release_time_sec: {any}
+  scheduler_interval_minutes: {any}
+  scheduler_locked_transactions_release_time_seconds: {any}
+  scheduler_rules_concurrent_execution_limit: {any}
+  dynamodb_policies_rcu: {any}
+  dynamodb_policies_wcu: {any}
+  dynamodb_secrets_rcu: {any}
+  dynamodb_secrets_wcu: {any}
+  dynamodb_rules_rcu: {any}
+  dynamodb_rules_wcu: {any}
+  dynamodb_rules_gsi_rcu: {any}
+  dynamodb_rules_gsi_wcu: {any}
+  dynamodb_transactions_rcu: {any}
+  dynamodb_transactions_wcu: {any}
+  dynamodb_transactions_gsi_rcu: {any}
+  dynamodb_transactions_gsi_wcu: {any}
 prod:
   node_env: production
   profile: {any}
@@ -23,5 +49,18 @@ prod:
   aws_access_key_id: {any}
   aws_secret_access_key: {any}
   encrypt_key: {any}
-  scheduler_interval: {any}
-  scheduler_locked_transactions_release_time_sec: {any}
+  scheduler_interval_minutes: {any}
+  scheduler_locked_transactions_release_time_seconds: {any}
+  scheduler_rules_concurrent_execution_limit: {any}
+  dynamodb_policies_rcu: {any}
+  dynamodb_policies_wcu: {any}
+  dynamodb_secrets_rcu: {any}
+  dynamodb_secrets_wcu: {any}
+  dynamodb_rules_rcu: {any}
+  dynamodb_rules_wcu: {any}
+  dynamodb_rules_gsi_rcu: {any}
+  dynamodb_rules_gsi_wcu: {any}
+  dynamodb_transactions_rcu: {any}
+  dynamodb_transactions_wcu: {any}
+  dynamodb_transactions_gsi_rcu: {any}
+  dynamodb_transactions_gsi_wcu: {any}

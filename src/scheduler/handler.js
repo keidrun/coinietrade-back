@@ -5,20 +5,38 @@ const { Policy, USER_EFFECTS } = require('../models/Policy');
 const { Secret } = require('../models/Secret');
 const { runSimpleArbitrage } = require('./runners/runSimpleArbitrage');
 
+const rulesConcurrentExecutionLimit = process.env.SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT;
+
 /* eslint-disable no-unused-vars */
 module.exports.scheduleArbitrage = async (event, context, callback) => {
   /* eslint-enable no-unused-vars */
 
   console.info(util.format('INFO : %s', 'Starting Arbitrage...'));
   try {
-    const availableRules = await Rule.query('status').eq(RULE_STATUS.AVAILABLE).exec();
-    availableRules.sort((a, b) => {
-      if (a.priority > b.priority) return -1;
-      if (a.priority < b.priority) return 1;
-      return 0;
-    });
-    availableRules.forEach(async (rule) => {
-      try {
+    const availableRules = await Rule.query('status')
+      .eq(RULE_STATUS.AVAILABLE)
+      .ascending() //sorted by modifiedAt
+      .limit(rulesConcurrentExecutionLimit)
+      .exec();
+
+    if (availableRules.count <= 0) {
+      console.warn(util.format('WARN : %s', 'Available Rules NOT Found, SKIPPING process...'));
+      return;
+    }
+
+    // AVAILABLE -> LOCKED
+    const lockedRules = await Promise.all(
+      availableRules.map(async (rule) => {
+        return await Rule.updateWithVersion(
+          { userId: rule.userId, ruleId: rule.ruleId },
+          { status: RULE_STATUS.LOCKED }
+        );
+      })
+    );
+
+    // handle rules
+    await Promise.all(
+      lockedRules.map(async (rule) => {
         const userId = rule.userId;
         const arbitrageStrategy = rule.arbitrageStrategy;
         const oneSiteName = rule.oneSiteName;
@@ -37,13 +55,13 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           const oneSecret = secrets.filter((secret) => secret.apiProvider === oneSiteName)[0];
           const otherSecret = secrets.filter((secret) => secret.apiProvider === otherSiteName)[0];
 
-          // If exist key and secret of both exchange sites
+          // Skip process if NOT exist key and secret of both exchange sites
           if (!oneSecret || !otherSecret) {
             console.warn(util.format('WARN : %s', 'Secrets MUST have over 2  effective items, SKIPPING process...'));
             return;
           }
 
-          // If change the rule's status to unavailable
+          // Change to UNAVAILABLE when exceeds max failed limit
           if (rule.counts.failureCount >= rule.maxFailedLimit) {
             await Rule.updateWithVersion(
               { userId: rule.userId, ruleId: rule.ruleId },
@@ -75,13 +93,20 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           console.info(util.format('INFO : %s', 'Applied  a rule'));
           console.log(updatedRule);
         }
-      } catch (error) {
-        // Rule table update error
-        console.error(util.format('ERROR : %s', error));
-      }
-    });
+      })
+    );
+
+    //  LOCKED -> AVAILABLE
+    await Promise.all(
+      lockedRules.map(async (rule) => {
+        return await Rule.updateWithVersion(
+          { userId: rule.userId, ruleId: rule.ruleId },
+          { status: RULE_STATUS.AVAILABLE }
+        );
+      })
+    );
   } catch (error) {
-    // database connection error OR bugs
+    // database connection error OR inconsistent data OR bugs
     console.error(util.format('ERROR : %s', error));
   }
 };

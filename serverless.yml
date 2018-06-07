@@ -27,16 +27,30 @@ provider:
     DYNAMODB_SECRET_ACCESS_KEY: ${file(./config/config.yml):${self:provider.stage}.aws_secret_access_key}
     DYNAMODB_REGION: ${self:provider.region}
     # Table names on DynamoDB
-    DYNAMODB_TABLE_POLICIES: ${self:custom.service.name}_policies_${self:provider.stage}
-    DYNAMODB_TABLE_SECRETS: ${self:custom.service.name}_secrets_${self:provider.stage}
-    DYNAMODB_TABLE_RULES: ${self:custom.service.name}_rules_${self:provider.stage}
-    DYNAMODB_TABLE_TRANSACTIONS: ${self:custom.service.name}_transactions_${self:provider.stage}
+    DYNAMODB_TABLE_POLICIES_NAME: ${self:custom.service.name}_policies_${self:provider.stage}
+    DYNAMODB_TABLE_POLICIES_RCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_policies_rcu}
+    DYNAMODB_TABLE_POLICIES_WCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_policies_wcu}
+    DYNAMODB_TABLE_SECRETS_NAME: ${self:custom.service.name}_secrets_${self:provider.stage}
+    DYNAMODB_TABLE_SECRETS_RCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_secrets_rcu}
+    DYNAMODB_TABLE_SECRETS_WCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_secrets_wcu}
+    DYNAMODB_TABLE_RULES_NAME: ${self:custom.service.name}_rules_${self:provider.stage}
+    DYNAMODB_TABLE_RULES_RCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_rules_rcu}
+    DYNAMODB_TABLE_RULES_WCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_rules_wcu}
+    DYNAMODB_TABLE_RULES_GSI_RCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_rules_gsi_rcu}
+    DYNAMODB_TABLE_RULES_GSI_WCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_rules_gsi_wcu}
+    DYNAMODB_TABLE_TRANSACTIONS_NAME: ${self:custom.service.name}_transactions_${self:provider.stage}
+    DYNAMODB_TABLE_TRANSACTIONS_RCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_transactions_rcu}
+    DYNAMODB_TABLE_TRANSACTIONS_WCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_transactions_wcu}
+    DYNAMODB_TABLE_TRANSACTIONS_GSI_RCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_transactions_gsi_rcu}
+    DYNAMODB_TABLE_TRANSACTIONS_GSI_WCU: ${file(./config/config.yml):${self:provider.stage}.dynamodb_transactions_gsi_wcu}
+
+
     # Secret encrypt
     ENCRYPT_KEY: ${file(./config/config.yml):${self:provider.stage}.encrypt_key}
-    # Scheduler interval minutes
-    SCHEDULER_INTERVAL: ${file(./config/config.yml):${self:provider.stage}.scheduler_interval}
-    # Scheduler locked transaction release time seconds
-    LOCKED_TRANSACTIONS_RELEASE_TIME_SEC: ${file(./config/config.yml):${self:provider.stage}.scheduler_locked_transactions_release_time_sec}
+    # Scheduler Settings
+    SCHEDULER_INTERVAL_MINUTES: ${file(./config/config.yml):${self:provider.stage}.scheduler_interval_minutes}
+    SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS: ${file(./config/config.yml):${self:provider.stage}.scheduler_locked_transactions_release_time_seconds}
+    SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT: ${file(./config/config.yml):${self:provider.stage}.scheduler_rules_concurrent_execution_limit}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -162,7 +176,7 @@ functions:
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage
     events:
-      - schedule: rate(${self:provider.environment.SCHEDULER_INTERVAL} minute)
+      - schedule: rate(${self:provider.environment.SCHEDULER_INTERVAL_MINUTES} minute)
 
 # Dynamodb settings
 resources:
@@ -170,7 +184,7 @@ resources:
     policiesTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_POLICIES_NAME}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
@@ -178,12 +192,12 @@ resources:
           - AttributeName: userId
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_POLICIES_RCU}
+          WriteCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_POLICIES_WCU}
     secretsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_SECRETS_NAME}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
@@ -195,12 +209,12 @@ resources:
           - AttributeName: secretId
             KeyType: RANGE
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_SECRETS_RCU}
+          WriteCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_SECRETS_WCU}
     rulesTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_RULES}
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_RULES_NAME}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
@@ -208,6 +222,8 @@ resources:
             AttributeType: S
           - AttributeName: status
             AttributeType: S
+          - AttributeName: modifiedAt
+            AttributeType: N
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
@@ -218,18 +234,20 @@ resources:
             KeySchema:
               - AttributeName: status
                 KeyType: HASH
+              - AttributeName: modifiedAt
+                KeyType: RANGE
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
+              ReadCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_RULES_GSI_RCU}
+              WriteCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_RULES_GSI_WCU}
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_RULES_RCU}
+          WriteCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_RULES_WCU}
     transactionsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_NAME}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
@@ -254,11 +272,11 @@ resources:
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
+              ReadCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_GSI_RCU}
+              WriteCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_GSI_WCU}
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          ReadCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_RCU}
+          WriteCapacityUnits: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_WCU}
 
 custom:
   # Alternative service properties
@@ -273,21 +291,21 @@ custom:
     seed:
       dev:
         sources:
-          - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES_NAME}
             sources: [.seed/dev/fake-policies.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS_NAME}
             sources: [.seed/dev/fake-secrets.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_RULES}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_RULES_NAME}
             sources: [.seed/dev/fake-rules.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_NAME}
             sources: [.seed/dev/fake-transactions.json]
       me:
         sources:
-          - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_POLICIES_NAME}
             sources: [.seed/me/my-policies.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_SECRETS_NAME}
             sources: [.seed/me/my-secrets.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_RULES}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_RULES_NAME}
             sources: [.seed/me/my-rules.json]
-          - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS}
+          - table: ${self:provider.environment.DYNAMODB_TABLE_TRANSACTIONS_NAME}
             sources: [.seed/me/my-transactions.json]

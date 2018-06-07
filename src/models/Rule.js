@@ -1,4 +1,5 @@
 const uuid = require('uuid');
+const moment = require('moment');
 const dynamoose = require('../services/dynamoose');
 const { Schema } = dynamoose;
 
@@ -32,6 +33,7 @@ const EXCHANGE_SITES = {
 const RULE_STATUS = {
   AVAILABLE: 'available',
   UNAVAILABLE: 'unavailable',
+  LOCKED: 'locked',
   DELETED: 'deleted'
 };
 
@@ -125,17 +127,26 @@ const ruleSchema = new Schema(
     },
     status: {
       type: String,
-      index: { global: true, name: 'statusIndex', project: true },
+      index: {
+        global: true,
+        rangeKey: 'modifiedAt',
+        name: 'statusIndex',
+        project: true
+      },
       required: true,
       default: RULE_STATUS.AVAILABLE,
       validate: (value) => Object.values(RULE_STATUS).indexOf(value) !== -1
     },
+    modifiedAt: { type: Date, required: true, default: () => moment().toISOString() },
     version: { type: Number, required: true, default: 0 }
   },
   options
 );
 
 ruleSchema.statics.updateWithVersion = async function(key, update, options) {
+  const modifiedAt = moment().toISOString();
+  update.modifiedAt = modifiedAt;
+
   const existingRule = await this.get({
     userId: key.userId,
     ruleId: key.ruleId
