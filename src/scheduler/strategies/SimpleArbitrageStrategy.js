@@ -1,3 +1,5 @@
+const path = require('path');
+const { createLog } = require('../../utils/logger');
 const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
 const uuid = require('uuid');
@@ -9,6 +11,8 @@ const Exchanges = {
 };
 const { ERROR_CODES } = require('../exchanges/errors');
 const { result, transaction } = require('./transactions');
+
+const logger = createLog('scheduler', path.basename(__filename));
 
 const lockedTransactionsReleaseTimeSec = process.env.SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS;
 const commitmentTimeLimitSec = process.env.SCHEDULER_COMMITMENT_TIME_LIMIT_SECONDS;
@@ -43,9 +47,8 @@ async function retryPromise(promise, args, retryIntervalMSec, retryTimes, instan
     return result;
   } catch (error) {
     if (error.code && error.code === ERROR_CODES.API_TEMPORARILY_UNAVAILABLE && retryTimes > 0) {
-      console.log('Retrying....');
-      console.log('retryIntervalMSec', retryIntervalMSec);
-      console.log('retryTimes', retryTimes);
+      logger.warn(`Retrying... after waiting ${retryIntervalMSec} [msec].`);
+      logger.debug(`Retry interval is ${retryIntervalMSec} [msec] and Retry times is ${retryTimes}.`);
       await setTimeoutPromise(retryIntervalMSec);
       return retryPromise(promise, args, retryIntervalMSec, retryTimes - 1, instance);
     } else {
@@ -87,57 +90,55 @@ class SimpleArbitrageStrategy {
     const sellTransactionId = uuid.v4();
 
     try {
+      logger.debug('Arguments =>');
+      logger.debug('userId', this.userId);
+      logger.debug('ruleId', this.ruleId);
+      logger.debug('arbitrageStrategy', this.arbitrageStrategy);
+      logger.debug('coinUnit', this.coinUnit);
+      logger.debug('currencyUnit', this.currencyUnit);
+      logger.debug('orderType', this.orderType);
+      logger.debug('assetRange', this.assetRange);
+      logger.debug('assetMinLimit', this.assetMinLimit);
+      logger.debug('commitmentTimeLimit', this.commitmentTimeLimit);
+      logger.debug('buyWeightRate', this.buyWeightRate);
+      logger.debug('sellWeightRate', this.sellWeightRate);
+
       // Check working transactions
       const workingTransactions = await transaction.getWorking(this.ruleId);
       if (workingTransactions.length > 0) {
         // Release locked transactions
-        const releaseTransactionPromises = workingTransactions.map(async (lockedTransaction) => {
-          const mNow = moment();
-          const mModifiedAt = moment(lockedTransaction.modifiedAt);
-          const diffSec = mModifiedAt.diff(mNow, 'seconds');
+        const releasedTransactions = await Promise.all(
+          workingTransactions.map(async (lockedTransaction) => {
+            const mNow = moment();
+            const mModifiedAt = moment(lockedTransaction.modifiedAt);
+            const diffSec = mModifiedAt.diff(mNow, 'seconds');
 
-          if (diffSec > lockedTransactionsReleaseTimeSec) {
-            // => FAILED
-            const releasedTransaction = await transaction.failed(
-              lockedTransaction.userId,
-              lockedTransaction.transactionId,
-              ERROR_CODES.RELEASED_LOCKED_TRANSACTIONS
-            );
-            return releasedTransaction;
-          }
-        });
-        const releasedTransactions = await Promise.all(releaseTransactionPromises);
+            if (diffSec > lockedTransactionsReleaseTimeSec) {
+              // => FAILED
+              const releasedTransaction = await transaction.failed(
+                lockedTransaction.userId,
+                lockedTransaction.transactionId,
+                ERROR_CODES.RELEASED_LOCKED_TRANSACTIONS
+              );
+              return releasedTransaction;
+            }
+          })
+        );
 
-        console.log('-------------------------');
-        console.log('Release transactions');
-        console.log(releasedTransactions);
-        console.log('-------------------------');
-        console.log('Skipping...');
-        console.log('-------------------------');
+        logger.debug('Released transactions =>');
+        logger.debug(releasedTransactions);
+        logger.warn(`Released ${releasedTransactions.count} transactions and Skipping to make new transactions...`);
+
         return result.noTransaction();
       }
-
-      console.log('##### arguments #####');
-      console.log('userId', this.userId);
-      console.log('ruleId', this.ruleId);
-      console.log('arbitrageStrategy', this.arbitrageStrategy);
-      console.log('coinUnit', this.coinUnit);
-      console.log('currencyUnit', this.currencyUnit);
-      console.log('orderType', this.orderType);
-      console.log('assetRange', this.assetRange);
-      console.log('assetMinLimit', this.assetMinLimit);
-      console.log('commitmentTimeLimit', this.commitmentTimeLimit);
-      console.log('buyWeightRate', this.buyWeightRate);
-      console.log('sellWeightRate', this.sellWeightRate);
-      console.log('####################');
 
       // Transaction minimum price unit
       const transactionMinPriceUnitA = await this.ExchangeA.getTransactionMinPriceUnit();
       const transactionMinPriceUnitB = await this.ExchangeB.getTransactionMinPriceUnit();
-      console.log('-------------------------');
-      console.log('transactionMinPriceUnitA', transactionMinPriceUnitA);
-      console.log('transactionMinPriceUnitB', transactionMinPriceUnitB);
-      console.log('-------------------------');
+
+      logger.debug('Transaction minimum price units =>');
+      logger.debug(`[${this.ExchangeA.getName()}] ${transactionMinPriceUnitA}`);
+      logger.debug(`[${this.ExchangeB.getName()}] ${transactionMinPriceUnitA}`);
 
       // Compute best bid and best ask, then Weighting and Align the price unit
       const boardA = await this.ExchangeA.getSortedBoard();
@@ -166,14 +167,13 @@ class SimpleArbitrageStrategy {
             Math.floor(boardB.asks[0].price * this.buyWeightRate) % transactionMinPriceUnitB;
       const bestAskAmountB = boardB.asks[0].amount;
 
-      console.log('-------------------------');
-      console.log('BEST Bid A', bestBidPriceA);
-      console.log('BEST Ask A', bestAskPriceA);
-      console.log('BEST Ask A', bestAskAmountA);
-      console.log('BEST Bid B', bestBidPriceB);
-      console.log('BEST Ask B', bestAskPriceB);
-      console.log('BEST Ask B', bestAskAmountB);
-      console.log('-------------------------');
+      logger.info('Best bids and asks =>');
+      logger.info(`[${this.ExchangeA.getName()}][BID][Price] ${bestBidPriceA}`);
+      logger.info(`[${this.ExchangeA.getName()}][ASK][Price] ${bestAskPriceA}`);
+      logger.info(`[${this.ExchangeA.getName()}][ASK][Amount] ${bestAskAmountA}`);
+      logger.info(`[${this.ExchangeB.getName()}][BID][Price] ${bestBidPriceB}`);
+      logger.info(`[${this.ExchangeB.getName()}][ASK][Price] ${bestAskPriceB}`);
+      logger.info(`[${this.ExchangeB.getName()}][ASK][Amount] ${bestAskAmountB}`);
 
       // Compute transaction fees
       const transactionFeeRateA = await this.ExchangeA.getTransactionFeeRate();
@@ -182,14 +182,16 @@ class SimpleArbitrageStrategy {
       const bestAskFeeA = bestAskPriceA * transactionFeeRateA;
       const bestBidFeeB = bestBidPriceB * transactionFeeRateB;
       const bestAskFeeB = bestAskPriceB * transactionFeeRateB;
-      console.log('-------------------------');
-      console.log('BEST FEE Rate B', transactionFeeRateA);
-      console.log('BEST FEE Rate B', transactionFeeRateB);
-      console.log('BEST Bid FEE A', bestBidFeeA);
-      console.log('BEST Ask FEE A', bestAskFeeA);
-      console.log('BEST Bid FEE B', bestBidFeeB);
-      console.log('BEST Ask FEE B', bestAskFeeB);
-      console.log('-------------------------');
+
+      logger.info('Fee rates =>');
+      logger.info(`[${this.ExchangeA.getName()}][Rate] ${transactionFeeRateA}`);
+      logger.info(`[${this.ExchangeB.getName()}][Rate] ${transactionFeeRateB}`);
+
+      logger.debug('Fees =>');
+      logger.debug(`[${this.ExchangeA.getName()}][BID][Fee] ${bestBidFeeA}`);
+      logger.debug(`[${this.ExchangeA.getName()}][ASK][Fee] ${bestAskFeeA}`);
+      logger.debug(`[${this.ExchangeB.getName()}][BID][Fee] ${bestBidFeeB}`);
+      logger.debug(`[${this.ExchangeB.getName()}][ASK][Fee] ${bestAskFeeB}`);
 
       // Compute transaction minimum amount and digit
       const transactionMinAmountA = this.ExchangeA.getTransactionMinAmount();
@@ -205,16 +207,12 @@ class SimpleArbitrageStrategy {
       const possibleCoinAmountLimitA = assetsAmountsA.presentCoinAmount * this.assetRange;
       const possiblePriceLimitB = assetsAmountsB.presentCurrencyAmount * this.assetRange;
       const possibleCoinAmountLimitB = assetsAmountsB.presentCoinAmount * this.assetRange;
-      console.log(`####### ${this.ExchangeA.getName()} ##########`);
-      console.log('BTC limit', possibleCoinAmountLimitA);
-      console.log('JPY limit', possiblePriceLimitA);
-      console.log(`####### ${this.ExchangeB.getName()} ##########`);
-      console.log('BTC limit', possibleCoinAmountLimitB);
-      console.log('JPY limit', possiblePriceLimitB);
-      console.log('########################');
-      console.log('DIFF BidA-AskB', bestBidPriceA - bestAskPriceB);
-      console.log('DIFF BidB-AskA', bestBidPriceB - bestAskPriceA);
-      console.log('########################');
+
+      logger.debug('[Limits to trade]');
+      logger.debug(`[${this.ExchangeA.getName()}][Coin] ${possibleCoinAmountLimitA}`);
+      logger.debug(`[${this.ExchangeA.getName()}][Currency] ${possiblePriceLimitA}`);
+      logger.debug(`[${this.ExchangeB.getName()}][Coin] ${possibleCoinAmountLimitB}`);
+      logger.debug(`[${this.ExchangeB.getName()}][Currency] ${possiblePriceLimitB}`);
 
       // Condition
       // A_Bid*(1 - A_FeeRate) - B_Ask*(1 - B_FeeRate) > (A_Bid*A_FeeRate) + (B_Ask*B_FeeRate)
@@ -224,10 +222,13 @@ class SimpleArbitrageStrategy {
       const isConditionedToBuyAskBAndSellBidA = bestBidPriceA - bestAskPriceB - 2 * bestBidFeeA > 0 ? true : false;
       const isConditionedToBuyAskAAndSellBidB = bestBidPriceB - bestAskPriceA - 2 * bestBidFeeB > 0 ? true : false;
 
-      console.log('-------------------------');
-      console.log('BUY B_ASK and SELL A_BID?', isConditionedToBuyAskBAndSellBidA);
-      console.log('BUY A_ASK and SELL B_BID?', isConditionedToBuyAskAAndSellBidB);
-      console.log('-------------------------');
+      logger.info('Conditions =>');
+      logger.info(
+        `BUY ${this.ExchangeB.getName()}'s ask and SEL ${this.ExchangeA.getName()}'s bid ? => ${isConditionedToBuyAskBAndSellBidA}`
+      );
+      logger.info(
+        `BUY ${this.ExchangeA.getName()}'s ask and SEL  ${this.ExchangeB.getName()}'s bid ? => ${isConditionedToBuyAskAAndSellBidB}`
+      );
 
       // Compute target to buy and sell
       let target;
@@ -251,12 +252,11 @@ class SimpleArbitrageStrategy {
         const fixedSellAmount =
           Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit);
 
-        console.log('-------------------------');
-        console.log('buyAmount', buyAmount);
-        console.log('fixedBuyAmount', fixedBuyAmount);
-        console.log('sellAmount', sellAmount);
-        console.log('fixedSellAmount', fixedSellAmount);
-        console.log('-------------------------');
+        logger.debug('Buy and Sell amounts =>');
+        logger.debug(`[BUY][Amount][Raw] ${buyAmount}`);
+        logger.debug(`[BUY][Amount][Fixed] ${fixedBuyAmount}`);
+        logger.debug(`[SELL][Amount][Raw] ${sellAmount}`);
+        logger.debug(`[SELL][Amount][Fixed] ${fixedSellAmount}`);
 
         target = {
           buy: {
@@ -296,12 +296,11 @@ class SimpleArbitrageStrategy {
         const fixedSellAmount =
           Math.floor(sellAmount * Math.pow(10, transactionDigit)) / Math.pow(10, transactionDigit);
 
-        console.log('-------------------------');
-        console.log('buyAmount', buyAmount);
-        console.log('fixedBuyAmount', fixedBuyAmount);
-        console.log('sellAmount', sellAmount);
-        console.log('fixedSellAmount', fixedSellAmount);
-        console.log('-------------------------');
+        logger.debug('Buy and Sell amounts =>');
+        logger.debug(`[BUY][Amount][Raw] ${buyAmount}`);
+        logger.debug(`[BUY][Amount][Fixed] ${fixedBuyAmount}`);
+        logger.debug(`[SELL][Amount][Raw] ${sellAmount}`);
+        logger.debug(`[SELL][Amount][Fixed] ${fixedSellAmount}`);
 
         target = {
           buy: {
@@ -322,30 +321,17 @@ class SimpleArbitrageStrategy {
           }
         };
       } else {
-        console.log('-------------------------');
-        console.log('NOOOOOOO Trade!!! NOOOO Match Condition');
-        console.log('-------------------------');
+        logger.warn(`NO match condition and Skipping to make new transactions...`);
         return result.noTransaction();
       }
 
-      console.log('-------------------------');
-      console.log('transactionMinAmount', transactionMinAmount);
-      console.log('target.buy.orderAmount', target.buy.orderAmount);
-      console.log('assetMinLimit', this.assetMinLimit);
-      console.log('target.buy.laterAssetPrice', target.buy.laterAssetPrice);
-      console.log('-------------------------');
-
       if (target.buy.laterAssetPrice < this.assetMinLimit) {
-        console.log('-------------------------');
-        console.log('NOOOOOOO Trade!!! OVER ASSET MIN LIMIT');
-        console.log('-------------------------');
+        logger.warn(`Exceeded asset minimum limit and Skipping to make new transactions...`);
         return result.noTransaction();
       }
 
       if (target.buy.orderAmount < transactionMinAmount) {
-        console.log('-------------------------');
-        console.log('NOOOOOOO Trade!!! TOO MIN');
-        console.log('-------------------------');
+        logger.warn(`Too small order amount and Skipping to make new transactions...`);
         return result.noTransaction();
       }
 
@@ -354,20 +340,17 @@ class SimpleArbitrageStrategy {
           target.buy.orderPrice * target.buy.orderAmount * (1 - target.buy.transactionFeeRate)
       );
 
-      console.log('########################');
-      console.log('BUY', 'name', target.buy.api.getName());
-      console.log('BUY', 'orderPrice', target.buy.orderPrice);
-      console.log('BUY', 'orderAmount', target.buy.orderAmount);
-      console.log('BUY', 'transactionFeeRate', target.buy.transactionFeeRate);
-      console.log('BUY', 'laterAssetCoin', target.buy.laterAssetCoin);
-      console.log('BUY', 'laterAssetPrice', target.buy.laterAssetPrice);
-      console.log('SELL', 'name', target.sell.api.getName());
-      console.log('SELL', 'orderPrice', target.sell.orderPrice);
-      console.log('SELL', 'orderAmount', target.sell.orderAmount);
-      console.log('SELL', 'transactionFeeRate', target.sell.transactionFeeRate);
-      console.log('SELL', 'laterAssetCoin', target.sell.laterAssetCoin);
-      console.log('SELL', 'laterAssetPrice', target.sell.laterAssetPrice);
-      console.log('########################');
+      logger.info('Order targets =>');
+      logger.info(`[${target.buy.api.getName()}][BUY][Price] ${target.buy.orderPrice}`);
+      logger.info(`[${target.buy.api.getName()}][BUY][Amount] ${target.buy.orderAmount}`);
+      logger.info(`[${target.buy.api.getName()}][BUY][Fee Rate] ${target.buy.transactionFeeRate}`);
+      logger.info(`[${target.buy.api.getName()}][BUY][Later Asset Coin] ${target.buy.laterAssetCoin}`);
+      logger.info(`[${target.buy.api.getName()}][BUY][Later Asset Price] ${target.buy.laterAssetPrice}`);
+      logger.info(`[${target.sell.api.getName()}][SELL][Price] ${target.sell.orderPrice}`);
+      logger.info(`[${target.sell.api.getName()}][SELL][Amount] ${target.sell.orderAmount}`);
+      logger.info(`[${target.sell.api.getName()}][SELL][Fee Rate] ${target.sell.transactionFeeRate}`);
+      logger.info(`[${target.sell.api.getName()}][SELL][Later Asset Coin] ${target.sell.laterAssetCoin}`);
+      logger.info(`[${target.sell.api.getName()}][SELL][Later Asset Price] ${target.sell.laterAssetPrice}`);
 
       // Begin transactions
       const buyTransactionObj = {
@@ -402,19 +385,20 @@ class SimpleArbitrageStrategy {
       // =>  INITIAL
       const buyTransaction = await transaction.initial(buyTransactionObj);
       const sellTransaction = await transaction.initial(sellTransactionObj);
-      console.log('-------------------------');
-      console.log(buyTransaction);
-      console.log(sellTransaction);
-      console.log('-------------------------');
+
+      logger.debug('New transactions =>');
+      logger.debug(buyTransaction);
+      logger.debug(sellTransaction);
 
       // Begin buy transaction
       let buyOrderId;
       // => IN_PROGRESS
       const workingBuyTransaction = await transaction.in_progress(this.userId, buyTransactionId);
-      console.log('##### BUY ORDER #####', target.buy.api.getName());
-      console.log('-------------------------');
-      console.log(workingBuyTransaction);
-      console.log('-------------------------');
+
+      logger.info(`Starting buy order to ${target.buy.api.getName()}...`);
+      logger.debug('[Working transaction to buy]');
+      logger.debug(workingBuyTransaction);
+
       try {
         buyOrderId = await retryPromise(
           target.buy.api.order,
@@ -437,10 +421,12 @@ class SimpleArbitrageStrategy {
           errorCode,
           errorDetail
         );
-        console.log('-------------------------');
-        console.log(canceledBuyTransaction);
-        console.log(error);
-        console.log('-------------------------');
+
+        logger.warn(`Canceled ${target.buy.api.getName()}'s buy order successfuly because any api problem.`);
+        logger.warn(new Error(error));
+        logger.debug('[Canceled buy transaction]');
+        logger.debug(canceledBuyTransaction);
+
         return result.cancellation();
       }
 
@@ -448,10 +434,11 @@ class SimpleArbitrageStrategy {
       let sellOrderId;
       // => IN_PROGRESS
       const workingSellTransaction = await transaction.in_progress(this.userId, sellTransactionId);
-      console.log('##### SELL ORDER #####', target.sell.api.getName());
-      console.log('-------------------------');
-      console.log(workingSellTransaction);
-      console.log('-------------------------');
+
+      logger.info(`Starting sell order to ${target.sell.api.getName()}...`);
+      logger.debug('[Working transaction to sell]');
+      logger.debug(workingSellTransaction);
+
       try {
         sellOrderId = await retryPromise(
           target.sell.api.order,
@@ -483,11 +470,15 @@ class SimpleArbitrageStrategy {
           errorCode,
           errorDetail
         );
-        console.log('-------------------------');
-        console.log(canceledBuyTransaction);
-        console.log(canceledSellTransaction);
-        console.log(error);
-        console.log('-------------------------');
+
+        logger.warn(
+          `Canceled both ${target.buy.api.getName()}'s buy order and ${target.sell.api.getName()}'s sell order successfuly because any api problem.`
+        );
+        logger.warn(new Error(error));
+        logger.debug('Canceled transactions =>');
+        logger.debug(canceledBuyTransaction);
+        logger.debug(canceledSellTransaction);
+
         return result.cancellation();
       }
 
@@ -509,10 +500,15 @@ class SimpleArbitrageStrategy {
         );
         // => SUCCEEDED but only sell order
         const succeededSellTransaction = await transaction.succeeded(this.userId, sellTransactionId);
-        console.log('-------------------------');
-        console.log(canceledBuyTransaction);
-        console.log(succeededSellTransaction);
-        console.log('-------------------------');
+
+        logger.warn(
+          `Canceled ${target.buy.api.getName()}'s buy order but Succeeded ${target.sell.api.getName()}'s sell order because exceeded commitment time limit.`
+        );
+        logger.debug('[Canceled buy transaction]');
+        logger.debug(canceledBuyTransaction);
+        logger.debug('[Succeeded sell transaction]');
+        logger.debug(succeededSellTransaction);
+
         return result.failure();
       } else if (isCompletedBuyOrder === true && isCompletedSellOrder === false) {
         // TODO: How to recover?
@@ -525,10 +521,15 @@ class SimpleArbitrageStrategy {
           sellTransactionId,
           ERROR_CODES.SELL_ORDER_TIMEOUT
         );
-        console.log('-------------------------');
-        console.log(succeededBuyTransaction);
-        console.log(canceledSellTransaction);
-        console.log('-------------------------');
+
+        logger.warn(
+          `Succeeded ${target.buy.api.getName()}'s buy order but Canceled ${target.sell.api.getName()}'s sell order because exceeded commitment time limit.`
+        );
+        logger.debug('[Succeeded sell transaction]');
+        logger.debug(succeededBuyTransaction);
+        logger.debug('[Canceled buy transaction]');
+        logger.debug(canceledSellTransaction);
+
         return result.failure();
       } else if (isCompletedBuyOrder === false && isCompletedSellOrder === false) {
         await target.buy.api.cancelOrder(buyOrderId);
@@ -544,19 +545,28 @@ class SimpleArbitrageStrategy {
           sellTransactionId,
           ERROR_CODES.BOTH_ORDERS_TIMEOUT
         );
-        console.log('-------------------------');
-        console.log(canceledBuyTransaction);
-        console.log(canceledSellTransaction);
-        console.log('-------------------------');
+
+        logger.warn(
+          `Canceled both ${target.buy.api.getName()}'s buy order and ${target.sell.api.getName()}'s sell order because exceeded commitment time limit.`
+        );
+        logger.debug('Canceled transactions =>');
+        logger.debug(canceledBuyTransaction);
+        logger.debug(canceledSellTransaction);
+
         return result.cancellation();
       } else {
         // => SUCCEEDED
         const succeededBuyTransaction = await transaction.succeeded(this.userId, buyTransactionId);
         const succeededSellTransaction = await transaction.succeeded(this.userId, sellTransactionId);
-        console.log('-------------------------');
-        console.log(succeededBuyTransaction);
-        console.log(succeededSellTransaction);
-        console.log('-------------------------');
+
+        logger.info(
+          `Succeeded both ${target.buy.api.getName()}'s buy order and ${target.sell.api.getName()}'s sell order.`
+        );
+        logger.info(`[Decided profit] ${anticipatedProfit}`);
+        logger.debug('Succeeded transactions =>');
+        logger.debug(succeededBuyTransaction);
+        logger.debug(succeededSellTransaction);
+
         return result.success(anticipatedProfit);
       }
     } catch (error) {
@@ -565,11 +575,13 @@ class SimpleArbitrageStrategy {
       // => FAILED
       const failedBuyTransaction = await transaction.failed(this.userId, buyTransactionId, errorCode, errorDetail);
       const failedSellTransaction = await transaction.failed(this.userId, sellTransactionId, errorCode, errorDetail);
-      console.log('-------------------------');
-      console.log(failedBuyTransaction);
-      console.log(failedSellTransaction);
-      console.log(error);
-      console.log('-------------------------');
+
+      logger.error('Failed unexpectedly!');
+      logger.error(new Error(error));
+      logger.error('Failed transactions =>');
+      logger.error(failedBuyTransaction);
+      logger.error(failedSellTransaction);
+
       return result.failure();
     }
   }

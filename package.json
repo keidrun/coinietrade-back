@@ -2,6 +2,7 @@
   "name": "coinietrade-back",
   "version": "0.0.1",
   "description": "CoinieTrade back end.",
+  "private": true,
   "engines": {
     "node": "8.10.0"
   },
@@ -10,18 +11,20 @@
   "license": "No license",
   "dependencies": {
     "axios": "^0.18.0",
+    "bunyan": "^1.8.12",
+    "bunyan-format": "^0.2.1",
     "crypto": "^1.0.1",
     "dynamoose": "^0.8.7",
     "qs": "^6.5.2",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "babel-core": "^6.25.0",
+    "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",
-    "babel-loader": "^7.1.1",
+    "babel-loader": "^7.1.4",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.23.0",
-    "babel-preset-env": "^1.6.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "dotenv": "^5.0.1",

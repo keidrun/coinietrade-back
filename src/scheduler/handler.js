@@ -1,9 +1,12 @@
-const util = require('util');
+const path = require('path');
+const { createLog } = require('../utils/logger');
 const moment = require('moment');
 const { Rule, RULE_STATUS, ARBITRAGE_STRATEGIES } = require('../models/Rule');
 const { Policy, USER_EFFECTS } = require('../models/Policy');
 const { Secret } = require('../models/Secret');
 const { runSimpleArbitrage } = require('./runners/runSimpleArbitrage');
+
+const logger = createLog('scheduler', path.basename(__filename));
 
 const rulesConcurrentExecutionLimit = process.env.SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT;
 
@@ -11,16 +14,18 @@ const rulesConcurrentExecutionLimit = process.env.SCHEDULER_RULES_CONCURRENT_EXE
 module.exports.scheduleArbitrage = async (event, context, callback) => {
   /* eslint-enable no-unused-vars */
 
-  console.info(util.format('INFO : %s', 'Starting Arbitrage...'));
+  logger.info('Starting Arbitrage...');
   try {
     const availableRules = await Rule.query('status')
       .eq(RULE_STATUS.AVAILABLE)
       .ascending() //sorted by modifiedAt
       .limit(rulesConcurrentExecutionLimit)
       .exec();
+    logger.debug('Available rules =>');
+    logger.debug(availableRules);
 
     if (availableRules.count <= 0) {
-      console.warn(util.format('WARN : %s', 'Available Rules NOT Found, SKIPPING process...'));
+      logger.warn('Available rules NOT found. Skipping process...');
       return;
     }
 
@@ -33,9 +38,12 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
         );
       })
     );
+    logger.debug('locked rules  =>');
+    logger.debug(lockedRules);
 
     // handle rules
-    await Promise.all(
+    logger.info('Applying rules...');
+    const updatedRules = await Promise.all(
       lockedRules.map(async (rule) => {
         const userId = rule.userId;
         const arbitrageStrategy = rule.arbitrageStrategy;
@@ -44,9 +52,10 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
 
         const policy = await Policy.get(userId);
         if (!policy) {
-          console.warn(util.format('WARN : %s', 'Policy NOT Found, SKIPPING process...'));
+          logger.warn('Policy NOT found. Skipping process...');
           return;
         }
+
         const effect = policy.effect;
         const mExpiredAt = moment(policy.expiredAt).utc();
         const mNow = moment().utc();
@@ -57,7 +66,7 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
 
           // Skip process if NOT exist key and secret of both exchange sites
           if (!oneSecret || !otherSecret) {
-            console.warn(util.format('WARN : %s', 'Secrets MUST have over 2  effective items, SKIPPING process...'));
+            logger.warn('Secrets MUST have pair effective items. Skipping process...');
             return;
           }
 
@@ -67,11 +76,8 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
               { userId: rule.userId, ruleId: rule.ruleId },
               { status: RULE_STATUS.UNAVAILABLE }
             );
-            console.warn(
-              util.format(
-                'WARN : %s',
-                "Over failure count, then the rule's status was changed to unavailable, SKIPPING process..."
-              )
+            logger.warn(
+              "Exceeded failure count, then the rule's status was changed to unavailable. Skipping process..."
             );
             return;
           }
@@ -80,7 +86,6 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           apiSecrets[oneSiteName] = oneSecret;
           apiSecrets[otherSiteName] = otherSecret;
 
-          console.info(util.format('INFO : %s', 'Applying a rule...'));
           let updatedRule;
           switch (arbitrageStrategy) {
             case ARBITRAGE_STRATEGIES.SIMPLE:
@@ -90,14 +95,17 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
               updatedRule = await runSimpleArbitrage(rule, apiSecrets);
               break;
           }
-          console.info(util.format('INFO : %s', 'Applied  a rule'));
-          console.log(updatedRule);
+          return updatedRule;
         }
       })
     );
 
-    //  LOCKED -> AVAILABLE
-    await Promise.all(
+    logger.info('Applied rules.');
+    logger.debug('Applied rules =>');
+    logger.debug(updatedRules);
+
+    // LOCKED -> AVAILABLE
+    const releasedRukes = await Promise.all(
       lockedRules.map(async (rule) => {
         return await Rule.updateWithVersion(
           { userId: rule.userId, ruleId: rule.ruleId },
@@ -105,8 +113,10 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
         );
       })
     );
+    logger.debug('Released rules =>');
+    logger.debug(releasedRukes);
   } catch (error) {
     // database connection error OR inconsistent data OR bugs
-    console.error(util.format('ERROR : %s', error));
+    logger.fatal(new Error(error));
   }
 };

@@ -47,7 +47,7 @@ const runSimpleArbitrage = async (rule, apiSecrets) => {
 
     return updatedRule;
   } catch (error) {
-    throw error;
+    throw new Error(error);
   }
 };
 

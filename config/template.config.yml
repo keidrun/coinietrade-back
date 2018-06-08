@@ -1,5 +1,7 @@
 dev:
   node_env: development
+  log_level: {any}
+  is_json_logs: {any}
   profile: {any}
   region: localhost
   aws_access_key_id: MOCK_ACCESS_KEY_ID
@@ -25,6 +27,8 @@ dev:
   dynamodb_transactions_gsi_wcu: {any}
 staging:
   node_env: staging
+  log_level: {any}
+  is_json_logs: {any}
   profile: {any}
   region: {any}
   aws_access_key_id: {any}
@@ -50,6 +54,8 @@ staging:
   dynamodb_transactions_gsi_wcu: {any}
 prod:
   node_env: production
+  log_level: {any}
+  is_json_logs: {any}
   profile: {any}
   region: {any}
   aws_access_key_id: {any}

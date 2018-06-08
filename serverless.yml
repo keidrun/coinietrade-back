@@ -21,6 +21,8 @@ provider:
     - ${opt:stage, self:provider.stage}-privateApiKey
   environment:
     NODE_ENV: ${file(./config/config.yml):${self:provider.stage}.node_env, 'development'}
+    LOG_LEVEL: ${file(./config/config.yml):${self:provider.stage}.log_level}
+    IS_JSON_LOGS: ${file(./config/config.yml):${self:provider.stage}.is_json_logs}
     SERVICE_NAME: ${self:custom.service.name}
     STAGE: ${self:provider.stage}
     DYNAMODB_ACCESS_KEY_ID: ${file(./config/config.yml):${self:provider.stage}.aws_access_key_id}
