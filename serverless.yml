@@ -179,7 +179,7 @@ functions:
   scheduleArbitrage:
     handler: src/scheduler/handler.scheduleArbitrage
     events:
-      - schedule: cron(0/${self:provider.environment.SCHEDULER_INTERVAL_MINUTES} * * * ? *)
+      - schedule: rate(${self:provider.environment.SCHEDULER_INTERVAL_MINUTES} minutes)
 
 # Dynamodb settings
 resources:

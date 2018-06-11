@@ -203,10 +203,15 @@ class SimpleArbitrageStrategy {
       // Compute trade limits
       const assetsAmountsA = await this.ExchangeA.getAssets();
       const assetsAmountsB = await this.ExchangeB.getAssets();
-      const possiblePriceLimitA = assetsAmountsA.presentCurrencyAmount * this.assetRange;
-      const possibleCoinAmountLimitA = assetsAmountsA.presentCoinAmount * this.assetRange;
-      const possiblePriceLimitB = assetsAmountsB.presentCurrencyAmount * this.assetRange;
-      const possibleCoinAmountLimitB = assetsAmountsB.presentCoinAmount * this.assetRange;
+      const possiblePriceLimitA = (assetsAmountsA.presentCurrencyAmount - this.assetMinLimit) * this.assetRange;
+      const possibleCoinAmountLimitA = assetsAmountsA.presentCoinAmount;
+      const possiblePriceLimitB = (assetsAmountsB.presentCurrencyAmount - this.assetMinLimit) * this.assetRange;
+      const possibleCoinAmountLimitB = assetsAmountsB.presentCoinAmount;
+
+      if (possiblePriceLimitA < 0 || possiblePriceLimitB < 0) {
+        logger.warn(`Asset minimum limit exceeded asset ptice and Skipping to make new transactions...`);
+        return result.noTransaction();
+      }
 
       logger.debug('[Limits to trade]');
       logger.debug(`[${this.ExchangeA.getName()}][Coin] ${possibleCoinAmountLimitA}`);
@@ -322,11 +327,6 @@ class SimpleArbitrageStrategy {
         };
       } else {
         logger.warn(`NO match condition and Skipping to make new transactions...`);
-        return result.noTransaction();
-      }
-
-      if (target.buy.laterAssetPrice < this.assetMinLimit) {
-        logger.warn(`Exceeded asset minimum limit and Skipping to make new transactions...`);
         return result.noTransaction();
       }
 
