@@ -84,13 +84,13 @@ const ruleSchema = new Schema(
       type: Number,
       required: true,
       default: 1,
-      validate: (value) => (value > 0 ? true : false)
+      validate: (value) => (value >= 0 ? true : false)
     },
     sellWeightRate: {
       type: Number,
       required: true,
       default: 1,
-      validate: (value) => (value > 0 ? true : false)
+      validate: (value) => (value >= 0 ? true : false)
     },
     maxFailedLimit: {
       type: Number,

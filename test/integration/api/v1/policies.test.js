@@ -3,7 +3,7 @@ const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../helpers/keys').get(process.env.NODE_ENV);
 require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
-const { Policy } = require('../../../../src/models/Policy');
+const { Policy, USER_EFFECTS, USER_GRADES } = require('../../../../src/models/Policy');
 const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 before(() => {
@@ -32,14 +32,14 @@ describe('policies endpoints', () => {
       axios
         .post(`/v1/policies`, {
           userId: uuid.v4(),
-          effect: 'allow',
-          grade: 'free',
+          effect: USER_EFFECTS.ALLOW,
+          grade: USER_GRADES.FREE,
           ruleLimit: 10,
           expiredAt: '2018-05-25T19:40:29.123Z'
         })
         .then((response) => {
-          expect(response.data.effect).to.equal('allow');
-          expect(response.data.grade).to.equal('free');
+          expect(response.data.effect).to.equal(USER_EFFECTS.ALLOW);
+          expect(response.data.grade).to.equal(USER_GRADES.FREE);
           expect(response.data.ruleLimit).to.equal(10);
           expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.123Z');
 
@@ -53,9 +53,9 @@ describe('policies endpoints', () => {
 
     it('should return added data response of deny', (done) => {
       axios
-        .post(`/v1/policies`, { userId: uuid.v4(), effect: 'deny', grade: 'professional' })
+        .post(`/v1/policies`, { userId: uuid.v4(), effect: USER_EFFECTS.DENY, grade: USER_GRADES.PRO })
         .then((response) => {
-          expect(response.data.effect).to.equal('deny');
+          expect(response.data.effect).to.equal(USER_EFFECTS.DENY);
           existingPolicies.push(response.data);
           done();
         })
@@ -68,7 +68,7 @@ describe('policies endpoints', () => {
       axios
         .post(`/v1/policies`, { userId: uuid.v4() })
         .then((response) => {
-          expect(response.data.effect).to.equal('allow');
+          expect(response.data.effect).to.equal(USER_EFFECTS.ALLOW);
           existingPolicies.push(response.data);
           done();
         })
@@ -156,14 +156,14 @@ describe('policies endpoints', () => {
 
       axios
         .patch(`/v1/policies/${expectedToUpdatePolicy.userId}`, {
-          effect: 'deny',
-          grade: 'professional',
+          effect: USER_EFFECTS.DENY,
+          grade: USER_GRADES.PRO,
           ruleLimit: 777
         })
         .then((response) => {
           const updatedPolicy = response.data;
-          expectedToUpdatePolicy.effect = 'deny';
-          expectedToUpdatePolicy.grade = 'professional';
+          expectedToUpdatePolicy.effect = USER_EFFECTS.DENY;
+          expectedToUpdatePolicy.grade = USER_GRADES.PRO;
           expectedToUpdatePolicy.ruleLimit = 777;
           expectedToUpdatePolicy.version = 1;
 
@@ -183,10 +183,10 @@ describe('policies endpoints', () => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
-        .patch(`/v1/policies/${expectedToUpdatePolicy.userId}`, { grade: 'ultimate' })
+        .patch(`/v1/policies/${expectedToUpdatePolicy.userId}`, { grade: USER_GRADES.ULTIMATE })
         .then((response) => {
           const updatedPolicy = response.data;
-          expectedToUpdatePolicy.grade = 'ultimate';
+          expectedToUpdatePolicy.grade = USER_GRADES.ULTIMATE;
 
           expect(updatedPolicy.id).to.equal(expectedToUpdatePolicy.id);
           expect(updatedPolicy.grade).to.equal(expectedToUpdatePolicy.grade);

@@ -8,9 +8,9 @@ const USER_EFFECTS = {
 };
 
 const USER_GRADES = {
-  FREE: 'free',
-  PRO: 'professional',
-  ULTIMATE: 'ultimate'
+  FREE: 0,
+  PRO: 1,
+  ULTIMATE: 2
 };
 
 const options = {
@@ -29,7 +29,7 @@ const policySchema = new Schema(
       validate: (value) => Object.values(USER_EFFECTS).indexOf(value) !== -1
     },
     grade: {
-      type: String,
+      type: Number,
       required: true,
       default: USER_GRADES.FREE,
       validate: (value) => Object.values(USER_GRADES).indexOf(value) !== -1
