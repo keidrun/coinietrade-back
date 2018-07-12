@@ -10,7 +10,7 @@ const ERROR_CODES = {
   ORDERS_FAILURE: 'orders_failure',
   BOTH_ORDERS_TIMEOUT: 'both_orders_timeout',
   BUY_ORDER_TIMEOUT: 'buy_order_timeout',
-  SELL_ORDER_TIMEOUT: 'sell_order_timeout'
+  SELL_ORDER_TIMEOUT: 'sell_order_timeout',
 };
 
 const errors = {
@@ -19,7 +19,7 @@ const errors = {
       code: ERROR_CODES.NETWORK_ERROR,
       provider,
       statusCode: null,
-      message
+      message,
     };
   },
   apiFailure: (provider, statusCode, message) => {
@@ -27,7 +27,7 @@ const errors = {
       code: ERROR_CODES.API_FAILURE,
       provider,
       statusCode,
-      message
+      message,
     };
   },
   apiUnauthorized: (provider, statusCode, message) => {
@@ -35,7 +35,7 @@ const errors = {
       code: ERROR_CODES.API_UNAUTHORIZED,
       provider,
       statusCode,
-      message
+      message,
     };
   },
   apiTemporarilyUnavailable: (provider, statusCode, message) => {
@@ -43,12 +43,12 @@ const errors = {
       code: ERROR_CODES.API_TEMPORARILY_UNAVAILABLE,
       provider,
       statusCode,
-      message
+      message,
     };
-  }
+  },
 };
 
 module.exports = {
   ERROR_CODES,
-  errors
+  errors,
 };

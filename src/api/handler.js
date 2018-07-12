@@ -12,21 +12,32 @@ const { removeRule } = require('./v1/rules/removeRule');
 const { getExchanges } = require('./v1/properties/getExchanges');
 
 // Policies API
-module.exports.getPolicies = (event, context, callback) => getPolicies(event, callback);
-module.exports.getPolicy = (event, context, callback) => getPolicy(event, callback);
-module.exports.addPolicy = (event, context, callback) => addPolicy(event, callback);
-module.exports.removePolicy = (event, context, callback) => removePolicy(event, callback);
-module.exports.updatePolicy = (event, context, callback) => updatePolicy(event, callback);
+module.exports.getPolicies = (event, context, callback) =>
+  getPolicies(event, callback);
+module.exports.getPolicy = (event, context, callback) =>
+  getPolicy(event, callback);
+module.exports.addPolicy = (event, context, callback) =>
+  addPolicy(event, callback);
+module.exports.removePolicy = (event, context, callback) =>
+  removePolicy(event, callback);
+module.exports.updatePolicy = (event, context, callback) =>
+  updatePolicy(event, callback);
 
 // Secrets API
-module.exports.addSecret = (event, context, callback) => addSecret(event, callback);
-module.exports.removeSecret = (event, context, callback) => removeSecret(event, callback);
+module.exports.addSecret = (event, context, callback) =>
+  addSecret(event, callback);
+module.exports.removeSecret = (event, context, callback) =>
+  removeSecret(event, callback);
 
 // Rules API
-module.exports.getRules = (event, context, callback) => getRules(event, callback);
-module.exports.getRulesByUserId = (event, context, callback) => getRulesByUserId(event, callback);
+module.exports.getRules = (event, context, callback) =>
+  getRules(event, callback);
+module.exports.getRulesByUserId = (event, context, callback) =>
+  getRulesByUserId(event, callback);
 module.exports.addRule = (event, context, callback) => addRule(event, callback);
-module.exports.removeRule = (event, context, callback) => removeRule(event, callback);
+module.exports.removeRule = (event, context, callback) =>
+  removeRule(event, callback);
 
 // Properties API
-module.exports.getExchanges = (event, context, callback) => getExchanges(event, callback);
+module.exports.getExchanges = (event, context, callback) =>
+  getExchanges(event, callback);

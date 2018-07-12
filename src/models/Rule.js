@@ -5,41 +5,41 @@ const { Schema } = dynamoose;
 
 const DEFAULT_MAX_FAILED_LIMIT_COUNT = 100;
 
-const ARBITRAGE_STRATEGIES = {
-  SIMPLE: 'simple'
+const STRATEGIES = {
+  SIMPLE_ARBITRAGE: 'simple_arbitrage',
 };
 
 const ORDER_TYPES = {
   LIMIT_ORDER: 'limit_order',
-  MARKET_ORDER: 'market_order'
+  MARKET_ORDER: 'market_order',
 };
 
 const COIN_UNITS = {
-  BTC: 'btc'
+  BTC: 'btc',
 };
 
 const CURRENCY_UNITS = {
   JPY: 'jpy',
   USD: 'usd',
-  CAD: 'cad'
+  CAD: 'cad',
 };
 
 const EXCHANGE_SITES = {
   BITFLYER: 'bitflyer',
-  ZAIF: 'zaif'
+  ZAIF: 'zaif',
 };
 
 const RULE_STATUS = {
   AVAILABLE: 'available',
   UNAVAILABLE: 'unavailable',
   LOCKED: 'locked',
-  DELETED: 'deleted'
+  DELETED: 'deleted',
 };
 
 const options = {
   timestamps: true,
   useNativeBooleans: true,
-  useDocumentTypes: true
+  useDocumentTypes: true,
 };
 
 const ruleSchema = new Schema(
@@ -47,66 +47,66 @@ const ruleSchema = new Schema(
     userId: { type: String, hashKey: true, required: true, trim: true },
     ruleId: { type: String, rangeKey: true, default: () => uuid.v4() },
     priority: { type: Number, required: true, default: 0 },
-    arbitrageStrategy: {
+    strategy: {
       type: String,
       required: true,
-      validate: (value) => Object.values(ARBITRAGE_STRATEGIES).indexOf(value) !== -1
+      validate: value => Object.values(STRATEGIES).indexOf(value) !== -1,
     },
     coinUnit: {
       type: String,
       required: true,
-      validate: (value) => Object.values(COIN_UNITS).indexOf(value) !== -1
+      validate: value => Object.values(COIN_UNITS).indexOf(value) !== -1,
     },
     currencyUnit: {
       type: String,
       required: true,
-      validate: (value) => Object.values(CURRENCY_UNITS).indexOf(value) !== -1
+      validate: value => Object.values(CURRENCY_UNITS).indexOf(value) !== -1,
     },
     orderType: {
       type: String,
       required: true,
       default: ORDER_TYPES.LIMIT_ORDER,
-      validate: (value) => Object.values(ORDER_TYPES).indexOf(value) !== -1
+      validate: value => Object.values(ORDER_TYPES).indexOf(value) !== -1,
     },
     assetRange: {
       type: Number,
       required: true,
       default: 1,
-      validate: (value) => (value >= 0 && value <= 1 ? true : false)
+      validate: value => (value >= 0 && value <= 1 ? true : false),
     },
     assetMinLimit: {
       type: Number,
       required: true,
       default: 0,
-      validate: (value) => (value >= 0 ? true : false)
+      validate: value => (value >= 0 ? true : false),
     },
     buyWeightRate: {
       type: Number,
       required: true,
       default: 1,
-      validate: (value) => (value >= 0 ? true : false)
+      validate: value => (value >= 0 ? true : false),
     },
     sellWeightRate: {
       type: Number,
       required: true,
       default: 1,
-      validate: (value) => (value >= 0 ? true : false)
+      validate: value => (value >= 0 ? true : false),
     },
     maxFailedLimit: {
       type: Number,
       required: true,
       default: DEFAULT_MAX_FAILED_LIMIT_COUNT,
-      validate: (value) => (value >= 0 ? true : false)
+      validate: value => (value >= 0 ? true : false),
     },
     oneSiteName: {
       type: String,
       required: true,
-      validate: (value) => Object.values(EXCHANGE_SITES).indexOf(value) !== -1
+      validate: value => Object.values(EXCHANGE_SITES).indexOf(value) !== -1,
     },
     otherSiteName: {
       type: String,
       required: true,
-      validate: (value) => Object.values(EXCHANGE_SITES).indexOf(value) !== -1
+      validate: value => Object.values(EXCHANGE_SITES).indexOf(value) !== -1,
     },
     totalProfit: { type: Number, required: true, default: 0 },
     counts: {
@@ -115,7 +115,7 @@ const ruleSchema = new Schema(
       executionCount: { type: Number, required: true },
       successCount: { type: Number, required: true },
       failureCount: { type: Number, required: true },
-      cancellationCount: { type: Number, required: true }
+      cancellationCount: { type: Number, required: true },
     },
     status: {
       type: String,
@@ -123,16 +123,20 @@ const ruleSchema = new Schema(
         global: true,
         rangeKey: 'modifiedAt',
         name: 'statusIndex',
-        project: true
+        project: true,
       },
       required: true,
       default: RULE_STATUS.AVAILABLE,
-      validate: (value) => Object.values(RULE_STATUS).indexOf(value) !== -1
+      validate: value => Object.values(RULE_STATUS).indexOf(value) !== -1,
     },
-    modifiedAt: { type: Date, required: true, default: () => moment().toISOString() },
-    version: { type: Number, required: true, default: 0 }
+    modifiedAt: {
+      type: Date,
+      required: true,
+      default: () => moment().toISOString(),
+    },
+    version: { type: Number, required: true, default: 0 },
   },
-  options
+  options,
 );
 
 ruleSchema.statics.updateWithVersion = async function(key, update, options) {
@@ -141,7 +145,7 @@ ruleSchema.statics.updateWithVersion = async function(key, update, options) {
 
   const existingRule = await this.get({
     userId: key.userId,
-    ruleId: key.ruleId
+    ruleId: key.ruleId,
   });
   if (existingRule) {
     const version = existingRule.version + 1;
@@ -150,12 +154,12 @@ ruleSchema.statics.updateWithVersion = async function(key, update, options) {
       {
         userId: key.userId,
         ruleId: key.ruleId,
-        version
+        version,
       },
       {
-        $PUT: update
+        $PUT: update,
       },
-      options
+      options,
     );
     return updatedRule;
   } else {
@@ -166,7 +170,7 @@ ruleSchema.statics.updateWithVersion = async function(key, update, options) {
 ruleSchema.statics.deleteWithVersion = async function(key, options) {
   const existingRule = await this.get({
     userId: key.userId,
-    ruleId: key.ruleId
+    ruleId: key.ruleId,
   });
   if (existingRule) {
     const version = existingRule.version + 1;
@@ -174,9 +178,9 @@ ruleSchema.statics.deleteWithVersion = async function(key, options) {
       {
         userId: key.userId,
         ruleId: key.ruleId,
-        version
+        version,
       },
-      options
+      options,
     );
     return deletedRule;
   } else {
@@ -187,7 +191,9 @@ ruleSchema.statics.deleteWithVersion = async function(key, options) {
 ruleSchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {
-    results = await this.scan().startKey(results.startKey).exec();
+    results = await this.scan()
+      .startKey(results.startKey)
+      .exec();
   }
   return results;
 };
@@ -195,11 +201,11 @@ ruleSchema.statics.getAll = async function() {
 const Rule = dynamoose.model('rules', ruleSchema);
 
 module.exports = {
-  ARBITRAGE_STRATEGIES,
+  STRATEGIES,
   ORDER_TYPES,
   COIN_UNITS,
   CURRENCY_UNITS,
   EXCHANGE_SITES,
   RULE_STATUS,
-  Rule
+  Rule,
 };

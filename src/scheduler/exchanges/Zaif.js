@@ -2,14 +2,19 @@ const moment = require('moment');
 const axios = require('axios');
 const qs = require('qs');
 const crypto = require('crypto');
-const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES, EXCHANGE_SITES } = require('../../models/Rule');
+const {
+  COIN_UNITS,
+  CURRENCY_UNITS,
+  ORDER_TYPES,
+  EXCHANGE_SITES,
+} = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 const messages = {
   NO_DATA_FOUND_FOR_THE_KEY: 'no data found for the key',
   SIGNATURE_MISMATCH: 'signature mismatch',
   TIME_WAIT_RESTRICTION: 'time wait restriction, please try later.',
-  TRADE_TEMPORARILY_UNAVAILABLE: 'trade temporarily unavailable.'
+  TRADE_TEMPORARILY_UNAVAILABLE: 'trade temporarily unavailable.',
 };
 
 const DEFAULT_TRANSACTION_FEE_RATE = 0;
@@ -36,7 +41,10 @@ function getPairCode(coinUnit, currencyUnit) {
 }
 
 function generateAccessHeaders(key, secret, encodedParams) {
-  const sign = crypto.createHmac('sha512', secret).update(encodedParams).digest('hex');
+  const sign = crypto
+    .createHmac('sha512', secret)
+    .update(encodedParams)
+    .digest('hex');
   return { key, sign };
 }
 
@@ -91,12 +99,18 @@ class Zaif {
 
   async getAssets() {
     const params = {
-      method: ASSETS_METHOD
+      method: ASSETS_METHOD,
     };
     const encodedParams = generateEncodedParams(params);
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      encodedParams,
+    );
     try {
-      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, {
+        headers,
+      });
 
       if (response.data.success !== 1) {
         if (
@@ -107,8 +121,10 @@ class Zaif {
             errors.apiUnauthorized(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else if (
           response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
@@ -118,33 +134,45 @@ class Zaif {
             errors.apiTemporarilyUnavailable(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else {
           return Promise.reject(
             errors.apiFailure(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ASSETS_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         }
       }
 
-      const presentCoinAmount = response.data.return.funds[getAssetCoinCode(this.coinUnit)];
-      const presentCurrencyAmount = response.data.return.funds[getAssetCurrencyCode(this.currencyUnit)];
+      const presentCoinAmount =
+        response.data.return.funds[getAssetCoinCode(this.coinUnit)];
+      const presentCurrencyAmount =
+        response.data.return.funds[getAssetCurrencyCode(this.currencyUnit)];
 
       return {
         presentCoinAmount,
-        presentCurrencyAmount
+        presentCurrencyAmount,
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()),
+        );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.ZAIF,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -161,7 +189,7 @@ class Zaif {
         currency_pair: this.pairCode,
         action: 'bid',
         price,
-        amount
+        amount,
       };
     } else {
       params = {
@@ -169,14 +197,20 @@ class Zaif {
         currency_pair: this.pairCode,
         action: 'ask',
         price,
-        amount
+        amount,
       };
     }
     const encodedParams = generateEncodedParams(params);
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      encodedParams,
+    );
 
     try {
-      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, {
+        headers,
+      });
       if (response.data.success !== 1) {
         if (
           response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
@@ -186,8 +220,10 @@ class Zaif {
             errors.apiUnauthorized(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else if (
           response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
@@ -197,16 +233,20 @@ class Zaif {
             errors.apiTemporarilyUnavailable(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else {
           return Promise.reject(
             errors.apiFailure(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         }
       }
@@ -216,10 +256,16 @@ class Zaif {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()),
+        );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.ZAIF,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -228,13 +274,19 @@ class Zaif {
   async isCompletedOrder(orderId) {
     const params = {
       method: ACTIVE_ORDER_METHOD,
-      currency_pair: this.pairCode
+      currency_pair: this.pairCode,
     };
     const encodedParams = generateEncodedParams(params);
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      encodedParams,
+    );
 
     try {
-      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, {
+        headers,
+      });
       if (response.data.success !== 1) {
         if (
           response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
@@ -244,8 +296,10 @@ class Zaif {
             errors.apiUnauthorized(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else if (
           response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
@@ -255,29 +309,41 @@ class Zaif {
             errors.apiTemporarilyUnavailable(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else {
           return Promise.reject(
             errors.apiFailure(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${ACTIVE_ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         }
       }
 
-      const isCompleted = response.data.return.hasOwnProperty(orderId) ? false : true;
+      const isCompleted = response.data.return.hasOwnProperty(orderId)
+        ? false
+        : true;
 
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()),
+        );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.ZAIF,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -287,13 +353,19 @@ class Zaif {
     const params = {
       method: CANCEL_ORDER_METHOD,
       order_id: orderId,
-      currency_pair: this.pairCode
+      currency_pair: this.pairCode,
     };
     const encodedParams = generateEncodedParams(params);
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, encodedParams);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      encodedParams,
+    );
 
     try {
-      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, { headers });
+      const response = await axios.post(`${PRIVATE_URL}`, encodedParams, {
+        headers,
+      });
       if (response.data.success !== 1) {
         if (
           response.data.error.includes(messages.NO_DATA_FOUND_FOR_THE_KEY) ||
@@ -303,8 +375,10 @@ class Zaif {
             errors.apiUnauthorized(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else if (
           response.data.error.includes(messages.TIME_WAIT_RESTRICTION) ||
@@ -314,16 +388,20 @@ class Zaif {
             errors.apiTemporarilyUnavailable(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         } else {
           return Promise.reject(
             errors.apiFailure(
               EXCHANGE_SITES.ZAIF,
               response.status,
-              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${response.data.error}`
-            )
+              `Failed to post '${PRIVATE_URL}' with '${CANCEL_ORDER_METHOD}': ${
+                response.data.error
+              }`,
+            ),
           );
         }
       }
@@ -331,10 +409,16 @@ class Zaif {
       return Promise.resolve(orderId);
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()),
+        );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.ZAIF,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -359,28 +443,34 @@ class Zaif {
         if (a > b) return 1;
         return 0;
       });
-      const formattedBids = bids.map((bid) => {
+      const formattedBids = bids.map(bid => {
         return {
           price: bid[0],
-          amount: bid[1]
+          amount: bid[1],
         };
       });
-      const formattedAsks = asks.map((ask) => {
+      const formattedAsks = asks.map(ask => {
         return {
           price: ask[0],
-          amount: ask[1]
+          amount: ask[1],
         };
       });
       return {
         bids: formattedBids,
-        asks: formattedAsks
+        asks: formattedAsks,
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.ZAIF, error.toString()),
+        );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.ZAIF, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.ZAIF,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }

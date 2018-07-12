@@ -1,5 +1,8 @@
 const { Rule } = require('../../../models/Rule');
-const { response, responseErrorFromDynamodb } = require('../../../utils/response');
+const {
+  response,
+  responseErrorFromDynamodb,
+} = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 
 module.exports.getRules = async (event, callback) => {
@@ -14,8 +17,8 @@ module.exports.getRules = async (event, callback) => {
         event.httpMethod,
         event.path,
         error,
-        event
-      )
+        event,
+      ),
     );
   }
 };

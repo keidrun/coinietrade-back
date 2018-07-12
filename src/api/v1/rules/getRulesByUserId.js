@@ -1,5 +1,9 @@
 const { Rule } = require('../../../models/Rule');
-const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
+const {
+  response,
+  responseError,
+  responseErrorFromDynamodb,
+} = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
@@ -7,7 +11,9 @@ module.exports.getRulesByUserId = async (event, callback) => {
   const { userId } = event.pathParameters;
 
   try {
-    const rules = await Rule.query('userId').eq(userId).exec();
+    const rules = await Rule.query('userId')
+      .eq(userId)
+      .exec();
     if (rules) {
       callback(null, response(200, rules));
     } else {
@@ -17,7 +23,7 @@ module.exports.getRulesByUserId = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_READ_DATA_NOT_FOUND_BY_USER_ID,
-        event
+        event,
       );
     }
   } catch (error) {
@@ -28,8 +34,8 @@ module.exports.getRulesByUserId = async (event, callback) => {
         event.httpMethod,
         event.path,
         error,
-        event
-      )
+        event,
+      ),
     );
   }
 };

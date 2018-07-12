@@ -8,19 +8,19 @@ const result = {
         executionCount: 1,
         successCount: 1,
         failureCount: 0,
-        cancellationCount: 0
-      }
+        cancellationCount: 0,
+      },
     });
   },
-  success: (profit) => {
+  success: profit => {
     return Promise.resolve({
       additionalProfit: profit,
       additionalCounts: {
         executionCount: 1,
         successCount: 1,
         failureCount: 0,
-        cancellationCount: 0
-      }
+        cancellationCount: 0,
+      },
     });
   },
   failure: () => {
@@ -30,8 +30,8 @@ const result = {
         executionCount: 1,
         successCount: 0,
         failureCount: 1,
-        cancellationCount: 0
-      }
+        cancellationCount: 0,
+      },
     });
   },
   cancellation: () => {
@@ -41,14 +41,14 @@ const result = {
         executionCount: 1,
         successCount: 0,
         failureCount: 0,
-        cancellationCount: 1
-      }
+        cancellationCount: 1,
+      },
     });
-  }
+  },
 };
 
 const transaction = {
-  initial: async (transactionObj) => {
+  initial: async transactionObj => {
     const newTransaction = new Transaction(transactionObj);
     const transaction = await newTransaction.save({ overwrite: false });
     return transaction;
@@ -57,8 +57,8 @@ const transaction = {
     const workingTransaction = await Transaction.updateWithVersionOrCreate(
       { userId, transactionId },
       {
-        state: TRANSACTION_STATES.IN_PROGRESS
-      }
+        state: TRANSACTION_STATES.IN_PROGRESS,
+      },
     );
     return workingTransaction;
   },
@@ -66,42 +66,48 @@ const transaction = {
     const succeededTransaction = await Transaction.updateWithVersionOrCreate(
       { userId, transactionId },
       {
-        state: TRANSACTION_STATES.SUCCEEDED
-      }
+        state: TRANSACTION_STATES.SUCCEEDED,
+      },
     );
     return succeededTransaction;
   },
   canceled: async (userId, transactionId, errorCode, errorDetail) => {
     let update = {
       state: TRANSACTION_STATES.CANCELED,
-      errorCode
+      errorCode,
     };
     if (errorDetail) update.errorDetail = errorDetail;
 
-    const canceledTransaction = await Transaction.updateWithVersionOrCreate({ userId, transactionId }, update);
+    const canceledTransaction = await Transaction.updateWithVersionOrCreate(
+      { userId, transactionId },
+      update,
+    );
     return canceledTransaction;
   },
   failed: async (userId, transactionId, errorCode, errorDetail) => {
     let update = {
       state: TRANSACTION_STATES.FAILED,
-      errorCode
+      errorCode,
     };
     if (errorDetail) update.errorDetail = errorDetail;
 
-    const failedTransaction = await Transaction.updateWithVersionOrCreate({ userId, transactionId }, update);
+    const failedTransaction = await Transaction.updateWithVersionOrCreate(
+      { userId, transactionId },
+      update,
+    );
     return failedTransaction;
   },
-  getWorking: async (ruleId) => {
+  getWorking: async ruleId => {
     const workingTransactions = await Transaction.query('ruleId')
       .eq(ruleId)
       .where('state')
       .eq(TRANSACTION_STATES.IN_PROGRESS)
       .exec();
     return workingTransactions;
-  }
+  },
 };
 
 module.exports = {
   result,
-  transaction
+  transaction,
 };

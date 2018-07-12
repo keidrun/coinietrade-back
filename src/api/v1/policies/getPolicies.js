@@ -1,5 +1,8 @@
 const { Policy } = require('../../../models/Policy');
-const { response, responseErrorFromDynamodb } = require('../../../utils/response');
+const {
+  response,
+  responseErrorFromDynamodb,
+} = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 
 module.exports.getPolicies = async (event, callback) => {
@@ -14,8 +17,8 @@ module.exports.getPolicies = async (event, callback) => {
         event.httpMethod,
         event.path,
         error,
-        event
-      )
+        event,
+      ),
     );
   }
 };

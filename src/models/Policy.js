@@ -4,19 +4,19 @@ const { Schema } = dynamoose;
 
 const USER_EFFECTS = {
   ALLOW: 'allow',
-  DENY: 'deny'
+  DENY: 'deny',
 };
 
 const USER_GRADES = {
   FREE: 0,
   PRO: 1,
-  ULTIMATE: 2
+  ULTIMATE: 2,
 };
 
 const options = {
   timestamps: true,
   useNativeBooleans: true,
-  useDocumentTypes: true
+  useDocumentTypes: true,
 };
 
 const policySchema = new Schema(
@@ -26,28 +26,31 @@ const policySchema = new Schema(
       type: String,
       required: true,
       default: USER_EFFECTS.ALLOW,
-      validate: (value) => Object.values(USER_EFFECTS).indexOf(value) !== -1
+      validate: value => Object.values(USER_EFFECTS).indexOf(value) !== -1,
     },
     grade: {
       type: Number,
       required: true,
       default: USER_GRADES.FREE,
-      validate: (value) => Object.values(USER_GRADES).indexOf(value) !== -1
+      validate: value => Object.values(USER_GRADES).indexOf(value) !== -1,
     },
     ruleLimit: { type: Number, required: true, default: 1 },
     expiredAt: {
       type: Date,
       required: true,
-      default: () => moment().add(1, 'month').toISOString()
+      default: () =>
+        moment()
+          .add(1, 'month')
+          .toISOString(),
     },
-    version: { type: Number, required: true, default: 0 }
+    version: { type: Number, required: true, default: 0 },
   },
-  options
+  options,
 );
 
 policySchema.statics.updateWithVersion = async function(key, update, options) {
   const existingPolicy = await this.get({
-    userId: key.userId
+    userId: key.userId,
   });
   if (existingPolicy) {
     const version = existingPolicy.version + 1;
@@ -55,12 +58,12 @@ policySchema.statics.updateWithVersion = async function(key, update, options) {
     const updatedPolicy = await this.update(
       {
         userId: key.userId,
-        version
+        version,
       },
       {
-        $PUT: update
+        $PUT: update,
       },
-      options
+      options,
     );
     return updatedPolicy;
   } else {
@@ -70,16 +73,16 @@ policySchema.statics.updateWithVersion = async function(key, update, options) {
 
 policySchema.statics.deleteWithVersion = async function(key, options) {
   const existingPolicy = await this.get({
-    userId: key.userId
+    userId: key.userId,
   });
   if (existingPolicy) {
     const version = existingPolicy.version + 1;
     const deletedPolicy = await this.delete(
       {
         userId: key.userId,
-        version
+        version,
       },
-      options
+      options,
     );
     return deletedPolicy;
   } else {
@@ -90,7 +93,9 @@ policySchema.statics.deleteWithVersion = async function(key, options) {
 policySchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {
-    results = await this.scan().startKey(results.startKey).exec();
+    results = await this.scan()
+      .startKey(results.startKey)
+      .exec();
   }
   return results;
 };
@@ -100,5 +105,5 @@ const Policy = dynamoose.model('policies', policySchema);
 module.exports = {
   USER_EFFECTS,
   USER_GRADES,
-  Policy
+  Policy,
 };

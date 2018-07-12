@@ -34,7 +34,7 @@ describe('rules endpoints', () => {
         .post(`/v1/rules`, {
           userId: groupUserId,
           priority: 1,
-          arbitrageStrategy: 'simple',
+          strategy: 'simple_arbitrage',
           coinUnit: 'btc',
           currencyUnit: 'jpy',
           orderType: 'limit_order',
@@ -48,7 +48,7 @@ describe('rules endpoints', () => {
         })
         .then((response) => {
           expect(response.data.priority).to.equal(1);
-          expect(response.data.arbitrageStrategy).to.equal('simple');
+          expect(response.data.strategy).to.equal('simple_arbitrage');
           expect(response.data.coinUnit).to.equal('btc');
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderType).to.equal('limit_order');
@@ -73,7 +73,7 @@ describe('rules endpoints', () => {
         .post(`/v1/rules`, {
           userId: groupUserId,
           priority: 2,
-          arbitrageStrategy: 'simple',
+          strategy: 'simple_arbitrage',
           coinUnit: 'btc',
           currencyUnit: 'jpy',
           orderType: 'market_order',
@@ -87,7 +87,7 @@ describe('rules endpoints', () => {
         })
         .then((response) => {
           expect(response.data.priority).to.equal(2);
-          expect(response.data.arbitrageStrategy).to.equal('simple');
+          expect(response.data.strategy).to.equal('simple_arbitrage');
           expect(response.data.coinUnit).to.equal('btc');
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderType).to.equal('market_order');
@@ -111,7 +111,7 @@ describe('rules endpoints', () => {
       axios
         .post(`/v1/rules`, {
           userId: uuid.v4(),
-          arbitrageStrategy: 'simple',
+          strategy: 'simple_arbitrage',
           coinUnit: 'btc',
           currencyUnit: 'jpy',
           oneSiteName: 'zaif',
@@ -119,7 +119,7 @@ describe('rules endpoints', () => {
         })
         .then((response) => {
           expect(response.data.priority).to.equal(0);
-          expect(response.data.arbitrageStrategy).to.equal('simple');
+          expect(response.data.strategy).to.equal('simple_arbitrage');
           expect(response.data.coinUnit).to.equal('btc');
           expect(response.data.currencyUnit).to.equal('jpy');
           expect(response.data.orderType).to.equal('limit_order');
@@ -154,7 +154,7 @@ describe('rules endpoints', () => {
               userId: existingRules[i].userId,
               ruleId: existingRules[i].ruleId,
               priority: existingRules[i].priority,
-              arbitrageStrategy: existingRules[i].arbitrageStrategy,
+              strategy: existingRules[i].strategy,
               coinUnit: existingRules[i].coinUnit,
               currencyUnit: existingRules[i].currencyUnit,
               orderType: existingRules[i].orderType,
@@ -196,7 +196,7 @@ describe('rules endpoints', () => {
               userId: existingRules[i].userId,
               ruleId: existingRules[i].ruleId,
               priority: existingRules[i].priority,
-              arbitrageStrategy: existingRules[i].arbitrageStrategy,
+              strategy: existingRules[i].strategy,
               coinUnit: existingRules[i].coinUnit,
               currencyUnit: existingRules[i].currencyUnit,
               orderType: existingRules[i].orderType,

@@ -1,7 +1,12 @@
 const moment = require('moment');
 const axios = require('axios');
 const crypto = require('crypto');
-const { COIN_UNITS, CURRENCY_UNITS, ORDER_TYPES, EXCHANGE_SITES } = require('../../models/Rule');
+const {
+  COIN_UNITS,
+  CURRENCY_UNITS,
+  ORDER_TYPES,
+  EXCHANGE_SITES,
+} = require('../../models/Rule');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 
@@ -31,12 +36,15 @@ function generateAccessHeaders(key, secret, method, path, body) {
   const timestamp = moment.utc().format('x');
   const bodyStr = body ? JSON.stringify(body) : '';
   const text = timestamp + method + path + bodyStr;
-  const sign = crypto.createHmac('sha256', secret).update(text).digest('hex');
+  const sign = crypto
+    .createHmac('sha256', secret)
+    .update(text)
+    .digest('hex');
 
   return {
     'ACCESS-KEY': key,
     'ACCESS-TIMESTAMP': timestamp,
-    'ACCESS-SIGN': sign
+    'ACCESS-SIGN': sign,
   };
 }
 
@@ -82,29 +90,44 @@ class Bitflyer {
     const PATH = `${TRANSACTION_FEE_PATH}?product_code=${this.pairCode}`;
     const URL = `${BASE_URL}${PATH}`;
     const method = 'GET';
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      method,
+      PATH,
+    );
     try {
       const response = await axios.get(`${URL}`, { headers });
       const transactionFee = response.data.commission_rate;
       return transactionFee;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()),
+        );
       } else if (error.response.status === 401) {
         return Promise.reject(
-          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiUnauthorized(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
           errors.apiTemporarilyUnavailable(
             EXCHANGE_SITES.BITFLYER,
             error.response.status,
-            JSON.stringify(error.response.data)
-          )
+            JSON.stringify(error.response.data),
+          ),
         );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -114,39 +137,54 @@ class Bitflyer {
     const PATH = ASSETS_PATH;
     const URL = `${BASE_URL}${PATH}`;
     const method = 'GET';
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      method,
+      PATH,
+    );
     try {
       const response = await axios.get(`${URL}`, { headers });
 
       const presentCoinAmount = response.data.filter(
-        (data) => data.currency_code === getAssetCoinCode(this.coinUnit)
+        data => data.currency_code === getAssetCoinCode(this.coinUnit),
       )[0].available;
       const presentCurrencyAmount = response.data.filter(
-        (data) => data.currency_code === getAssetCurrencyCode(this.currencyUnit)
+        data => data.currency_code === getAssetCurrencyCode(this.currencyUnit),
       )[0].available;
 
       return {
         presentCoinAmount,
-        presentCurrencyAmount
+        presentCurrencyAmount,
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()),
+        );
       } else if (error.response.status === 401) {
         return Promise.reject(
-          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiUnauthorized(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
           errors.apiTemporarilyUnavailable(
             EXCHANGE_SITES.BITFLYER,
             error.response.status,
-            JSON.stringify(error.response.data)
-          )
+            JSON.stringify(error.response.data),
+          ),
         );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -175,9 +213,15 @@ class Bitflyer {
       price,
       size: amount,
       minute_to_expire: 43200, // 30 days (default)
-      time_in_force: 'GTC' // Good 'Til Canceled (default)
+      time_in_force: 'GTC', // Good 'Til Canceled (default)
     };
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH, body);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      method,
+      PATH,
+      body,
+    );
     try {
       const response = await axios.post(`${URL}`, body, { headers });
       const orderId = response.data.child_order_acceptance_id;
@@ -185,33 +229,49 @@ class Bitflyer {
       return orderId;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()),
+        );
       } else if (error.response.status === 401) {
         return Promise.reject(
-          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiUnauthorized(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
           errors.apiTemporarilyUnavailable(
             EXCHANGE_SITES.BITFLYER,
             error.response.status,
-            JSON.stringify(error.response.data)
-          )
+            JSON.stringify(error.response.data),
+          ),
         );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
   }
 
   async isCompletedOrder(orderId) {
-    const PATH = `${COMPLETED_OERDER_PATH}?product_code=${this
-      .pairCode}&count=100&child_order_acceptance_id=${orderId}`;
+    const PATH = `${COMPLETED_OERDER_PATH}?product_code=${
+      this.pairCode
+    }&count=100&child_order_acceptance_id=${orderId}`;
     const URL = `${BASE_URL}${PATH}`;
     const method = 'GET';
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      method,
+      PATH,
+    );
 
     try {
       const response = await axios.get(`${URL}`, { headers });
@@ -220,22 +280,32 @@ class Bitflyer {
       return isCompleted;
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()),
+        );
       } else if (error.response.status === 401) {
         return Promise.reject(
-          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiUnauthorized(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
           errors.apiTemporarilyUnavailable(
             EXCHANGE_SITES.BITFLYER,
             error.response.status,
-            JSON.stringify(error.response.data)
-          )
+            JSON.stringify(error.response.data),
+          ),
         );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -247,29 +317,45 @@ class Bitflyer {
     const method = 'POST';
     const body = {
       product_code: this.pairCode,
-      child_order_acceptance_id: orderId
+      child_order_acceptance_id: orderId,
     };
-    const headers = generateAccessHeaders(this.apiKey, this.apiSecret, method, PATH, body);
+    const headers = generateAccessHeaders(
+      this.apiKey,
+      this.apiSecret,
+      method,
+      PATH,
+      body,
+    );
     try {
       await axios.post(`${URL}`, body, { headers });
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()),
+        );
       } else if (error.response.status === 401) {
         return Promise.reject(
-          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiUnauthorized(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
           errors.apiTemporarilyUnavailable(
             EXCHANGE_SITES.BITFLYER,
             error.response.status,
-            JSON.stringify(error.response.data)
-          )
+            JSON.stringify(error.response.data),
+          ),
         );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }
@@ -295,40 +381,50 @@ class Bitflyer {
         if (a.price > b.price) return 1;
         return 0;
       });
-      const formattedBids = bids.map((bid) => {
+      const formattedBids = bids.map(bid => {
         return {
           price: bid.price,
-          amount: bid.size
+          amount: bid.size,
         };
       });
-      const formattedAsks = asks.map((ask) => {
+      const formattedAsks = asks.map(ask => {
         return {
           price: ask.price,
-          amount: ask.size
+          amount: ask.size,
         };
       });
       return {
         bids: formattedBids,
-        asks: formattedAsks
+        asks: formattedAsks,
       };
     } catch (error) {
       if (!error.response) {
-        return Promise.reject(errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()));
+        return Promise.reject(
+          errors.networkError(EXCHANGE_SITES.BITFLYER, error.toString()),
+        );
       } else if (error.response.status === 401) {
         return Promise.reject(
-          errors.apiUnauthorized(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiUnauthorized(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       } else if (error.response.data.status === -208) {
         return Promise.reject(
           errors.apiTemporarilyUnavailable(
             EXCHANGE_SITES.BITFLYER,
             error.response.status,
-            JSON.stringify(error.response.data)
-          )
+            JSON.stringify(error.response.data),
+          ),
         );
       } else {
         return Promise.reject(
-          errors.apiFailure(EXCHANGE_SITES.BITFLYER, error.response.status, JSON.stringify(error.response.data))
+          errors.apiFailure(
+            EXCHANGE_SITES.BITFLYER,
+            error.response.status,
+            JSON.stringify(error.response.data),
+          ),
         );
       }
     }

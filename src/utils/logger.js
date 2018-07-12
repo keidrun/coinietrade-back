@@ -8,12 +8,14 @@ const outputMode = isJsonLogs ? 'bunyan' : 'short';
 
 const formatOut = bformat({ outputMode: outputMode, levelInString: true });
 
-function createLog(name, filename) {
+function createLog(groupName, fileName) {
   return bunyan.createLogger({
-    name: name,
-    filename: filename,
+    name: fileName,
     level: logLevel, // 'debug' < 'info' < 'warn' < 'error' < 'fatal'
-    stream: formatOut
+    stream: formatOut,
+    src: true,
+    // Additional
+    group: groupName,
   });
 }
 

@@ -5,13 +5,13 @@ const { encrypt, decrypt } = require('../utils/crypto');
 const { EXCHANGE_SITES } = require('./Rule');
 
 const API_PROVIDERS = {
-  ...EXCHANGE_SITES
+  ...EXCHANGE_SITES,
 };
 
 const options = {
   timestamps: true,
   useNativeBooleans: true,
-  useDocumentTypes: true
+  useDocumentTypes: true,
 };
 
 const secretSchema = new Schema(
@@ -21,14 +21,14 @@ const secretSchema = new Schema(
     apiProvider: {
       type: String,
       required: true,
-      validate: (value) => Object.values(API_PROVIDERS).indexOf(value) !== -1
+      validate: value => Object.values(API_PROVIDERS).indexOf(value) !== -1,
     },
     apiKey: { type: String, required: true, trim: true },
     apiSecret: { type: String, required: true, trim: true },
     apiKind: { type: String },
-    version: { type: Number, required: true, default: 0 }
+    version: { type: Number, required: true, default: 0 },
   },
-  options
+  options,
 );
 
 secretSchema.methods.encryptAndSave = function(encryptKey, options) {
@@ -51,7 +51,7 @@ secretSchema.statics.getAndDecrypt = async function(id, encryptKey) {
 secretSchema.statics.deleteWithVersion = async function(key, options) {
   const existingSecret = await this.get({
     userId: key.userId,
-    secretId: key.secretId
+    secretId: key.secretId,
   });
   if (existingSecret) {
     const version = existingSecret.version + 1;
@@ -59,9 +59,9 @@ secretSchema.statics.deleteWithVersion = async function(key, options) {
       {
         userId: key.userId,
         secretId: key.secretId,
-        version
+        version,
       },
-      options
+      options,
     );
     return deletedSecret;
   } else {
@@ -72,7 +72,9 @@ secretSchema.statics.deleteWithVersion = async function(key, options) {
 secretSchema.statics.getAll = async function() {
   let results = await this.scan().exec();
   while (results.lastKey) {
-    results = await this.scan().startKey(results.startKey).exec();
+    results = await this.scan()
+      .startKey(results.startKey)
+      .exec();
   }
   return results;
 };
@@ -81,5 +83,5 @@ const Secret = dynamoose.model('secrets', secretSchema);
 
 module.exports = {
   API_PROVIDERS,
-  Secret
+  Secret,
 };

@@ -1,14 +1,15 @@
 const path = require('path');
 const { createLog } = require('../utils/logger');
 const moment = require('moment');
-const { Rule, RULE_STATUS, ARBITRAGE_STRATEGIES } = require('../models/Rule');
+const { Rule, RULE_STATUS, STRATEGIES } = require('../models/Rule');
 const { Policy, USER_EFFECTS } = require('../models/Policy');
 const { Secret } = require('../models/Secret');
 const { runSimpleArbitrage } = require('./runners/runSimpleArbitrage');
 
 const logger = createLog('scheduler', path.basename(__filename));
 
-const rulesConcurrentExecutionLimit = process.env.SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT;
+const rulesConcurrentExecutionLimit =
+  process.env.SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT;
 
 /* eslint-disable no-unused-vars */
 module.exports.scheduleArbitrage = async (event, context, callback) => {
@@ -31,12 +32,12 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
 
     // AVAILABLE -> LOCKED
     const lockedRules = await Promise.all(
-      availableRules.map(async (rule) => {
+      availableRules.map(async rule => {
         return await Rule.updateWithVersion(
           { userId: rule.userId, ruleId: rule.ruleId },
-          { status: RULE_STATUS.LOCKED }
+          { status: RULE_STATUS.LOCKED },
         );
-      })
+      }),
     );
     logger.debug('locked rules  =>');
     logger.debug(lockedRules);
@@ -44,9 +45,9 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
     // handle rules
     logger.info('Applying rules...');
     const updatedRules = await Promise.all(
-      lockedRules.map(async (rule) => {
+      lockedRules.map(async rule => {
         const userId = rule.userId;
-        const arbitrageStrategy = rule.arbitrageStrategy;
+        const strategy = rule.strategy;
         const oneSiteName = rule.oneSiteName;
         const otherSiteName = rule.otherSiteName;
 
@@ -60,13 +61,21 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
         const mExpiredAt = moment(policy.expiredAt).utc();
         const mNow = moment().utc();
         if (effect === USER_EFFECTS.ALLOW && mNow.isBefore(mExpiredAt)) {
-          const secrets = await Secret.query('userId').eq(userId).exec();
-          const oneSecret = secrets.filter((secret) => secret.apiProvider === oneSiteName)[0];
-          const otherSecret = secrets.filter((secret) => secret.apiProvider === otherSiteName)[0];
+          const secrets = await Secret.query('userId')
+            .eq(userId)
+            .exec();
+          const oneSecret = secrets.filter(
+            secret => secret.apiProvider === oneSiteName,
+          )[0];
+          const otherSecret = secrets.filter(
+            secret => secret.apiProvider === otherSiteName,
+          )[0];
 
           // Skip process if NOT exist key and secret of both exchange sites
           if (!oneSecret || !otherSecret) {
-            logger.warn('Secrets MUST have pair effective items. Skipping process...');
+            logger.warn(
+              'Secrets MUST have pair effective items. Skipping process...',
+            );
             return;
           }
 
@@ -74,10 +83,10 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           if (rule.counts.failureCount >= rule.maxFailedLimit) {
             await Rule.updateWithVersion(
               { userId: rule.userId, ruleId: rule.ruleId },
-              { status: RULE_STATUS.UNAVAILABLE }
+              { status: RULE_STATUS.UNAVAILABLE },
             );
             logger.warn(
-              "Exceeded failure count, then the rule's status was changed to unavailable. Skipping process..."
+              "Exceeded failure count, then the rule's status was changed to unavailable. Skipping process...",
             );
             return;
           }
@@ -87,8 +96,8 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           apiSecrets[otherSiteName] = otherSecret;
 
           let updatedRule;
-          switch (arbitrageStrategy) {
-            case ARBITRAGE_STRATEGIES.SIMPLE:
+          switch (strategy) {
+            case STRATEGIES.SIMPLE_ARBITRAGE:
               updatedRule = await runSimpleArbitrage(rule, apiSecrets);
               break;
             default:
@@ -97,7 +106,7 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
           }
           return updatedRule;
         }
-      })
+      }),
     );
 
     logger.info('Applied rules.');
@@ -106,12 +115,12 @@ module.exports.scheduleArbitrage = async (event, context, callback) => {
 
     // LOCKED -> AVAILABLE
     const releasedRukes = await Promise.all(
-      lockedRules.map(async (rule) => {
+      lockedRules.map(async rule => {
         return await Rule.updateWithVersion(
           { userId: rule.userId, ruleId: rule.ruleId },
-          { status: RULE_STATUS.AVAILABLE }
+          { status: RULE_STATUS.AVAILABLE },
         );
-      })
+      }),
     );
     logger.debug('Released rules =>');
     logger.debug(releasedRukes);

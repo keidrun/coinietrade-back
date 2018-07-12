@@ -1,5 +1,9 @@
 const { Rule, RULE_STATUS } = require('../../../models/Rule');
-const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
+const {
+  response,
+  responseError,
+  responseErrorFromDynamodb,
+} = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
@@ -12,8 +16,8 @@ module.exports.removeRule = async (event, callback) => {
       await Rule.updateWithVersion(
         { userId, ruleId },
         {
-          status: RULE_STATUS.DELETED
-        }
+          status: RULE_STATUS.DELETED,
+        },
       );
       callback(null, response(204));
     } else {
@@ -23,7 +27,7 @@ module.exports.removeRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_DELETE_DATA_NOT_FOUND_BY_IDS,
-        event
+        event,
       );
     }
   } catch (error) {
@@ -34,8 +38,8 @@ module.exports.removeRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         error,
-        event
-      )
+        event,
+      ),
     );
   }
 };

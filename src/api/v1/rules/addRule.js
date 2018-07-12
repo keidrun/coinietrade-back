@@ -1,5 +1,9 @@
 const { Rule } = require('../../../models/Rule');
-const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
+const {
+  response,
+  responseError,
+  responseErrorFromDynamodb,
+} = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
@@ -7,7 +11,7 @@ module.exports.addRule = async (event, callback) => {
   let {
     userId,
     priority,
-    arbitrageStrategy,
+    strategy,
     coinUnit,
     currencyUnit,
     orderType,
@@ -17,7 +21,7 @@ module.exports.addRule = async (event, callback) => {
     sellWeightRate,
     maxFailedLimit,
     oneSiteName,
-    otherSiteName
+    otherSiteName,
   } = JSON.parse(event.body);
 
   if (!userId) {
@@ -29,12 +33,12 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_MISSING_USER_ID,
-        event
-      )
+        event,
+      ),
     );
   }
 
-  if (!arbitrageStrategy) {
+  if (!strategy) {
     return callback(
       null,
       responseError(
@@ -43,8 +47,8 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_MISSING_ARBITRAGE_STRATEGY,
-        event
-      )
+        event,
+      ),
     );
   }
 
@@ -57,8 +61,8 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_MISSING_COIN_UNIT,
-        event
-      )
+        event,
+      ),
     );
   }
 
@@ -71,8 +75,8 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_MISSING_CURRENCY_UNIT,
-        event
-      )
+        event,
+      ),
     );
   }
 
@@ -85,8 +89,8 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_MISSING_ONE_SITE_NAME,
-        event
-      )
+        event,
+      ),
     );
   }
 
@@ -99,14 +103,14 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.RULE_MISSING_OTHER_SITE_NAME,
-        event
-      )
+        event,
+      ),
     );
   }
 
   const rule = {
     userId,
-    arbitrageStrategy,
+    strategy,
     coinUnit,
     currencyUnit,
     oneSiteName,
@@ -115,8 +119,8 @@ module.exports.addRule = async (event, callback) => {
       executionCount: 0,
       successCount: 0,
       failureCount: 0,
-      cancellationCount: 0
-    }
+      cancellationCount: 0,
+    },
   };
   if (priority) rule.priority = priority;
   if (orderType) rule.orderType = orderType;
@@ -138,8 +142,8 @@ module.exports.addRule = async (event, callback) => {
         event.httpMethod,
         event.path,
         error,
-        event
-      )
+        event,
+      ),
     );
   }
 };

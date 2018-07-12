@@ -1,6 +1,10 @@
 const moment = require('moment');
 const { Policy } = require('../../../models/Policy');
-const { response, responseError, responseErrorFromDynamodb } = require('../../../utils/response');
+const {
+  response,
+  responseError,
+  responseErrorFromDynamodb,
+} = require('../../../utils/response');
 const apiMessages = require('../../../messages/apiMessages');
 const apiErrors = require('../../../messages/apiErrors');
 
@@ -16,8 +20,8 @@ module.exports.addPolicy = async (event, callback) => {
         event.httpMethod,
         event.path,
         apiErrors.errors.POLICY_MISSING_USER_ID,
-        event
-      )
+        event,
+      ),
     );
   }
 
@@ -34,8 +38,8 @@ module.exports.addPolicy = async (event, callback) => {
           event.httpMethod,
           event.path,
           apiErrors.errors.POLICY_INVALID_EXPIRED_AT,
-          event
-        )
+          event,
+        ),
       );
     }
   }
@@ -58,8 +62,8 @@ module.exports.addPolicy = async (event, callback) => {
         event.httpMethod,
         event.path,
         error,
-        event
-      )
+        event,
+      ),
     );
   }
 };
