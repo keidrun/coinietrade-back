@@ -1,13 +1,12 @@
 const uuid = require('uuid');
-const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../helpers/keys').get(process.env.NODE_ENV);
 require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
 const { Secret } = require('../../../../src/models/Secret');
 const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
-before(() => {
-  // Clear all secrets items
+beforeAll(() => {
+  // Clear all secrets testems
   return Secret.getAll().then((existingSecrets) => {
     return existingSecrets.forEach((secret) => {
       return Secret.delete({ userId: secret.userId, secretId: secret.secretId });
@@ -15,8 +14,8 @@ before(() => {
   });
 });
 
-after(() => {
-  // Clear all secrets items
+afterAll(() => {
+  // Clear all secrets testems
   return Secret.getAll().then((existingSecrets) => {
     return existingSecrets.forEach((secret) => {
       return Secret.delete({ userId: secret.userId, secretId: secret.secretId });
@@ -28,7 +27,7 @@ describe('secrets endpoints', () => {
   const existingSecrets = [];
 
   describe('POST /v1/secrets', () => {
-    it('should return added data response of bitflyer', (done) => {
+    test('should return added data response of bitflyer', (done) => {
       axios
         .post(`/v1/secrets`, {
           userId: uuid.v4(),
@@ -37,9 +36,9 @@ describe('secrets endpoints', () => {
           apiSecret: 'ANY_API_SECRET'
         })
         .then((response) => {
-          expect(response.data.apiProvider).to.equal('bitflyer');
-          expect(response.data.apiKey).to.be.undefined;
-          expect(response.data.apiSecret).to.be.undefined;
+          expect(response.data.apiProvider).toBe('bitflyer');
+          expect(response.data.apiKey).toBeUndefined();
+          expect(response.data.apiSecret).toBeUndefined();
           existingSecrets.push(response.data);
           done();
         })
@@ -48,7 +47,7 @@ describe('secrets endpoints', () => {
         });
     });
 
-    it('should return added data response of zaif', (done) => {
+    test('should return added data response of zaif', (done) => {
       axios
         .post(`/v1/secrets`, {
           userId: uuid.v4(),
@@ -57,9 +56,9 @@ describe('secrets endpoints', () => {
           apiSecret: 'ANY_API_SECRET'
         })
         .then((response) => {
-          expect(response.data.apiProvider).to.equal('zaif');
-          expect(response.data.apiKey).to.be.undefined;
-          expect(response.data.apiSecret).to.be.undefined;
+          expect(response.data.apiProvider).toBe('zaif');
+          expect(response.data.apiKey).toBeUndefined();
+          expect(response.data.apiSecret).toBeUndefined();
           existingSecrets.push(response.data);
           done();
         })
@@ -70,13 +69,13 @@ describe('secrets endpoints', () => {
   });
 
   describe('DELETE /v1/secrets/{userId}/{secretId}', () => {
-    it('should return 204 status', (done) => {
+    test('should return 204 status', (done) => {
       const expectedToDeleteSecret = existingSecrets[existingSecrets.length - 1];
       axios
         .delete(`/v1/secrets/${expectedToDeleteSecret.userId}/${expectedToDeleteSecret.secretId}`)
         .then((response) => {
-          expect(response.status).to.equal(204);
-          expect(response.data).to.be.empty;
+          expect(response.status).toBe(204);
+          expect(response.data).toBe("");
           existingSecrets.pop();
           done();
         })

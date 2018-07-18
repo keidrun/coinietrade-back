@@ -1,5 +1,4 @@
 const uuid = require('uuid');
-const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../helpers/keys').get(process.env.NODE_ENV);
 require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
@@ -7,9 +6,9 @@ const { EXCHANGE_SITES, COIN_UNITS, CURRENCY_UNITS } = require('../../../../src/
 
 describe('properties endpoints', () => {
   describe('GET /v1/exchanges', () => {
-    it('should return correct exchanges properties data', (done) => {
+    test('should return correct exchanges properties data', (done) => {
       axios.get('/v1/exchanges').then((response) => {
-        expect(response.data).to.deep.equal({
+        expect(response.data).toEqual({
           [EXCHANGE_SITES.BITFLYER]: [
             {
               coinUnit: COIN_UNITS.BTC,

@@ -1,12 +1,11 @@
 const uuid = require('uuid');
-const expect = require('../../../helpers/chai').expect;
 const axios = require('../../../helpers/axios');
 const keys = require('../../../helpers/keys').get(process.env.NODE_ENV);
 require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(process.env.NODE_ENV);
 const { Policy, USER_EFFECTS, USER_GRADES } = require('../../../../src/models/Policy');
 const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
-before(() => {
+beforeAll(() => {
   // Clear all policies items
   return Policy.getAll().then((existingPolicies) => {
     return existingPolicies.forEach((policy) => {
@@ -15,7 +14,7 @@ before(() => {
   });
 });
 
-after(() => {
+afterAll(() => {
   // Clear all policies items
   return Policy.getAll().then((existingPolicies) => {
     return existingPolicies.forEach((policy) => {
@@ -28,7 +27,7 @@ describe('policies endpoints', () => {
   const existingPolicies = [];
 
   describe('POST /v1/policies', () => {
-    it('should return added data response of allow', (done) => {
+    test('should return added data response of allow', (done) => {
       axios
         .post(`/v1/policies`, {
           userId: uuid.v4(),
@@ -38,10 +37,10 @@ describe('policies endpoints', () => {
           expiredAt: '2018-05-25T19:40:29.123Z'
         })
         .then((response) => {
-          expect(response.data.effect).to.equal(USER_EFFECTS.ALLOW);
-          expect(response.data.grade).to.equal(USER_GRADES.FREE);
-          expect(response.data.ruleLimit).to.equal(10);
-          expect(response.data.expiredAt).to.equal('2018-05-25T19:40:29.123Z');
+          expect(response.data.effect).toBe(USER_EFFECTS.ALLOW);
+          expect(response.data.grade).toBe(USER_GRADES.FREE);
+          expect(response.data.ruleLimit).toBe(10);
+          expect(response.data.expiredAt).toBe('2018-05-25T19:40:29.123Z');
 
           existingPolicies.push(response.data);
           done();
@@ -51,11 +50,11 @@ describe('policies endpoints', () => {
         });
     });
 
-    it('should return added data response of deny', (done) => {
+    test('should return added data response of deny', (done) => {
       axios
         .post(`/v1/policies`, { userId: uuid.v4(), effect: USER_EFFECTS.DENY, grade: USER_GRADES.PRO })
         .then((response) => {
-          expect(response.data.effect).to.equal(USER_EFFECTS.DENY);
+          expect(response.data.effect).toBe(USER_EFFECTS.DENY);
           existingPolicies.push(response.data);
           done();
         })
@@ -64,11 +63,11 @@ describe('policies endpoints', () => {
         });
     });
 
-    it('should return added data response of allow when empty request', (done) => {
+    test('should return added data response of allow when empty request', (done) => {
       axios
         .post(`/v1/policies`, { userId: uuid.v4() })
         .then((response) => {
-          expect(response.data.effect).to.equal(USER_EFFECTS.ALLOW);
+          expect(response.data.effect).toBe(USER_EFFECTS.ALLOW);
           existingPolicies.push(response.data);
           done();
         })
@@ -79,16 +78,16 @@ describe('policies endpoints', () => {
   });
 
   describe('GET /v1/policies', () => {
-    it('should return all data response', (done) => {
+    test('should return all data response', (done) => {
       axios
         .get(`/v1/policies`)
         .then((response) => {
           const policies = response.data;
           sortByCreatedAt(policies);
 
-          expect(policies.length).equals(3);
+          expect(policies.length).toBe(3);
           policies.forEach((policy, i) => {
-            expect(policy).to.deep.equal({
+            expect(policy).toEqual({
               userId: existingPolicies[i].userId,
               effect: existingPolicies[i].effect,
               grade: existingPolicies[i].grade,
@@ -108,13 +107,13 @@ describe('policies endpoints', () => {
   });
 
   describe('GET /v1/policies/{userId}', () => {
-    it('should return one data response', (done) => {
+    test('should return one data response', (done) => {
       axios
         .get(`/v1/policies/${existingPolicies[0].userId}`)
         .then((response) => {
           const policy = response.data;
 
-          expect(policy).to.deep.equal({
+          expect(policy).toEqual({
             userId: existingPolicies[0].userId,
             effect: existingPolicies[0].effect,
             grade: existingPolicies[0].grade,
@@ -133,14 +132,14 @@ describe('policies endpoints', () => {
   });
 
   describe('DELETE /v1/policies/{userId}', () => {
-    it('should return 204 status', (done) => {
+    test('should return 204 status', (done) => {
       const expectedToDeletePlicy = existingPolicies[existingPolicies.length - 1];
 
       axios
         .delete(`/v1/policies/${expectedToDeletePlicy.userId}`)
         .then((response) => {
-          expect(response.status).to.equal(204);
-          expect(response.data).to.be.empty;
+          expect(response.status).toBe(204);
+          expect(response.data).toBe("") ;
           existingPolicies.pop();
           done();
         })
@@ -151,7 +150,7 @@ describe('policies endpoints', () => {
   });
 
   describe('PATCH /v1/policies/{userId}', () => {
-    it('should return updated data response', (done) => {
+    test('should return updated data response', (done) => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
@@ -167,11 +166,11 @@ describe('policies endpoints', () => {
           expectedToUpdatePolicy.ruleLimit = 777;
           expectedToUpdatePolicy.version = 1;
 
-          expect(updatedPolicy.id).to.equal(expectedToUpdatePolicy.id);
-          expect(updatedPolicy.effect).to.equal(expectedToUpdatePolicy.effect);
-          expect(updatedPolicy.grade).to.equal(expectedToUpdatePolicy.grade);
-          expect(updatedPolicy.ruleLimit).to.equal(expectedToUpdatePolicy.ruleLimit);
-          expect(updatedPolicy.version).to.equal(expectedToUpdatePolicy.version);
+          expect(updatedPolicy.id).toBe (expectedToUpdatePolicy.id);
+          expect(updatedPolicy.effect).toBe(expectedToUpdatePolicy.effect);
+          expect(updatedPolicy.grade).toBe(expectedToUpdatePolicy.grade);
+          expect(updatedPolicy.ruleLimit).toBe(expectedToUpdatePolicy.ruleLimit);
+          expect(updatedPolicy.version).toBe(expectedToUpdatePolicy.version);
           done();
         })
         .catch((error) => {
@@ -179,7 +178,7 @@ describe('policies endpoints', () => {
         });
     });
 
-    it('should return data response updated only grade field', (done) => {
+    test('should return data response updated only grade field', (done) => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
@@ -188,8 +187,8 @@ describe('policies endpoints', () => {
           const updatedPolicy = response.data;
           expectedToUpdatePolicy.grade = USER_GRADES.ULTIMATE;
 
-          expect(updatedPolicy.id).to.equal(expectedToUpdatePolicy.id);
-          expect(updatedPolicy.grade).to.equal(expectedToUpdatePolicy.grade);
+          expect(updatedPolicy.id).toBe(expectedToUpdatePolicy.id);
+          expect(updatedPolicy.grade).toBe(expectedToUpdatePolicy.grade);
           done();
         })
         .catch((error) => {
@@ -197,7 +196,7 @@ describe('policies endpoints', () => {
         });
     });
 
-    it('should return updated data response', (done) => {
+    test('should return updated data response', (done) => {
       const expectedToUpdatePolicy = existingPolicies[0];
 
       axios
@@ -206,8 +205,8 @@ describe('policies endpoints', () => {
           const updatedPolicy = response.data;
           expectedToUpdatePolicy.ruleLimit = 100;
 
-          expect(updatedPolicy.id).to.equal(expectedToUpdatePolicy.id);
-          expect(updatedPolicy.ruleLimit).to.equal(expectedToUpdatePolicy.ruleLimit);
+          expect(updatedPolicy.id).toBe(expectedToUpdatePolicy.id);
+          expect(updatedPolicy.ruleLimit).toBe(expectedToUpdatePolicy.ruleLimit);
           done();
         })
         .catch((error) => {

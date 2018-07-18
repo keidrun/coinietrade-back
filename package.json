@@ -21,16 +21,14 @@
   },
   "devDependencies": {
     "babel-eslint": "^8.2.3",
-    "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1",
     "dotenv": "^5.0.1",
     "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-prettier": "^2.6.2",
     "husky": "^0.14.3",
+    "jest": "^23.4.1",
     "js-yaml": "^3.11.0",
     "lint-staged": "^7.2.0",
-    "mocha": "^5.1.1",
     "npm-run-all": "^4.1.2",
     "prettier": "^1.13.7",
     "serverless": "^1.26.1",
@@ -44,6 +42,9 @@
       "git add"
     ]
   },
+  "jest": {
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.js$"
+  },
   "scripts": {
     "start": "sls offline start --seed=dev",
     "debug": "SLS_DEBUG=* sls offline start --seed=dev",
@@ -51,7 +52,7 @@
     "debug-me": "SLS_DEBUG=* sls offline start --seed=me",
     "precommit": "lint-staged",
     "lint": "eslint --fix src/**/*.js",
-    "test": "mocha test/**/*.test.js",
+    "test": "jest",
     "db:init": "sls dynamodb install",
     "db:rm": "sls dynamodb remove",
     "db:start": "sls dynamodb start --seed=dev",
@@ -59,7 +60,7 @@
     "db:seed": "sls dynamodb seed --seed=dev",
     "dev:start": "yarn start",
     "dev:lint": "nodemon --exec \"yarn lint\"",
-    "dev:test": "sleep 10 && nodemon --exec \"yarn test\"",
+    "dev:test": "sleep 10 && yarn test -u --watchAll",
     "dev": "npm-run-all -p dev:*",
     "staging:deploy": "sls deploy -s staging",
     "staging:test": "NODE_ENV='staging' mocha test/integration/**/*.test.js",
