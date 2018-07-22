@@ -284,6 +284,9 @@ resources:
 custom:
   # Alternative service properties
   service: *service
+  # Local lambda settings
+  serverless-offline:
+    port: 4000
   # Local dynamodb settings
   dynamodb:
     start:
