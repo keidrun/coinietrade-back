@@ -17,13 +17,16 @@ module.exports.getRulesByUserId = async (event, callback) => {
     if (rules) {
       callback(null, response(200, rules));
     } else {
-      responseError(
-        404,
-        apiMessages.errors.RULE_API_MESSAGE_READ_BY_USER_ID_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.RULE_READ_DATA_NOT_FOUND_BY_USER_ID,
-        event,
+      callback(
+        null,
+        responseError(
+          404,
+          apiMessages.errors.RULE_API_MESSAGE_READ_BY_USER_ID_FAILED,
+          event.httpMethod,
+          event.path,
+          apiErrors.errors.RULE_READ_DATA_NOT_FOUND_BY_USER_ID,
+          event,
+        ),
       );
     }
   } catch (error) {

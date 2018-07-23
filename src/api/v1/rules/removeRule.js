@@ -21,13 +21,16 @@ module.exports.removeRule = async (event, callback) => {
       );
       callback(null, response(204));
     } else {
-      responseError(
-        404,
-        apiMessages.errors.RULE_API_MESSAGE_DELETE_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.RULE_DELETE_DATA_NOT_FOUND_BY_IDS,
-        event,
+      callback(
+        null,
+        responseError(
+          404,
+          apiMessages.errors.RULE_API_MESSAGE_DELETE_FAILED,
+          event.httpMethod,
+          event.path,
+          apiErrors.errors.RULE_DELETE_DATA_NOT_FOUND_BY_IDS,
+          event,
+        ),
       );
     }
   } catch (error) {

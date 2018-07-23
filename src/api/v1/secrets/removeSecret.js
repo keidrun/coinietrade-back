@@ -16,13 +16,16 @@ module.exports.removeSecret = async (event, callback) => {
       await Secret.deleteWithVersion({ userId, secretId });
       callback(null, response(204));
     } else {
-      responseError(
-        404,
-        apiMessages.errors.SECRET_API_MESSAGE_DELETE_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.SECRET_DELETE_DATA_NOT_FOUND_BY_IDS,
-        event,
+      callback(
+        null,
+        responseError(
+          404,
+          apiMessages.errors.SECRET_API_MESSAGE_DELETE_FAILED,
+          event.httpMethod,
+          event.path,
+          apiErrors.errors.SECRET_DELETE_DATA_NOT_FOUND_BY_IDS,
+          event,
+        ),
       );
     }
   } catch (error) {

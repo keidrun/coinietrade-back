@@ -9,12 +9,13 @@ const apiErrors = require('../../../messages/apiErrors');
 
 module.exports.updatePolicy = async (event, callback) => {
   const { userId } = event.pathParameters;
-  const { effect, grade, ruleLimit } = JSON.parse(event.body);
+  const { effect, grade, ruleLimit, expiredAt } = JSON.parse(event.body);
 
   let policy = {};
   if (effect) policy.effect = effect;
   if (grade) policy.grade = grade;
   if (ruleLimit) policy.ruleLimit = ruleLimit;
+  if (expiredAt) policy.expiredAt = expiredAt;
 
   try {
     const existingPolicy = await Policy.get(userId);
@@ -22,13 +23,16 @@ module.exports.updatePolicy = async (event, callback) => {
       const updatedPolicy = await Policy.updateWithVersion({ userId }, policy);
       callback(null, response(200, updatedPolicy));
     } else {
-      responseError(
-        404,
-        apiMessages.errors.POLICY_API_MESSAGE_UPDATE_FAILED,
-        event.httpMethod,
-        event.path,
-        apiErrors.errors.POLICY_UPDATE_DATA_NOT_FOUND_BY_ID,
-        event,
+      callback(
+        null,
+        responseError(
+          404,
+          apiMessages.errors.POLICY_API_MESSAGE_UPDATE_FAILED,
+          event.httpMethod,
+          event.path,
+          apiErrors.errors.POLICY_UPDATE_DATA_NOT_FOUND_BY_ID,
+          event,
+        ),
       );
     }
   } catch (error) {
