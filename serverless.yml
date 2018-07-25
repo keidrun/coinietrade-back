@@ -83,7 +83,7 @@ functions:
           method: get
           path: v1/policies
           private: true
-          cors: false
+          cors: true
   getPolicy:
     handler: src/api/handler.getPolicy
     events:
@@ -91,7 +91,7 @@ functions:
           method: get
           path: v1/policies/{userId}
           private: true
-          cors: false
+          cors: true
   addPolicy:
     handler: src/api/handler.addPolicy
     events:
@@ -99,7 +99,7 @@ functions:
           method: post
           path: v1/policies
           private: true
-          cors: false
+          cors: true
   removePolicy:
     handler: src/api/handler.removePolicy
     events:
@@ -107,7 +107,7 @@ functions:
           method: delete
           path: v1/policies/{userId}
           private: true
-          cors: false
+          cors: true
   updatePolicy:
     handler: src/api/handler.updatePolicy
     events:
@@ -115,7 +115,7 @@ functions:
           method: patch
           path: v1/policies/{userId}
           private: true
-          cors: false
+          cors: true
   # Secrets API
   addSecret:
     handler: src/api/handler.addSecret
@@ -124,7 +124,7 @@ functions:
           method: post
           path: v1/secrets
           private: true
-          cors: false
+          cors: true
   removeSecret:
     handler: src/api/handler.removeSecret
     events:
@@ -132,7 +132,7 @@ functions:
           method: delete
           path: v1/secrets/{userId}/{secretId}
           private: true
-          cors: false
+          cors: true
   # Rules API
   getRules:
     handler: src/api/handler.getRules
@@ -141,7 +141,7 @@ functions:
           method: get
           path: v1/rules
           private: true
-          cors: false
+          cors: true
   getRulesByUserId:
     handler: src/api/handler.getRulesByUserId
     events:
@@ -149,7 +149,7 @@ functions:
           method: get
           path: v1/rules/{userId}
           private: true
-          cors: false
+          cors: true
   addRule:
     handler: src/api/handler.addRule
     events:
@@ -157,7 +157,7 @@ functions:
           method: post
           path: v1/rules
           private: true
-          cors: false
+          cors: true
   removeRule:
     handler: src/api/handler.removeRule
     events:
@@ -165,7 +165,7 @@ functions:
           method: delete
           path: v1/rules/{userId}/{ruleId}
           private: true
-          cors: false
+          cors: true
   # Properties API
   getExchanges:
     handler: src/api/handler.getExchanges
@@ -174,10 +174,10 @@ functions:
           method: get
           path: v1/exchanges
           private: true
-          cors: false
+          cors: true
   # Scheduler
-  scheduleArbitrage:
-    handler: src/scheduler/handler.scheduleArbitrage
+  scheduleToApplyStrategies:
+    handler: src/scheduler/handler.scheduleToApplyStrategies
     events:
       - schedule: rate(${self:provider.environment.SCHEDULER_INTERVAL_MINUTES} minutes)
 

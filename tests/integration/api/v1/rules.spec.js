@@ -7,7 +7,7 @@ const { Rule, RULE_STATUS } = require('../../../../src/models/Rule');
 const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 beforeAll(() => {
-  // Clear all Rules testems
+  // Clear all Rules items
   return Rule.getAll().then(existingRules => {
     return existingRules.forEach(rule => {
       return Rule.delete({ userId: rule.userId, ruleId: rule.ruleId });
@@ -16,7 +16,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  // Clear all Rules testems
+  // Clear all Rules items
   return Rule.getAll().then(existingRules => {
     return existingRules.forEach(rule => {
       return Rule.delete({ userId: rule.userId, ruleId: rule.ruleId });

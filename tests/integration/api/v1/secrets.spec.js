@@ -6,7 +6,7 @@ require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(
 const { Secret } = require('../../../../src/models/Secret');
 
 beforeAll(() => {
-  // Clear all secrets testems
+  // Clear all secrets items
   return Secret.getAll().then(existingSecrets => {
     return existingSecrets.forEach(secret => {
       return Secret.delete({
@@ -18,7 +18,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  // Clear all secrets testems
+  // Clear all secrets items
   return Secret.getAll().then(existingSecrets => {
     return existingSecrets.forEach(secret => {
       return Secret.delete({
