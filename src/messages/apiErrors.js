@@ -100,13 +100,33 @@ exports.errors = {
     code: 7306,
     message: "Required field Rule 'otherSiteName' is missing",
   },
-  RULE_DELETE_DATA_NOT_FOUND_BY_IDS: {
+  RULE_MISSING_EXECUTION_COUNT: {
     code: 7307,
+    message: "Required field Rule 'executionCount' is missing",
+  },
+  RULE_MISSING_SUCCESS_COUNT: {
+    code: 7308,
+    message: "Required field Rule 'successCount' is missing",
+  },
+  RULE_MISSING_FAILURE_COUNT: {
+    code: 7309,
+    message: "Required field Rule 'failureCount' is missing",
+  },
+  RULE_MISSING_CANCELLATION_COUNT: {
+    code: 7310,
+    message: "Required field Rule 'cancellationCount' is missing",
+  },
+  RULE_DELETE_DATA_NOT_FOUND_BY_IDS: {
+    code: 7311,
     message: "Rule data with the provided 'userId' and 'ruleId' NOT found",
   },
   RULE_READ_DATA_NOT_FOUND_BY_USER_ID: {
-    code: 7308,
+    code: 7312,
     message: "Rule data with the provided 'userId' NOT found",
+  },
+  RULE_UPDATE_DATA_NOT_FOUND_BY_IDS: {
+    code: 7313,
+    message: "Rule data with the provided 'userId' and 'ruleId' NOT found",
   },
 };
 

@@ -166,6 +166,14 @@ functions:
           path: v1/rules/{userId}/{ruleId}
           private: true
           cors: true
+  updateRule:
+    handler: src/api/handler.updateRule
+    events:
+      - http:
+          method: patch
+          path: v1/rules/{userId}/{ruleId}
+          private: true
+          cors: true
   # Properties API
   getExchanges:
     handler: src/api/handler.getExchanges

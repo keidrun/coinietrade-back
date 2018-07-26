@@ -17,7 +17,7 @@ const responseError = (
   validationError,
   payload,
 ) => {
-  const errors = [validationError];
+  const errors = [].concat(validationError);
   if (!payload) payload = {};
 
   return {

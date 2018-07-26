@@ -3,7 +3,15 @@ const axios = require('../../../helpers/axios');
 require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(
   process.env.NODE_ENV,
 );
-const { Rule, RULE_STATUS } = require('../../../../src/models/Rule');
+const {
+  Rule,
+  STRATEGIES,
+  ORDER_TYPES,
+  COIN_UNITS,
+  CURRENCY_UNITS,
+  EXCHANGE_SITES,
+  RULE_STATUS,
+} = require('../../../../src/models/Rule');
 const { sortByCreatedAt } = require('../../../helpers/testUtils');
 
 beforeAll(() => {
@@ -59,6 +67,7 @@ describe('rules endpoints', () => {
       expect(response.data.oneSiteName).toBe('bitflyer');
       expect(response.data.otherSiteName).toBe('zaif');
       expect(response.data.status).toBe('available');
+
       existingRules.push(response.data);
     });
 
@@ -92,6 +101,7 @@ describe('rules endpoints', () => {
       expect(response.data.oneSiteName).toBe('bitflyer');
       expect(response.data.otherSiteName).toBe('zaif');
       expect(response.data.status).toBe('available');
+
       existingRules.push(response.data);
     });
 
@@ -118,6 +128,7 @@ describe('rules endpoints', () => {
         failureCount: 0,
         cancellationCount: 0,
       });
+
       existingRules.push(response.data);
     });
   });
@@ -225,7 +236,6 @@ describe('rules endpoints', () => {
       expect(deletedRule.status).toBe(RULE_STATUS.DELETED);
 
       existingRules.pop();
-      existingRules.push(deletedRule);
     });
 
     test('should fetch 404 status when any data NOT exit', async () => {
@@ -233,6 +243,122 @@ describe('rules endpoints', () => {
       const ruleId = 'none';
       try {
         await axios.delete(`/v1/rules/${userId}/${ruleId}`);
+      } catch (error) {
+        expect(error.response.status).toBe(404);
+      }
+    });
+  });
+
+  describe('PATCH /v1/rules/{userId}/{ruleId}', () => {
+    test('should fetch updated all data', async () => {
+      const expectedToUpdateRule = existingRules[0];
+
+      const response = await axios.patch(
+        `/v1/rules/${expectedToUpdateRule.userId}/${
+          expectedToUpdateRule.ruleId
+        }`,
+        {
+          priority: 123,
+          strategy: STRATEGIES.SIMPLE_ARBITRAGE,
+          coinUnit: COIN_UNITS.BTC,
+          currencyUnit: CURRENCY_UNITS.JPY,
+          orderType: ORDER_TYPES.LIMIT_ORDER,
+          assetRange: 0.123,
+          assetMinLimit: 12345,
+          buyWeightRate: 1.00123,
+          sellWeightRate: 0.99877,
+          maxFailedLimit: 123,
+          oneSiteName: EXCHANGE_SITES.ZAIF,
+          otherSiteName: EXCHANGE_SITES.BITFLYER,
+          totalProfit: 123,
+          counts: {
+            executionCount: 1,
+            successCount: 2,
+            failureCount: 3,
+            cancellationCount: 4,
+          },
+          status: RULE_STATUS.UNAVAILABLE,
+        },
+      );
+
+      const updatedRule = response.data;
+      expectedToUpdateRule.priority = 123;
+      expectedToUpdateRule.strategy = STRATEGIES.SIMPLE_ARBITRAGE;
+      expectedToUpdateRule.coinUnit = COIN_UNITS.BTC;
+      expectedToUpdateRule.currencyUnit = CURRENCY_UNITS.JPY;
+      expectedToUpdateRule.orderType = ORDER_TYPES.LIMIT_ORDER;
+      expectedToUpdateRule.assetRange = 0.123;
+      expectedToUpdateRule.assetMinLimit = 12345;
+      expectedToUpdateRule.buyWeightRate = 1.00123;
+      expectedToUpdateRule.sellWeightRate = 0.99877;
+      expectedToUpdateRule.maxFailedLimit = 123;
+      expectedToUpdateRule.oneSiteName = EXCHANGE_SITES.ZAIF;
+      expectedToUpdateRule.otherSiteName = EXCHANGE_SITES.BITFLYER;
+      expectedToUpdateRule.totalProfit = 123;
+      expectedToUpdateRule.counts = {
+        executionCount: 1,
+        successCount: 2,
+        failureCount: 3,
+        cancellationCount: 4,
+      };
+      expectedToUpdateRule.status = RULE_STATUS.UNAVAILABLE;
+      expectedToUpdateRule.version = expectedToUpdateRule.version + 1;
+
+      expect(updatedRule.userId).toBe(expectedToUpdateRule.userId);
+      expect(updatedRule.ruleId).toBe(expectedToUpdateRule.ruleId);
+      expect(updatedRule.priority).toBe(expectedToUpdateRule.priority);
+      expect(updatedRule.strategy).toBe(expectedToUpdateRule.strategy);
+      expect(updatedRule.coinUnit).toBe(expectedToUpdateRule.coinUnit);
+      expect(updatedRule.currencyUnit).toBe(expectedToUpdateRule.currencyUnit);
+      expect(updatedRule.orderType).toBe(expectedToUpdateRule.orderType);
+      expect(updatedRule.assetRange).toBe(expectedToUpdateRule.assetRange);
+      expect(updatedRule.assetMinLimit).toBe(
+        expectedToUpdateRule.assetMinLimit,
+      );
+      expect(updatedRule.buyWeightRate).toBe(
+        expectedToUpdateRule.buyWeightRate,
+      );
+      expect(updatedRule.sellWeightRate).toBe(
+        expectedToUpdateRule.sellWeightRate,
+      );
+      expect(updatedRule.maxFailedLimit).toBe(
+        expectedToUpdateRule.maxFailedLimit,
+      );
+      expect(updatedRule.oneSiteName).toBe(expectedToUpdateRule.oneSiteName);
+      expect(updatedRule.otherSiteName).toBe(
+        expectedToUpdateRule.otherSiteName,
+      );
+      expect(updatedRule.totalProfit).toBe(expectedToUpdateRule.totalProfit);
+      expect(updatedRule.counts).toEqual(expectedToUpdateRule.counts);
+      expect(updatedRule.status).toBe(expectedToUpdateRule.status);
+      expect(updatedRule.version).toBe(expectedToUpdateRule.version);
+
+      existingRules[0] = expectedToUpdateRule;
+    });
+
+    test('should fetch 400 status because of counts validation error', async () => {
+      const expectedToUpdateRule = existingRules[0];
+
+      try {
+        await axios.patch(
+          `/v1/rules/${expectedToUpdateRule.userId}/${
+            expectedToUpdateRule.ruleId
+          }`,
+          {
+            counts: {},
+          },
+        );
+      } catch (error) {
+        expect(error.response.status).toBe(400);
+        expect(error.response.data.errors).toHaveLength(4);
+      }
+    });
+
+    test('should fetch 404 status when any data NOT exit', async () => {
+      const userId = 'none';
+      const ruleId = 'none';
+      try {
+        await axios.patch(`/v1/rules/${userId}/${ruleId}`);
       } catch (error) {
         expect(error.response.status).toBe(404);
       }
