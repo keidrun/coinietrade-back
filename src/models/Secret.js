@@ -25,7 +25,6 @@ const secretSchema = new Schema(
     },
     apiKey: { type: String, required: true, trim: true },
     apiSecret: { type: String, required: true, trim: true },
-    apiKind: { type: String },
     version: { type: Number, required: true, default: 0 },
   },
   options,
