@@ -1,5 +1,5 @@
 function toJsonDateString(utcNumber) {
-  return JSON.stringify(new Date(utcNumber)).replace(/\"/g, '');
+  return JSON.stringify(new Date(utcNumber)).replace(/"/g, '');
 }
 
 function sortByCreatedAt(arr) {
@@ -17,5 +17,5 @@ function sortByCreatedAt(arr) {
 
 module.exports = {
   toJsonDateString,
-  sortByCreatedAt
+  sortByCreatedAt,
 };
