@@ -23,7 +23,12 @@ const options = {
 
 const policySchema = new Schema(
   {
-    userId: { type: String, hashKey: true, required: true, trim: true },
+    userId: {
+      type: String,
+      hashKey: true,
+      required: true,
+      trim: true,
+    },
     effect: {
       type: String,
       required: true,
@@ -36,7 +41,11 @@ const policySchema = new Schema(
       default: USER_GRADES.FREE,
       validate: value => Object.values(USER_GRADES).indexOf(value) !== -1,
     },
-    ruleLimit: { type: Number, required: true, default: DEFAULT_RULE_NUM },
+    ruleLimit: {
+      type: Number,
+      required: true,
+      default: DEFAULT_RULE_NUM,
+    },
     expiredAt: {
       type: Date,
       required: true,
@@ -45,7 +54,11 @@ const policySchema = new Schema(
           .add(1, 'month')
           .toISOString(),
     },
-    version: { type: Number, required: true, default: 0 },
+    version: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   options,
 );

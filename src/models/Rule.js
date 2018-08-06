@@ -44,9 +44,22 @@ const options = {
 
 const ruleSchema = new Schema(
   {
-    userId: { type: String, hashKey: true, required: true, trim: true },
-    ruleId: { type: String, rangeKey: true, default: () => uuid.v4() },
-    priority: { type: Number, required: true, default: 0 },
+    userId: {
+      type: String,
+      hashKey: true,
+      required: true,
+      trim: true,
+    },
+    ruleId: {
+      type: String,
+      rangeKey: true,
+      default: () => uuid.v4(),
+    },
+    priority: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     strategy: {
       type: String,
       required: true,
@@ -108,14 +121,30 @@ const ruleSchema = new Schema(
       required: true,
       validate: value => Object.values(EXCHANGE_SITES).indexOf(value) !== -1,
     },
-    totalProfit: { type: Number, required: true, default: 0 },
+    totalProfit: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     counts: {
       // Initialize all to 0 in api because the dynamoose cannot define
       // defaults in an object
-      executionCount: { type: Number, required: true },
-      successCount: { type: Number, required: true },
-      failureCount: { type: Number, required: true },
-      cancellationCount: { type: Number, required: true },
+      executionCount: {
+        type: Number,
+        required: true,
+      },
+      successCount: {
+        type: Number,
+        required: true,
+      },
+      failureCount: {
+        type: Number,
+        required: true,
+      },
+      cancellationCount: {
+        type: Number,
+        required: true,
+      },
     },
     status: {
       type: String,
@@ -134,7 +163,11 @@ const ruleSchema = new Schema(
       required: true,
       default: () => moment().toISOString(),
     },
-    version: { type: Number, required: true, default: 0 },
+    version: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   options,
 );

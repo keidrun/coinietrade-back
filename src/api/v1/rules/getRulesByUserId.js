@@ -1,4 +1,4 @@
-const { Rule } = require('../../../models/Rule');
+const { Rule, RULE_STATUS } = require('../../../models/Rule');
 const {
   response,
   responseError,
@@ -13,6 +13,8 @@ module.exports.getRulesByUserId = async (event, callback) => {
   try {
     const rules = await Rule.query('userId')
       .eq(userId)
+      .filter('status')
+      .in([RULE_STATUS.AVAILABLE, RULE_STATUS.UNAVAILABLE, RULE_STATUS.LOCKED])
       .exec();
     if (rules) {
       callback(null, response(200, rules));

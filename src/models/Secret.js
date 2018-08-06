@@ -16,16 +16,37 @@ const options = {
 
 const secretSchema = new Schema(
   {
-    userId: { type: String, hashKey: true, required: true, trim: true },
-    secretId: { type: String, rangeKey: true, default: () => uuid.v4() },
+    userId: {
+      type: String,
+      hashKey: true,
+      required: true,
+      trim: true,
+    },
+    secretId: {
+      type: String,
+      rangeKey: true,
+      default: () => uuid.v4(),
+    },
     apiProvider: {
       type: String,
       required: true,
       validate: value => Object.values(API_PROVIDERS).indexOf(value) !== -1,
     },
-    apiKey: { type: String, required: true, trim: true },
-    apiSecret: { type: String, required: true, trim: true },
-    version: { type: Number, required: true, default: 0 },
+    apiKey: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    apiSecret: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    version: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   options,
 );

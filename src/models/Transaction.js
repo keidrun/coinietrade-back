@@ -96,7 +96,10 @@ const transactionSchema = new Schema(
       required: true,
       validate: value => (value >= 0 ? true : false),
     },
-    transactionFeeRate: { type: Number, required: true },
+    transactionFeeRate: {
+      type: Number,
+      required: true,
+    },
     state: {
       type: String,
       required: true,
@@ -113,8 +116,14 @@ const transactionSchema = new Schema(
       type: String,
       validate: value => Object.values(ERROR_CODES).indexOf(value) !== -1,
     },
-    errorDetail: { type: String },
-    version: { type: Number, required: true, default: 0 },
+    errorDetail: {
+      type: String,
+    },
+    version: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   options,
 );
