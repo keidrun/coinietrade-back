@@ -1,6 +1,6 @@
 service: &service
   name: coinietrade-back
-  frameworkVersion: "=1.26.1"
+  frameworkVersion: '=1.26.1'
 
 plugins:
   - serverless-dynamodb-local
@@ -55,7 +55,7 @@ provider:
     SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS: ${file(./config/config.yml):${self:provider.stage}.scheduler_locked_transactions_release_time_seconds}
     SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT: ${file(./config/config.yml):${self:provider.stage}.scheduler_rules_concurrent_execution_limit}
   iamRoleStatements:
-    - Effect: "Allow"
+    - Effect: 'Allow'
       Action:
         - dynamodb:Query
         - dynamodb:Scan
@@ -63,7 +63,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/*"
+      Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/*'
 
 package:
   include:
@@ -140,6 +140,14 @@ functions:
       - http:
           method: get
           path: v1/rules
+          private: true
+          cors: true
+  getRule:
+    handler: src/api/handler.getRule
+    events:
+      - http:
+          method: get
+          path: v1/rules/{userId}/{ruleId}
           private: true
           cors: true
   getRulesByUserId:

@@ -24,6 +24,8 @@ module.exports.removeSecret = (event, context, callback) =>
 // Rules API
 module.exports.getRules = (event, context, callback) =>
   rules.getRules(event, callback);
+module.exports.getRule = (event, context, callback) =>
+  rules.getRule(event, callback);
 module.exports.getRulesByUserId = (event, context, callback) =>
   rules.getRulesByUserId(event, callback);
 module.exports.addRule = (event, context, callback) =>

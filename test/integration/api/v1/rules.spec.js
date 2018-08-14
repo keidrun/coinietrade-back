@@ -1,8 +1,7 @@
 const uuid = require('uuid');
-const axios = require('../../../helpers/axios');
-require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(
-  process.env.NODE_ENV,
-);
+const { configYamlUtils, axios, testUtils } = require('../../../helpers');
+configYamlUtils.loadConfigYamlToEnv(process.env.NODE_ENV);
+const { sortByCreatedAt } = testUtils;
 const {
   Rule,
   STRATEGIES,
@@ -11,8 +10,7 @@ const {
   CURRENCY_UNITS,
   EXCHANGE_SITES,
   RULE_STATUS,
-} = require('../../../../src/models/Rule');
-const { sortByCreatedAt } = require('../../../helpers/testUtils');
+} = require('../../../../src/models');
 
 beforeAll(() => {
   // Clear all Rules items
@@ -211,6 +209,17 @@ describe('rules endpoints', () => {
       } catch (error) {
         expect(error.response.status).toBe(404);
       }
+    });
+  });
+
+  describe('GET /v1/rules/{userId}/{ruleId}', () => {
+    test('should fetch a rule', async () => {
+      const existingRule = existingRules[0];
+      const ruleId = existingRule.ruleId;
+      const response = await axios.get(`/v1/rules/${groupUserId}/${ruleId}`);
+
+      expect(response.status).toBe(200);
+      expect(response.data).toEqual(existingRule);
     });
   });
 

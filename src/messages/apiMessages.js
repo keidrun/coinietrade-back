@@ -15,6 +15,7 @@ exports.errors = {
   RULE_API_MESSAGE_READ_LIST_FAILED: 'Read Rules Request Failed',
   RULE_API_MESSAGE_READ_BY_USER_ID_FAILED:
     'Read Rules by userId Request Failed',
+  RULE_API_MESSAGE_READ_ONE_FAILED: 'Read One Rule Request Failed',
   RULE_API_MESSAGE_UPDATE_FAILED: 'Update Rule Request Failed',
   RULE_API_MESSAGE_DELETE_FAILED: 'Delete Rule Request Failed',
 };

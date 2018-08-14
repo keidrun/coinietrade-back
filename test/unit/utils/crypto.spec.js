@@ -1,8 +1,7 @@
-const { encrypt, decrypt } = require('../../../src/utils/crypto');
-require('../../helpers/configYamlUtils').loadConfigYamlToEnv(
-  process.env.NODE_ENV,
-);
-
+const { crypto } = require('../../../src/utils');
+const { encrypt, decrypt } = crypto;
+const { configYamlUtils } = require('../../helpers');
+configYamlUtils.loadConfigYamlToEnv(process.env.NODE_ENV);
 const encryptKey = process.env.ENCRYPT_KEY;
 
 describe('crypto', () => {

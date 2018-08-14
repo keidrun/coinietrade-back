@@ -3,16 +3,14 @@ const yaml = require('js-yaml');
 
 const getConfigYaml = {
   conifg: yaml.safeLoad(
-    fs.readFileSync(`${__dirname}/../../config/config.yml`, 'utf8')
+    fs.readFileSync(`${__dirname}/../../config/config.yml`, 'utf8'),
   ),
   serverless: yaml.safeLoad(
-    fs.readFileSync(`${__dirname}/../../serverless.yml`, 'utf8')
-  )
+    fs.readFileSync(`${__dirname}/../../serverless.yml`, 'utf8'),
+  ),
 };
 
 const loadConfigYamlToEnv = environment => {
-  const configYaml = getConfigYaml;
-
   if (environment == 'production') {
     process.env.SERVICE_NAME = getConfigYaml.serverless.service.name;
     process.env.STAGE = 'prod';
@@ -45,5 +43,5 @@ const loadConfigYamlToEnv = environment => {
 
 module.exports = {
   getConfigYaml,
-  loadConfigYamlToEnv
+  loadConfigYamlToEnv,
 };

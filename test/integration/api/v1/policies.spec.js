@@ -1,14 +1,8 @@
 const uuid = require('uuid');
-const axios = require('../../../helpers/axios');
-require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(
-  process.env.NODE_ENV,
-);
-const {
-  Policy,
-  USER_EFFECTS,
-  USER_GRADES,
-} = require('../../../../src/models/Policy');
-const { sortByCreatedAt } = require('../../../helpers/testUtils');
+const { configYamlUtils, axios, testUtils } = require('../../../helpers');
+configYamlUtils.loadConfigYamlToEnv(process.env.NODE_ENV);
+const { sortByCreatedAt } = testUtils;
+const { Policy, USER_EFFECTS, USER_GRADES } = require('../../../../src/models');
 
 beforeAll(() => {
   // Clear all policies items

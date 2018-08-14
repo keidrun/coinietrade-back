@@ -1,9 +1,7 @@
 const uuid = require('uuid');
-const axios = require('../../../helpers/axios');
-require('../../../helpers/configYamlUtils').loadConfigYamlToEnv(
-  process.env.NODE_ENV,
-);
-const { Secret } = require('../../../../src/models/Secret');
+const { configYamlUtils, axios } = require('../../../helpers');
+configYamlUtils.loadConfigYamlToEnv(process.env.NODE_ENV);
+const { Secret } = require('../../../../src/models');
 
 beforeAll(() => {
   // Clear all secrets items
