@@ -1,17 +1,12 @@
-const { Policy } = require('../../../models/Policy');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Policy } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 
-module.exports.getPolicy = async (event, callback) => {
+const getPolicy = async (event, callback) => {
   const { userId } = event.pathParameters;
 
   try {
-    console.log(userId);
     const policy = await Policy.get(userId);
     if (policy) {
       callback(null, response(200, policy));
@@ -41,3 +36,5 @@ module.exports.getPolicy = async (event, callback) => {
     );
   }
 };
+
+module.exports = getPolicy;

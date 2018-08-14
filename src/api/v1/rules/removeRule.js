@@ -1,13 +1,9 @@
-const { Rule, RULE_STATUS } = require('../../../models/Rule');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Rule, RULE_STATUS } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 
-module.exports.removeRule = async (event, callback) => {
+const removeRule = async (event, callback) => {
   const { userId, ruleId } = event.pathParameters;
 
   try {
@@ -46,3 +42,5 @@ module.exports.removeRule = async (event, callback) => {
     );
   }
 };
+
+module.exports = removeRule;

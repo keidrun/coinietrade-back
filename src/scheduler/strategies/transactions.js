@@ -1,4 +1,4 @@
-const { Transaction, TRANSACTION_STATES } = require('../../models/Transaction');
+const { Transaction, TRANSACTION_STATES } = require('../../models');
 
 const result = {
   noTransaction: () => {

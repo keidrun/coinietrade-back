@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 const moment = require('moment');
-const dynamoose = require('../services/dynamoose');
+const { dynamoose } = require('../services');
 const { Schema } = dynamoose;
 const {
   ARBITRAGE_STRATEGIES,

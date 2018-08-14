@@ -1,7 +1,8 @@
 const uuid = require('uuid');
-const dynamoose = require('../services/dynamoose');
+const { dynamoose } = require('../services');
 const { Schema } = dynamoose;
-const { encrypt, decrypt } = require('../utils/crypto');
+const { crypto } = require('../utils');
+const { encrypt, decrypt } = crypto;
 const { EXCHANGE_SITES } = require('./Rule');
 
 const API_PROVIDERS = {

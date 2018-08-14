@@ -1,14 +1,10 @@
-const { Secret } = require('../../../models/Secret');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Secret } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 const encryptKey = process.env.ENCRYPT_KEY;
 
-module.exports.addSecret = async (event, callback) => {
+const addSecret = async (event, callback) => {
   const { userId, apiProvider, apiKey, apiSecret } = JSON.parse(event.body);
 
   if (!userId) {
@@ -96,3 +92,5 @@ module.exports.addSecret = async (event, callback) => {
     );
   }
 };
+
+module.exports = addSecret;

@@ -1,13 +1,9 @@
-const { Rule } = require('../../../models/Rule');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Rule } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 
-module.exports.updateRule = async (event, callback) => {
+const updateRule = async (event, callback) => {
   const { userId, ruleId } = event.pathParameters;
   let {
     priority,
@@ -108,3 +104,5 @@ module.exports.updateRule = async (event, callback) => {
     );
   }
 };
+
+module.exports = updateRule;

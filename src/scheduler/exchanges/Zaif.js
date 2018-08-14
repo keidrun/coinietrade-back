@@ -7,8 +7,8 @@ const {
   CURRENCY_UNITS,
   ORDER_TYPES,
   EXCHANGE_SITES,
-} = require('../../models/Rule');
-const { ORDER_PROCESSES } = require('../../models/Transaction');
+  ORDER_PROCESSES,
+} = require('../../models');
 const { errors } = require('./errors');
 const messages = {
   NO_DATA_FOUND_FOR_THE_KEY: 'no data found for the key',

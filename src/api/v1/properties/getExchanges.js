@@ -1,11 +1,12 @@
-const { response } = require('../../../utils/response');
+const { apiResponse } = require('../../../utils');
+const { response } = apiResponse;
 const {
   EXCHANGE_SITES,
   COIN_UNITS,
   CURRENCY_UNITS,
-} = require('../../../models/Rule');
+} = require('../../../models');
 
-module.exports.getExchanges = async (event, callback) => {
+const getExchanges = async (event, callback) => {
   const exchanges = {
     [EXCHANGE_SITES.BITFLYER]: [
       {
@@ -22,3 +23,5 @@ module.exports.getExchanges = async (event, callback) => {
   };
   callback(null, response(200, exchanges));
 };
+
+module.exports = getExchanges;

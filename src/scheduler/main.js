@@ -1,12 +1,17 @@
 const path = require('path');
-const { createLog } = require('../../utils/logger');
 const moment = require('moment');
-const { Rule, RULE_STATUS, STRATEGIES } = require('../../models/Rule');
-const { Policy, USER_EFFECTS } = require('../../models/Policy');
-const { Secret } = require('../../models/Secret');
-const { runSimpleArbitrage } = require('../runners/runSimpleArbitrage');
+const { logFactory } = require('../utils');
+const {
+  Rule,
+  RULE_STATUS,
+  STRATEGIES,
+  Policy,
+  USER_EFFECTS,
+  Secret,
+} = require('../models');
+const { runSimpleArbitrage } = require('./runners');
 
-const logger = createLog('scheduler', path.basename(__filename));
+const logger = logFactory.createLog('scheduler', path.basename(__filename));
 
 const rulesConcurrentExecutionLimit =
   process.env.SCHEDULER_RULES_CONCURRENT_EXECUTION_LIMIT;

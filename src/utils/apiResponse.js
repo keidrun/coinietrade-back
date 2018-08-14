@@ -1,4 +1,4 @@
-const apiErrors = require('../messages/apiErrors');
+const { apiErrors } = require('../messages');
 
 const response = (statusCode, body) => {
   return !body

@@ -1,13 +1,9 @@
-const { Policy } = require('../../../models/Policy');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Policy } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 
-module.exports.updatePolicy = async (event, callback) => {
+const updatePolicy = async (event, callback) => {
   const { userId } = event.pathParameters;
   const { effect, grade, ruleLimit, expiredAt } = JSON.parse(event.body);
 
@@ -48,3 +44,5 @@ module.exports.updatePolicy = async (event, callback) => {
     );
   }
 };
+
+module.exports = updatePolicy;

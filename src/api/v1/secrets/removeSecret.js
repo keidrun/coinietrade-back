@@ -1,13 +1,9 @@
-const { Secret } = require('../../../models/Secret');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Secret } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 
-module.exports.removeSecret = async (event, callback) => {
+const removeSecret = async (event, callback) => {
   const { userId, secretId } = event.pathParameters;
 
   try {
@@ -41,3 +37,5 @@ module.exports.removeSecret = async (event, callback) => {
     );
   }
 };
+
+module.exports = removeSecret;

@@ -1,8 +1,7 @@
-const {
-  SimpleArbitrageStrategy,
-} = require('../strategies/SimpleArbitrageStrategy');
-const { Rule } = require('../../models/Rule');
-const { decrypt } = require('../../utils/crypto');
+const { SimpleArbitrageStrategy } = require('../strategies');
+const { Rule } = require('../../models');
+const { crypto } = require('../../utils');
+const { decrypt } = crypto;
 const encryptKey = process.env.ENCRYPT_KEY;
 
 const runSimpleArbitrage = async (rule, apiSecrets) => {

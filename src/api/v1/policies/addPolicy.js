@@ -1,14 +1,10 @@
 const moment = require('moment');
-const { Policy } = require('../../../models/Policy');
-const {
-  response,
-  responseError,
-  responseErrorFromDynamodb,
-} = require('../../../utils/response');
-const apiMessages = require('../../../messages/apiMessages');
-const apiErrors = require('../../../messages/apiErrors');
+const { Policy } = require('../../../models');
+const { apiResponse } = require('../../../utils');
+const { response, responseError, responseErrorFromDynamodb } = apiResponse;
+const { apiMessages, apiErrors } = require('../../../messages');
 
-module.exports.addPolicy = async (event, callback) => {
+const addPolicy = async (event, callback) => {
   let { userId, effect, grade, ruleLimit, expiredAt } = JSON.parse(event.body);
 
   if (!userId) {
@@ -67,3 +63,5 @@ module.exports.addPolicy = async (event, callback) => {
     );
   }
 };
+
+module.exports = addPolicy;

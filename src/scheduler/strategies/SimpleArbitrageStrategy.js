@@ -1,18 +1,15 @@
 const path = require('path');
-const { createLog } = require('../../utils/logger');
 const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
+const { logFactory } = require('../../utils');
 const uuid = require('uuid');
 const moment = require('moment');
-const { ORDER_PROCESSES } = require('../../models/Transaction');
-const Exchanges = {
-  bitflyer: require('../exchanges/Bitflyer'),
-  zaif: require('../exchanges/Zaif'),
-};
-const { ERROR_CODES } = require('../exchanges/errors');
+const { ORDER_PROCESSES } = require('../../models');
+const { errors, Exchanges } = require('../exchanges');
+const { ERROR_CODES } = errors;
 const { result, transaction } = require('./transactions');
 
-const logger = createLog('scheduler', path.basename(__filename));
+const logger = logFactory.createLog('scheduler', path.basename(__filename));
 
 const lockedTransactionsReleaseTimeSec =
   process.env.SCHEDULER_LOCKED_TRANSACTIONS_RELEASE_TIME_SECONDS;

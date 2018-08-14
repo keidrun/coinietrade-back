@@ -6,7 +6,7 @@ const {
   CURRENCY_UNITS,
   ORDER_TYPES,
   EXCHANGE_SITES,
-} = require('../../models/Rule');
+} = require('../../models');
 const { ORDER_PROCESSES } = require('../../models/Transaction');
 const { errors } = require('./errors');
 
