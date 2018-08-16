@@ -44,7 +44,6 @@
     ]
   },
   "jest": {
-    "testDirectoryName": "test",
     "testRegex": "(/__test__/.*|(\\.|/)(test|spec))\\.js$",
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -77,7 +76,7 @@
     "dev:test": "sleep 10 && yarn test",
     "dev": "npm-run-all -p dev:*",
     "staging:deploy": "sls deploy -s staging",
-    "staging:test": "NODE_ENV='staging' mocha test/integration/**/*.test.js",
+    "staging:test": "NODE_ENV='staging' jest test/integration/*/*/*.spec.js",
     "staging:info": "sls info -s staging",
     "staging:rm": "sls remove -s staging",
     "prod:deploy": "sls deploy -s prod",

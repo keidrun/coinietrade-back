@@ -367,7 +367,9 @@ describe('rules endpoints', () => {
       const userId = 'none';
       const ruleId = 'none';
       try {
-        await axios.patch(`/v1/rules/${userId}/${ruleId}`);
+        await axios.patch(`/v1/rules/${userId}/${ruleId}`, {
+          status: RULE_STATUS.UNAVAILABLE,
+        });
       } catch (error) {
         expect(error.response.status).toBe(404);
       }

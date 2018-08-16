@@ -77,8 +77,9 @@ describe('secrets endpoints', () => {
 
     test('should fetch 404 status when any data NOT exit', async () => {
       const userId = 'none';
+      const secretId = 'none';
       try {
-        await axios.delete(`/v1/secrets/${userId}`);
+        await axios.delete(`/v1/secrets/${userId}/${secretId}`);
       } catch (error) {
         expect(error.response.status).toBe(404);
       }

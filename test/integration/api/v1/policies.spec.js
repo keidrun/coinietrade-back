@@ -233,7 +233,9 @@ describe('policies endpoints', () => {
     test('should fetch 404 status when any data NOT exit', async () => {
       const userId = 'none';
       try {
-        await axios.patch(`/v1/policies/${userId}`);
+        await axios.patch(`/v1/policies/${userId}`, {
+          effect: USER_EFFECTS.DENY,
+        });
       } catch (error) {
         expect(error.response.status).toBe(404);
       }
