@@ -63,4 +63,4 @@ const runSimpleArbitrage = async (rule, apiSecrets) => {
   }
 };
 
-module.exports = { runSimpleArbitrage };
+module.exports = runSimpleArbitrage;

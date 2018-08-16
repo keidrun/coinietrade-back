@@ -760,4 +760,4 @@ class SimpleArbitrageStrategy {
   }
 }
 
-module.exports = { SimpleArbitrageStrategy };
+module.exports = SimpleArbitrageStrategy;
