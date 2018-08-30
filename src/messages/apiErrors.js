@@ -141,14 +141,19 @@ exports.errors = {
  * @return {Object} error response body
  */
 exports.createBody = function(message, method, endpoint, errors, payload) {
-  return {
+  const errorResponse = {
     message,
     time: new Date(),
     method,
     endpoint,
     errors,
-    payload,
   };
+
+  if (process.env.NODE_ENV === 'development') {
+    errorResponse.payload = payload;
+  }
+
+  return errorResponse;
 };
 
 /**
