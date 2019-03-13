@@ -8,7 +8,7 @@
   },
   "repository": "https://github.com/keidrun/coinietrade-back.git",
   "author": "keidrun",
-  "license": "No license",
+  "license": "GPL-3.0-only",
   "dependencies": {
     "axios": "^0.18.0",
     "bunyan": "^1.8.12",
